@@ -1,90 +1,90 @@
 ---
 name: differential-equation
-description: "ODE 积分与有限差分描述连续演化系统。Use when 传染病、热传导、种群等动力系统时。"
+description: "ODE 积分与有限差分描述连续演化系统。传染病、热传导、种群等动力系统时用。"
 ---
 # 微分方程建模
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
 
-A construction skill. It does ONE thing: turn a continuous evolution problem (epidemics, heat, populations) into integrated trajectories with verified numerics. It does not do data-driven forecasting (that's `time-series-arima`), stochastic simulation (that's `monte-carlo-simulation`), or symbolic closed forms (that's `symbolic-computation`).
+只做一件事的构造型技能：连续演化问题（传染病、热、种群）变成数值验证过的轨迹。不做数据驱动预测（那是 `time-series-arima`）、不做随机模拟（那是 `monte-carlo-simulation`）、不做符号闭式（那是 `symbolic-computation`）。
 
 ## Operating Posture
 
-You are a modeling specialist producing trajectories a reviewer can re-integrate. The bar is verified numerics: units consistent, initial/boundary conditions stated, solver tolerances set, mesh refined once to prove convergence. Write it so the refinement check passes the first time.
+你是建模专员，产出的轨迹审稿人能重积出来。标准是验证过的数值：单位一致、初边值声明、求解器容差设定、网格加密一次证明收敛。写的时候就按加密检查一次通过来写。
 
-Two failure modes, and the first is worse:
+两种失败模式，第一种更糟：
 
-1. **Integrating the wrong equations confidently.** Missing compartment, wrong boundary condition, unit mismatch (days vs hours), parameters fitted to the same curve being "predicted". A converged wrong model is precisely wrong.
-2. **One grid, one tolerance, no check** — default tolerances, no refinement, stiffness unexamined, parameters quoted without a scan. An unverified trajectory is a drawing.
+1. **自信地积错方程。** 漏仓室、边值错、单位混（天和小时）、拿拟合曲线的参数号称“预测”。收敛的错模型是精确的错。
+2. **一网格一容差，无检查**——默认容差、不加密、刚性不看、参数引用不扫描。没验证的轨迹是画。
 
-Never present a trajectory without its refinement evidence and parameter sources. No evidence, no curve.
+没有加密证据和参数来源就不给轨迹。无证据，无曲线。
 
 ## Hard Rules
 
-1. **Equations + units + initial/boundary conditions on paper first.** Every symbol with units; every parameter with value + source (fitted, literature, assumed — labeled). Dimension check before any code runs.
-2. **Solver matched to stiffness.** Non-stiff → explicit/RK (e.g. RK45); stiff → implicit (e.g. Radau/BDF). Unknown → try non-stiff, diagnose step-size collapse, switch loudly rather than shrinking tolerance forever.
-3. **Tolerances stated, then refinement.** rtol/atol recorded; halve the step (or tighten tol 10×) once and show the trajectory doesn't move. No refinement, no convergence claim.
-4. **Parameters scanned, not quoted.** ±(stated %) sweep on the top drivers; bifurcation/qualitative change reported when found. A point prediction from a chaotic or threshold system without a scan is a lottery ticket.
-5. **Fit and validate on separate data when parameters are fitted.** Fit on one window, validate on the next. Fitting and "predicting" the same curve is circular.
+1. **方程 + 单位 + 初边值纸上先行。** 每个符号带单位；每个参数带值 + 来源（拟合、文献、假设——贴标签）。跑代码前先量纲检查。
+2. **求解器配刚性。** 非刚性 → 显式/RK（如 RK45）；刚性 → 隐式（如 Radau/BDF）。未知 → 先试非刚性，看步长崩了就大声转隐式，不要无脑缩容差。
+3. **容差声明，再加密。** rtol/atol 记录；步长减半（或容差紧 10 倍）一次，轨迹不动才算数。不加密，不谈收敛。
+4. **参数扫描，不引用。** 主驱动参数 ±（声明过的 %）扫；分岔/质变报出来。混沌或阈值系统不扫描就报点预测，是彩票。
+5. **拟合参数要分窗验证。** 一段拟合，下段验证。同条曲线又拟合又“预测”是循环论证。
 
 ## The Build Sequence
 
-### 1. Should this be differential equations at all?
+### 1. 先判断该不该用微分方程
 
-| Situation | Decision |
+| 情形 | 判定 |
 | --- | --- |
-| Continuous evolution statable as ODE/PDE (SIR, heat, populations) | **DE modeling. Continue.** |
-| Have trajectory data but no mechanism | Stop. That's `time-series-arima` or regression territory. |
-| Randomness dominates the dynamics | Stop. Use `monte-carlo-simulation` or stochastic DE, stated. |
-| Closed form wanted for insight | Derive it with `symbolic-computation` first, then verify numerically here. |
+| 连续演化能写成 ODE/PDE（SIR、热、种群） | **微分方程建模，继续** |
+| 有轨迹数据无机理 | 停。那是 `time-series-arima` 或回归的地盘 |
+| 随机性主导动力学 | 停。用 `monte-carlo-simulation` 或随机微分方程，声明 |
+| 要闭式求洞察 | 先去 `symbolic-computation` 推，回来这里数值验证 |
 
-### 2. Write the model down
+### 2. 把模型写下来
 
-- State variables, equations, initial/boundary conditions, parameter table (value + unit + source label per row).
-- Nondimensionalize where it clarifies (SIR → R₀ form); name the dimensionless groups. Dimension check: every term, every equation.
-- Equilibria and linear stability on paper for ODE systems where affordable — numerics confirm analysis, never replace it.
+- 状态变量、方程、初边值、参数表（每行值 + 单位 + 来源标签）。
+- 能无量纲化就无量纲化（SIR → R₀ 形式）；无量纲群点名。量纲检查：每项、每方程。
+- ODE 系统负担得起就纸上求平衡点和线性稳定性——数值验证分析，不替代分析。
 
-### 3. Discretize and solve
+### 3. 离散求解
 
-- ODE: `solve_ivp`-style integrator, method + rtol/atol stated. PDE: finite-difference scheme named (explicit/implicit/Crank–Nicolson) with its stability condition checked (e.g. CFL / Fourier number ≤ 1/2 for explicit heat) — state the number.
-- Stiffness: watch step counts; collapse → implicit method, stated switch.
-- **Gate**: one refinement (halve h or tighten tol) with max-norm difference reported. Moved → refine again; stable → proceed.
+- ODE：`solve_ivp` 式积分器，方法 + rtol/atol 声明。PDE：差分格式点名（显/隐/Crank–Nicolson），稳定性条件验算（如显式热传导 Fourier 数 ≤ 1/2）——数字写出来。
+- 刚性：盯步数；崩了 → 转隐式，大声声明。
+- **gate**：加密一次（h 减半或容差收紧），最大模差报告。动了 → 再加密；不动 → 往下走。
 
-### 4. Scan parameters, validate against data
+### 4. 参数扫描，对数据验证
 
-- Sweep key parameters over plausible ranges; plot the envelope. Threshold behavior (R₀ crossing 1, blow-up, extinction) flagged, not smoothed over.
-- Fitted parameters: fit window vs validation window split; report both errors. Same-curve fit-and-predict is circular — forbid it.
-- Compare against an analytic limit where one exists (early exponential growth, steady state) as an independent check.
+- 关键参数在合理范围扫；画包络。阈值行为（R₀ 过 1、爆破、灭绝）标出来，不要抹平。
+- 拟合参数：拟合窗对验证窗分开；两个误差都报。同曲线拟合兼预测是循环——禁止。
+- 有解析极限就对（早期指数增长、稳态），当独立检查。
 
-### 5. Plot for the report
+### 5. 为报告画图
 
-- Trajectories with units on axes, conditions/parameters in caption; phase portraits where they illuminate. Follow `scientific-plotting` conventions; numerical evidence (refinement table) goes in as a table, not prose.
+- 轨迹横纵轴带单位，题注写条件/参数；相图有启发就画。按 `scientific-plotting` 规范；数值证据（加密表）进表格，不写散文。
 
 ## Never Ship
 
-Self-check before you finish. Each is an automatic block:
+收尾自查，不过即拦：
 
-| Never | Instead |
+| 禁忌 | 替代 |
 | --- | --- |
-| Equations without units/conditions | Full statement + dimension check |
-| Default tolerances, no refinement | Stated tol + one refinement, difference reported |
-| Stiff system on explicit integrator | Implicit method, loud switch |
-| Fitted curve presented as prediction | Fit/validation split, both errors |
-| Point forecast from threshold system | Parameter scan + envelope + threshold flags |
-| Stability condition unchecked (PDE) | CFL/Fourier number stated and satisfied |
+| 方程无单位/条件 | 完整陈述 + 量纲检查 |
+| 默认容差不加密 | 容差声明 + 加密一次，差值报告 |
+| 刚性系统用显式格式 | 隐式，大声切换 |
+| 拟合曲线当预测卖 | 拟合/验证分窗，两个误差 |
+| 阈值系统报点预测 | 参数扫描 + 包络 + 阈值标记 |
+| PDE 稳定性条件不验 | CFL/Fourier 数声明且满足 |
 
 ## Output
 
-The deliverable is the trajectory **plus its numerics**, in this order:
+交付物是轨迹**加数值**，顺序如下：
 
-- **Model** — equations, units, conditions, parameter table with sources.
-- **Numerics** — solver/scheme, tolerances, stability number, refinement table.
-- **Results** — trajectories/phase plots with captioned conditions.
-- **Scan + validation** — parameter envelope, fit-vs-validation errors.
-- **Limits** — threshold behavior, valid regime, what breaks the model.
+- **模型**——方程、单位、条件、带来源参数表。
+- **数值**——求解器/格式、容差、稳定性数、加密表。
+- **结果**——轨迹/相图，题注带条件。
+- **扫描 + 验证**——参数包络，拟合对验证误差。
+- **局限**——阈值行为、有效区间、什么打破模型。
 
-Don't pad this into a report. The refinement table is the deliverable.
+不要写成报告。加密表就是交付物。
 
 ## Tone
 
-Opinionated and brief. When the honest answer is "explicit Euler on this stiffness needs a million steps — switch to implicit", give it. When the fit only reproduces the training curve, call it calibration, not prediction.
+立场鲜明、废话少。当正确答案是“这个刚性显式 Euler 要百万步——转隐式”就直说。拟合只复现训练曲线时，那叫标定，不叫预测。

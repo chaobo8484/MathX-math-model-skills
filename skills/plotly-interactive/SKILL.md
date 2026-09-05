@@ -1,83 +1,83 @@
 ---
 name: plotly-interactive
-description: "缩放悬停联动的 Plotly 探索图。Use when 数据探索需交互或上万点需 WebGL 时；定稿矢量图走 scientific-plotting。"
+description: "缩放悬停联动的 Plotly 探索图。数据探索需交互或上万点需 WebGL 时用；定稿矢量图见 scientific-plotting。"
 ---
 # 交互式 Plotly 图表
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
 
-A construction skill. It does ONE thing: build a zoom/hover/linked Plotly chart for data exploration — light spec, fast load, honest about what was sampled away. It does not do print figures (that's `scientific-plotting`) or journal assembly (that's `publication-figure`).
+只做一件事的构造型技能：给数据探索做缩放/悬停/联动的 Plotly 图——spec 轻、加载快、采样如实交代。不做印刷图（那是 `scientific-plotting`），不做期刊拼版（那是 `publication-figure`）。
 
 ## Operating Posture
 
-You are building an instrument, not an illustration: the user will interrogate data through it. The bar is responsiveness with provenance — hover shows values with units, every filter/aggregation stated, downsampling disclosed on the chart. Write it so the file opens fast on a cold load.
+你在造仪器，不是画插图：用户要透过它审问数据。标准是带来源的响应——悬停显示带单位的值，每个过滤/聚合都声明，降采样画在图上。写的时候就按冷加载秒开来写。
 
-Two failure modes, and the first is worse:
+两种失败模式，第一种更糟：
 
-1. **A 40-MB HTML "exploration".** Full-resolution millions of points inline, frozen browser, unshareable file. An interactive chart nobody can open is a failed export with buttons.
-2. **Silent aggregation.** Downsampled, binned, or filtered data presented as the raw data. Exploration on hidden transforms produces discoveries about the transform.
+1. **40MB 的 HTML“探索”。** 百万点全分辨率内联，浏览器冻住，文件传不出去。打不开的交互图是带按钮的失败导出。
+2. **悄悄聚合。** 降采样、分箱、过滤后的数据当原始数据展示。在藏起来的变换上探索，发现的是变换本身。
 
-Never deliver an interactive chart without its data budget line (N shown vs N total, method). No budget line, no chart.
+没有数据预算行（展示 N 对总数，方法）就不交交互图。无预算行，无图。
 
 ## Hard Rules
 
-1. **Point budget: ~10k SVG, WebGL beyond.** Under ~10k points standard traces are fine; above it use scattergl (or datashader-style raster + hover) — decided by count, not by hope.
-2. **Downsampling disclosed on the chart.** Method named (stratified/random/every-kth, seed where random) plus "showing X of N". Undisclosed sampling is misrepresentation at zoom.
-3. **Hover carries units and identity.** Every trace: what the point is, values with units. Hover showing bare numbers without labels is a missed instrument reading.
-4. **Spec lean, data external where big.** Keep the generating script; inline data only when small. A chart that can't be regenerated from its script is a dead end.
-5. **Exploration-only by default.** If a view from this chart ends up in the paper, redraw it statically via `scientific-plotting` — screenshots of interactive charts print badly and carry no style contract.
+1. **点预算：约 1 万 SVG，以上 WebGL。** 1 万点以下标准 trace 行；以上 scattergl（或 datashader 式光栅 + 悬停）——按数量定，不靠许愿。
+2. **降采样画在图上。** 方法点名（分层/随机/隔 k 抽，随机带种子）加“展示 X / 共 N”。不声明的采样是缩放下的 misrepresentation。
+3. **悬停带单位和身份。** 每条 trace：点是什么、值带单位。光秃秃数字无标签的悬停是错过的仪表读数。
+4. **spec 瘦，数据大了外置。** 生成脚本留档；数据小才内联。脚本复生不了的图是死胡同。
+5. **默认只做探索。** 这张图的某个视图进了论文，重去 `scientific-plotting` 画静态——交互图截图打印难看，且无样式契约。
 
 ## The Build Sequence
 
-### 1. Should this be interactive at all?
+### 1. 先判断该不该交互
 
-| Situation | Decision |
+| 情形 | 判定 |
 | --- | --- |
-| Exploration needs zoom/hover/filter, or 10k+ points | **Plotly interactive. Continue.** |
-| Final paper figure | Stop. Use `scientific-plotting` (panels) then `publication-figure`. |
-| Statistical claim to exhibit | Route through `statistical-plot` for the numbers; interactivity is optional chrome. |
-| n < ~500, one static message | Stop. A static figure loads instantly and prints. |
+| 探索要缩放/悬停/过滤，或上万点 | **Plotly 交互，继续** |
+| 论文终稿图 | 停。用 `scientific-plotting`（子图）再 `publication-figure` |
+| 要展示统计断言 | 数字走 `statistical-plot`；交互是可选镀铬 |
+| n < ~500，一句话静态消息 | 停。静态图秒开又能打印 |
 
-### 2. Budget the points
+### 2. 给点做预算
 
-- Count N. ≤ ~10k → standard traces. Above → scattergl for scatter; aggregation (2-D histogram/hexbin) for density; level-of-detail or server-side for millions — and say which.
-- Downsampling method chosen and written into the chart subtitle/legend: "showing 10,000 of 2.4M (stratified by class, seed 7)".
+- 数 N。≤ 约 1 万 → 标准 trace。以上 → 散点 scattergl；密度用聚合（二维直方/六边箱）；百万级用细节层次或服务端——用哪种写明。
+- 降采样方法写进图副标题/图例：“共 240 万展示 1 万（按类分层，种子 7）”。
 
-### 3. Build the instrument
+### 3. 造仪器
 
-- Traces minimal: one per series/class, named in the legend as a human would say it. Linked views (brush across panels) only when the question genuinely spans panels.
-- Axes with units, ranges sane (no 40 empty decades), log declared where used. Buttons/sliders only if they answer a question — chrome that answers nothing is clutter.
-- Colors from the project palette (`scientific-plotting` rules apply: Okabe-Ito, no rainbow).
+- trace 极简：每系列/类一条，图例用人话命名。联动视图（跨子图刷选）只在问题真跨子图时上。
+- 坐标轴带单位，范围合理（不要 40 个空量级），对数用了就声明。按钮/滑杆只回答问题——不回答问题的镀铬是杂物。
+- 颜色走项目色板（`scientific-plotting` 规则：Okabe-Ito，无彩虹）。
 
-### 4. Verify — the gate
+### 4. 验证——gate
 
-- **Gate**: cold-load the exported HTML, time it; zoom to full depth, hover edge points, check the budget line matches the data. Slow load or wrong hover labels → fix before delivery.
-- Confirm each number visible on hover against the source row in code. Hover text is generated text — it can be wrong like any other.
+- **gate**：导出 HTML 冷加载计时；缩放到最深，悬停边缘点，预算行对数据核对。加载慢或悬停标签错 → 修好再交付。
+- 悬停每个可见数字对源码行核对。悬停文本是生成的文本，和别的一样会错。
 
 ## Never Ship
 
-Self-check before you finish. Each is an automatic block:
+收尾自查，不过即拦：
 
-| Never | Instead |
+| 禁忌 | 替代 |
 | --- | --- |
-| 100k SVG points inline | scattergl / aggregation, decided by count |
-| Silent downsampling | Method + "X of N" on the chart |
-| Bare-number hovers | Identity + values + units per trace |
-| Unregenerable HTML blob | Generating script kept, seed noted |
-| Paper screenshot of the widget | Redraw statically via scientific-plotting |
-| Chrome answering nothing | Every control tied to a question |
+| 10 万 SVG 点内联 | scattergl/聚合，按数量定 |
+| 悄悄降采样 | 方法 + “X / 共 N”画图上 |
+| 光秃秃数字悬停 | 每 trace 身份 + 值 + 单位 |
+| 复生不了的 HTML 团 | 生成脚本留档，种子注明 |
+| 论文贴控件截图 | 回 scientific-plotting 重画静态 |
+| 不回答问题的镀铬 | 每个控件系一个问题 |
 
 ## Output
 
-The deliverable is the instrument **plus its budget**, in this order:
+交付物是仪器**加预算**，顺序如下：
 
-- **Chart file** — HTML (+ generating script), cold-load time noted.
-- **Budget line** — N shown vs N total, sampling method, seed.
-- **Reading guide** — what to hover/filter, what the views answer (3 lines max).
-- **Limits** — what sampling hides, valid exploration scope.
+- **图文件**——HTML（+ 生成脚本），冷加载耗时注明。
+- **预算行**——展示 N 对总数，采样方法，种子。
+- **阅读指南**——悬停/过滤看什么，视图回答什么（最多 3 行）。
+- **局限**——采样藏了什么，有效探索范围。
 
-Don't pad this into a report. The fast-loading chart is the deliverable.
+不要写成报告。秒开的图就是交付物。
 
 ## Tone
 
-Opinionated and brief. When the honest answer is "2.4M points need aggregation — plotting them all helps no one", aggregate and disclose. When the user wants the widget in the paper, redraw it statically instead of screenshotting.
+立场鲜明、废话少。当正确答案是“240 万点要聚合——全画出来帮不了任何人”就聚合加声明。用户要把控件放论文时，重画静态，不要截图。

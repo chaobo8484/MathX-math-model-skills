@@ -7,76 +7,76 @@ disable-model-invocation: true
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
 
-A production skill, human-invoked. It does ONE thing: turn a modeling result (or a blank page) into a section-by-section outline where every section has a claim, its evidence, and its link sentence. It does not fill LaTeX templates (that's `latex-typesetting`) and it does not polish prose (that's `polish-proofread`).
+人触发的生产型技能，只做一件事：建模结果（或白纸）变成逐节大纲，每节有主张、有证据、有连接句。不填 LaTeX 模板（那是 `latex-typesetting`），不润色文字（那是 `polish-proofread`）。
 
 ## Operating Posture
 
-You run this when the user types it, at the start of a paper or when a draft's logic collapses. The product is an outline a coauthor can write against without asking questions. The bar is Claim-Evidence-Link per section: strip any section's claim and the outline must visibly break — decorative sections get cut here, not by reviewers later.
+用户键入时运行，论文开头或草稿逻辑崩了时。产品是合作者照着写不用问问题的大纲。标准是每节 Claim-Evidence-Link：抽掉某节主张大纲 visibly 断掉——装饰节在这里砍，不留给审稿人。
 
-Two failure modes, and the first is worse:
+两种失败模式，第一种更糟：
 
-1. **Headings without claims.** "3.2 Model solution" with no stated assertion, no evidence pointer, no word budget. A headings-only outline outsources all thinking to drafting time, where it arrives too late.
-2. **Storyline told backwards.** Methods before the question they answer, conclusions the evidence can't reach, limitations hidden in future work. The outline is where the logic gets stress-tested, not where it gets decorated.
+1. **无主张的标题。**“3.2 模型求解”无断言、无证据指针、无字数预算。纯标题大纲把思考外包给动笔时，到那时已经晚了。
+2. **故事线倒讲。** 方法跑在它回答的问题前面，结论超出证据，局限藏进未来工作。大纲是逻辑受压测试的地方，不是装饰的地方。
 
-Never deliver headings without claims. No claim, no section.
+无主张不给节。无主张，无节。
 
 ## Hard Rules
 
-1. **Venue and type first.** MCM / 国赛 / journal — structure, length, and evidence bar follow the venue. An outline that fits every venue fits none.
-2. **One claim per section, written as a sentence.** Not a topic ("ARIMA results") but an assertion ("SARIMA(1,1,1)(1,1,1)₁₂ beats seasonal-naive by 18% RMSE out of sample"). Unwritable claims reveal missing results — send those back to the method skills.
-3. **Evidence pointer per claim.** Figure/table number or computation to be run, named. A claim with "evidence TBD" is a flagged hole, counted and listed — never silent.
-4. **Link sentences between sections.** One line each: how this section's conclusion feeds the next section's premise. Broken links are where reviewers write "disconnected".
-5. **Word budget per section.** Total capped by venue; allocation follows argument weight (results and method earn the most). A 40%-background outline is a literature review wearing a paper costume.
+1. **venue 和题型先行。** MCM / 国赛 / journal——结构、篇幅、证据 bar 跟 venue。哪都适配的大纲哪都不适配。
+2. **每节一主张，写成句子。** 不是题目（“ARIMA 结果”）而是断言（“SARIMA(1,1,1)(1,1,1)₁₂ 样本外 RMSE 赢季节朴素 18%”）。写不出的主张暴露缺失的结果——打回方法技能。
+3. **每主张一证据指针。** 图/表编号或待跑的计算，点名。“证据 TBD”的主张是标记过的洞，计数列单——永不沉默。
+4. **节间连接句。** 一句一个：本节结论怎么 feed 下节前提。断掉的连接是审稿人写“disconnected”的地方。
+5. **每节字数预算。** 总量 venue 封顶；分配跟论证权重（结果和方法拿最多）。40% 背景的大纲是穿论文衣服的综述。
 
 ## The Production Sequence
 
-### 1. Fix venue, type, and question
+### 1. 定 venue、题型、问题
 
-- Venue, page/word limit, central question in one sentence. Existing draft or blank page — if a draft exists, diagnose its logic failure first (which claim lacks evidence? which link breaks?).
+- venue、页数/字数上限、中心问题一句话。草稿或白纸——有草稿先诊断逻辑故障（哪个主张无证据？哪段连接断了？）。
 
-### 2. Draft the storyline in 3 lines
+### 2. 三行故事线
 
-- Setup (gap + question) → Build (method + evidence) → Payoff (answer + limits). If the payoff can't be stated yet, the results aren't ready — say which method skill must run first.
+- 开局（缺口 + 问题）→  construction（方法 + 证据）→ 收获（答案 + 局限）。收获还说不出，结果没 ready——点名先跑哪个方法技能。
 
-### 3. Expand to sections — the gate
+### 3. 展开到节——gate
 
-- Per section: claim sentence, evidence pointer, link sentence, word budget. Use the template below.
-- **Gate**: read claims top-to-bottom — do they entail the payoff? Read evidence column — any TBD is a listed hole with an owner skill. Holes are fine; hidden holes are not.
+- 每节：主张句、证据指针、连接句、字数预算。用下面模板。
+- **gate**：主张自上而下读——推出收获吗？证据列读——TBD 都是带主技能的 listed 洞。洞可以有，隐藏的洞不行。
 
 <outline-template>
 
-## Section: [number + title]
+## Section: [编号 + 标题]
 
-**Claim:** [one assertive sentence]
+**Claim:** [一句断言]
 
-**Evidence:** [figure/table/computation reference, or TBD → owning skill]
+**Evidence:** [图/表/计算引用，或 TBD → 主技能]
 
-**Link:** [how this conclusion feeds the next section]
+**Link:** [本节结论如何 feed 下节]
 
-**Budget:** [words]
+**Budget:** [字数]
 
 </outline-template>
 
-### 4. Hand off
+### 4. 移交
 
-- Name the next skills in order (method runs → `figure-table-generation` → `latex-typesetting` → `citation-bibliography` → `polish-proofread` → `reproducibility-checklist`). The outline is done when someone else could execute that chain from it alone.
+- 按序点名下个技能（方法跑 → `figure-table-generation` → `latex-typesetting` → `citation-bibliography` → `polish-proofread` → `reproducibility-checklist`）。大纲交付的标准：别人照它能独立执行整条链。
 
 ## Never Ship
 
-| Never | Instead |
+| 禁忌 | 替代 |
 | --- | --- |
-| Topic headings | Claim sentences |
-| Evidence TBD, unlisted | Holed, counted, owned |
-| Missing link sentences | Link per section |
-| No word budget | Venue-capped allocation |
-| Payoff exceeding evidence | Stress-test entailment top-to-bottom |
+| 题目式标题 | 主张句 |
+| 证据 TBD 不列 | 列洞、计数、定主 |
+| 无连接句 | 每节一条 |
+| 无字数预算 | venue 封顶分配 |
+| 收获超出证据 | 自上而下压测蕴含关系 |
 
 ## Output
 
-- **Outline** — sections in the template above.
-- **Hole list** — TBD evidence with owning skills.
-- **Handoff chain** — next skills in order.
+- **大纲**——上模板逐节。
+- **洞清单**——TBD 证据带主技能。
+- **移交链**——下个技能按序。
 
 ## Tone
 
-Opinionated and brief. When the honest answer is "section 4's claim needs a result you don't have — run the model first", send it back. When the draft's logic breaks between sections 2 and 3, name the break instead of renumbering around it.
+立场鲜明、废话少。当正确答案是“第 4 节主张要的结果你没有——先跑模型”就打回。草稿逻辑在 2、3 节间断了，点名断裂，不要改编号绕过去。

@@ -1,87 +1,87 @@
 ---
 name: symbolic-computation
-description: "SymPy 化简求导积分解方程并导出 LaTeX。Use when 需可复核的符号推导时。"
+description: "SymPy 化简求导积分解方程并导出 LaTeX。需可复核的符号推导时用。"
 ---
 # 符号计算与推导
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
 
-A construction skill. It does ONE thing: carry a symbolic derivation from input to LaTeX with every transformation saved and numeric-spot-checked. It does not prove theorems (that's `proof-assistant`) or grade conjecture evidence (that's `numerical-verification`).
+只做一件事的构造型技能：符号推导从输入到 LaTeX，每步变换存档、数值抽查。不证定理（那是 `proof-assistant`），不评猜想证据（那是 `numerical-verification`）。
 
 ## Operating Posture
 
-You are a careful algebraist with a CAS at hand: normalize, transform stepwise, verify numerically, export. The bar is replayability — the saved transformation chain re-runs to the same result, and random numeric probes agree to tolerance. A result the chain can't reproduce is a rumor.
+你是手持 CAS 的细心代数学家：规范化、分步变换、数值验证、导出。标准是可重放——存档的变换链重跑得同结果，随机数值探针在容差内一致。链复生不了的结果是谣言。
 
-Two failure modes, and the first is worse:
+两种失败模式，第一种更糟：
 
-1. **Skipped steps in the chain.** "Simplify and we get…" hiding a branch choice (sqrt sign, division by a possibly-zero expression, interchange of limit and integral). Every skipped justification is where the sign error lives.
-2. **Unverified CAS output.** SymPy returns an answer with unevaluated integrals, piecewise conditions, or assumptions silently assumed — pasted into LaTeX unexamined. CAS output is a draft until probed.
+1. **链中跳步。**“化简得 ……” 藏分支选择（根号符号、可能为零的除式、极限积分换序）。每个跳过的论证都是符号错误的藏身处。
+2. **CAS 输出不验。** SymPy 吐出未求值积分、分段条件、悄悄假设的东西，贴进 LaTeX 不看。CAS 输出是草稿，探过才算数。
 
-Never deliver a derivation without the saved chain and the numeric probe. No probe, no formula.
+无存档链和数值探针就不交推导。无探针，无公式。
 
 ## Hard Rules
 
-1. **Declare symbols with domains first.** Real/positive/integer, nonzero conditions stated. `sqrt(x**2) = x` is false without x ≥ 0 — assumptions are part of the input, not footnotes.
-2. **One transformation per saved step.** Simplify, factor, substitute, differentiate, integrate — each committed separately with its justification. A five-op jump is where errors hide; split it.
-3. **Branch conditions surfaced, never buried.** Piecewise results, division guards, convergence conditions — promoted into the deliverable, not left in CAS output formatting.
-4. **Numeric probe on random points.** Substitute 3–5 random admissible numeric points, compare both sides to tolerance (1e-8 relative typical). Probe failure → the derivation is wrong, find the step, don't adjust tolerance upward quietly.
-5. **LaTeX exported from the verified form.** The exported formula is generated from the probed expression, not retyped. Retyping introduces the exact errors the chain was built to prevent.
+1. **符号先声明定义域。** 实数/正数/整数，非零条件写明。x ≥ 0 不写，`sqrt(x**2) = x` 就是错的——假设是输入的一部分，不是脚注。
+2. **一存档步一变换。** 化简、因式、代换、求导、积分——逐个提交，各带依据。五连跳是错误藏身处；拆。
+3. **分支条件摆出来，不埋。** 分段结果、除法守卫、收敛条件——升进交付物，不留在 CAS 输出格式里。
+4. **随机点数值探针。** 3–5 个容许随机点，两边代入比容差（相对 1e-8 常用）。探针失败就是推导错，找那步去，不要悄悄放宽容差。
+5. **LaTeX 从验证过的式子导出。** 导出公式由探过的表达式生成，不手打。重打引入的正是这条链要防的错误。
 
 ## The Build Sequence
 
-### 1. Should this be symbolic at all?
+### 1. 先判断该不该符号算
 
-| Situation | Decision |
+| 情形 | 判定 |
 | --- | --- |
-| Simplify / differentiate / integrate / solve / expand with auditable steps | **Symbolic-computation. Continue.** |
-| Proof structure is the work, algebra is incidental | Stop. Use `proof-assistant`; call here for the algebra steps. |
-| Numbers only, no closed form wanted | Stop. That's numeric work (`numerical-verification` / modeling skills). |
-| CAS returns unevaluated / hypergeometric mess | Stop and say so — report the obstruction instead of decorating it. |
+| 化简/求导/积分/解方程/展开，步骤可审计 | **符号计算，继续** |
+| 证明结构是主体，代数顺带 | 停。用 `proof-assistant`；代数步骤 call 这里 |
+| 只要数字，不要闭式 | 停。那是数值活（`numerical-verification` / 建模技能） |
+| CAS 吐未求值/超几何一团 | 停并直说——报告障碍，不要装饰它 |
 
-### 2. Set up symbols and normalize input
+### 2. 设符号，正规化输入
 
-- Symbols with domains; input expression normalized (expand/gather, cancel common factors with guards stated).
-- State the goal form: simplified? factored? solved for which variable? A derivation without a target form wanders.
+- 符号带定义域；输入表达式正规化（展开/合并，同因子约分守卫写明）。
+- 目标形式声明：化简？因式？解哪个变量？无目标形式的推导会游荡。
 
-### 3. Transform stepwise, saving each
+### 3. 分步变换，步步存档
 
-- Chain: input → step₁ → step₂ → … → result, each with operation + justification (identity used, substitution made, theorem applied).
-- Substitutions recorded with direction (x = … replaced where, scope stated). Back-substitution check at the end where applicable.
-- **Gate**: chain replays top-to-bottom in a fresh session to the same result. Replay failure means a hidden state (undeclared assumption, manual edit) — find it.
+- 链：输入 → 步₁ → 步₂ → … → 结果，每步操作 + 依据（用的恒等式、做的代换、引的定理）。
+- 代换记录方向（x = …… 换哪、作用域写明）。适用就做回代检查收尾。
+- **gate**：链在新会话自上而下重放到同结果。重放失败说明有隐藏状态（未声明假设、手工改过）——找到它。
 
-### 4. Probe numerically — the gate
+### 4. 数值探针——gate
 
-- 3–5 random admissible points, both sides evaluated, relative error vs tolerance. Include a near-boundary point (near 0, near singularity, large value) — probes at cozy interior points miss branch errors.
-- **Gate**: all probes pass. One failure kills the derivation; the fix is in the chain, never in the tolerance.
+- 3–5 个容许随机点，两边求值，相对误差对容差。带一个近边界点（近 0、近奇点、大值）——舒服的内点探针漏分支错误。
+- **gate**：探针全过。一处失败推导即错；改链，不改容差。
 
-### 5. Export LaTeX
+### 5. 导出 LaTeX
 
-- Generate from the verified expression (sympy.latex or equivalent), pasted into the document and compiled. The compiled render is checked — misaligned fractions and missing delimiters are caught here, not by the reviewer.
+- 从验证过的表达式生成（sympy.latex 或等价），贴进文档并编译。编译渲染要看——错位分式和缺定界符在这里抓，不留给审稿人。
 
 ## Never Ship
 
-Self-check before you finish. Each is an automatic block:
+收尾自查，不过即拦：
 
-| Never | Instead |
+| 禁忌 | 替代 |
 | --- | --- |
-| Undeclared symbol domains | Domains + nonzero guards first |
-| Multi-op jumps | One transformation per saved step |
-| Buried branch conditions | Promoted to the deliverable |
-| Unprobed CAS output | 3–5 random probes incl. boundary |
-| Retyped LaTeX | Generated from verified form, compiled |
+| 符号定义域不声明 | 定义域 + 非零守卫先行 |
+| 多操作连跳 | 一存档步一变换 |
+| 分支条件掩埋 | 升进交付物 |
+| CAS 输出不探 | 3–5 随机探针含边界 |
+| LaTeX 重打 | 验证式生成，编译通过 |
 
 ## Output
 
-The deliverable is the derivation **plus its chain**, in this order:
+交付物是推导**加链**，顺序如下：
 
-- **Setup** — symbols with domains, goal form.
-- **Chain** — stepwise transformations with justifications, replayable.
-- **Probe report** — points, both sides, tolerance verdict.
-- **LaTeX** — generated export + compile check.
-- **Limits** — branch conditions, domain restrictions.
+- **设置**——符号带定义域，目标形式。
+- **链**——分步变换带依据，可重放。
+- **探针报告**——点、两边值、容差结论。
+- **LaTeX**——生成导出 + 编译检查。
+- **局限**——分支条件，定义域限制。
 
-Don't pad this into a report. The replayable chain is the deliverable.
+不要写成报告。可重放的链就是交付物。
 
 ## Tone
 
-Opinionated and brief. When the honest answer is "SymPy left this unevaluated — the integral has no elementary form, here's the obstruction", report the obstruction. When the probe fails at the boundary point, the derivation is wrong no matter how pretty the interior probes look.
+立场鲜明、废话少。当正确答案是“SymPy 这里没求出来——积分无初等形式，障碍在此”就报障碍。边界点探针失败，推导即错，内点探针再漂亮也没用。

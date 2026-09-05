@@ -7,66 +7,66 @@ disable-model-invocation: true
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
 
-A production skill, human-invoked. It does ONE thing: convert analysis outputs into captioned, cited, column-sized figures and booktabs tables ready for the manuscript. It does not draw exploratory plots (that's `scientific-plotting` et al.) and it does not assemble the final composite (that's `publication-figure`).
+人触发的生产型技能，只做一件事：分析结果变成带题注、带引用、栏宽尺寸的投稿级图表和 booktabs 表格。不画探索图（那是 `scientific-plotting` 一家），不拼终版（那是 `publication-figure`）。
 
 ## Operating Posture
 
-You run this when the user types it, with results in hand. The product is a numbered figure/table set where every number traces to its computation and every caption stands alone. The bar is the caption test: figure + caption + table notes must convey the result without the main text.
+用户键入时运行，结果在手。产品是编号的图/表集，每个数字追溯到计算，每个题注独立成立。标准是题注测试：图 + 题注 + 表注脱离正文讲清结果。
 
-Two failure modes, and the first is worse:
+两种失败模式，第一种更糟：
 
-1. **Numbers without provenance.** A table of RMSEs nobody can re-derive, a bar chart from a spreadsheet nobody kept. Every cell traces to code + data + seed, or the cell doesn't ship.
-2. **Caption decoration.** "Results of the experiment" as a caption, units missing, N missing, table rules from the spreadsheet era (vertical lines everywhere). A caption that says nothing forces the reader to decode the graphic raw.
+1. **无来源的数字。** 没人复算得出的 RMSE 表，没人留住的表格画的柱图。每格追溯到代码 + 数据 + 种子，否则这格不发货。
+2. **装饰性题注。** 题注写“实验结果”，单位缺，N 缺，表格线回到电子表格时代（竖线林立）。无信息题注逼读者裸解图形。
 
-Never deliver a figure/table without its source trace and a standalone caption. No trace, no exhibit.
+无来源追溯、无独立题注，不交图/表。无追溯，无展品。
 
 ## Hard Rules
 
-1. **One message per exhibit.** If the figure needs two captions, it's two figures. Combined mega-figures that serve three arguments serve none.
-2. **Captions standalone.** What is shown, N, method in one clause, key reading in one clause, units everywhere. "As shown in Fig. 3" must never be load-bearing in the main text either — but that's `polish-proofread`'s fight; here the caption carries its weight.
-3. **booktabs tables, no vertical rules.** \toprule/\midrule/\bottomrule only; units in the header row, not repeated per cell; significant digits matched to the error (a ±0.02 effect reported to 4 decimals is noise cosplay).
-4. **Column-sized vector exports.** Widths per the venue (single ≈ 89mm typical — confirm), type sizes final, palette from the project system. Regenerate at size; never scale screenshots.
-5. **Text-cites-figure consistency.** Every number the prose quotes appears identically in the exhibit (same rounding!). Grep the prose figures against the tables before delivery — transcription drift is the classic silent retraction.
+1. **一展品一消息。** 一张图要两个题注，就是两张图。服务三个论点的 mega 图一个也服务不好。
+2. **题注独立。** 展示什么、N、方法一句、关键读数一句、单位处处。“如图 3 所示”在正文也不许承重——那是 `polish-proofread` 的仗；这里题注自己立住。
+3. **booktabs 表格，无竖线。** 只用 \toprule/\midrule/\bottomrule；单位放表头行，不逐格重复；有效数字配误差（±0.02 的效应报 4 位小数是噪声 cosplay）。
+4. **栏宽矢量导出。** 宽度按 venue（单栏约 89mm 常见——确认），字号终版，色板走项目系统。按尺寸重生成；截图放大永不。
+5. **正文引用和图一致。** 正文引的每个数字在展品里一模一样（修约一致！）。交付前 grep 正文数字对表格——誊写漂移是经典静默撤稿。
 
 ## The Production Sequence
 
-### 1. Inventory the exhibits
+### 1. 盘点展品
 
-- List from the outline: which claim needs which figure/table. Uncited exhibits get cut or assigned — never produced "just in case".
+- 按大纲列：哪个主张要哪张图/表。无引用展品删或领主——绝不“备着”生产。
 
-### 2. Build each exhibit
+### 2. 逐个建
 
-- Figures: spec the drawing (chart type per `chart-decision` if undecided), draw via the plotting skills, export vector at column size.
-- Tables: booktabs, header units, digit discipline, notes row for methods/abbreviations.
+- 图：定画法（图型未定走 `chart-decision`），经绘图技能画，栏宽矢量导出。
+- 表：booktabs，表头单位，数字纪律，方法/缩写备注行。
 
-### 3. Caption + trace — the gate
+### 3. 题注 + 追溯——gate
 
-- **Gate per exhibit**: standalone-caption read (a colleague gets the result from caption + graphic alone?) + provenance line (code + data + seed) + prose-consistency grep (quoted numbers match to the digit).
+- **每展品 gate**：独立题注朗读（同事只看题注 + 图得结论？）+ 来源行（代码 + 数据 + 种子）+ 正文一致 grep（引用数字到 digit 相符）。
 
-### 4. Hand off
+### 4. 移交
 
-- Numbered files (fig03.pdf, tab02.tex) with the caption catalog; forward to `latex-typesetting` for inclusion, `publication-figure` for multi-panel assembly, `polish-proofread` for prose around them.
+- 编号文件（fig03.pdf、tab02.tex）加题注目录；去 `latex-typesetting` 入版，去 `publication-figure` 多子图拼版，去 `polish-proofread` 修周围文字。
 
 ## Never Ship
 
-| Never | Instead |
+| 禁忌 | 替代 |
 | --- | --- |
-| Tracless numbers | Code + data + seed per cell |
-| "Results of…" captions | Standalone: what + N + method + reading |
-| Vertical-ruled tables | booktabs, header units |
-| Digits beyond the error | Digit discipline per column |
-| Prose/exhibit drift | Grep-to-match before delivery |
-| Screenshot scaling | Regenerate at column size |
+| 无追溯数字 | 每格代码 + 数据 + 种子 |
+| “……结果”式题注 | 独立：是什么 + N + 方法 + 读数 |
+| 竖线表格 | booktabs，表头单位 |
+| 超出误差的位数 | 按列数字纪律 |
+| 正文展品漂移 | 交付前 grep 对上 |
+| 截图放大 | 按栏宽重生成 |
 
 ## Output
 
-- **Exhibit files** — numbered vectors + table sources.
-- **Caption catalog** — standalone captions, all exhibits.
-- **Trace table** — exhibit → code + data + seed.
-- **Consistency grep** — prose numbers match, evidence shown.
+- **展品文件**——编号矢量 + 表格源码。
+- **题注目录**——独立题注，全展品。
+- **追溯表**——展品 → 代码 + 数据 + 种子。
+- **一致 grep**——正文数字相符，证据展示。
 
 ## Tone
 
-Opinionated and brief. When the honest answer is "this table's fourth decimal is noise — cut two digits", cut them. When a figure serves no outline claim, cut the figure instead of writing a caption to justify it.
+立场鲜明、废话少。当正确答案是“这表第四位小数是噪声——砍两位”就砍。某图不服务大纲任何主张，删图，不要写题注给它续命。
 
 模板文件见 assets/templates/figure-table-generation.tex（随本技能分发；改动前先核对 venue spec）。

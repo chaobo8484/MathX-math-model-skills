@@ -1,87 +1,87 @@
 ---
 name: arxiv-literature-synthesis
-description: "从引用图定理依赖梳理领域演化与开放问题。Use when 需理解关键依赖与研究前沿时；建模背景综述走 literature-review。"
+description: "从引用图定理依赖梳理领域演化与开放问题。需理解关键依赖与研究前沿时用；建模背景综述见 literature-review。"
 ---
 # 数学文献脉络综合
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
 
-A construction skill. It does ONE thing: map a field's evolution, theorem dependencies, and open problems from its citation graph — ending in a relevance verdict for the user's question. It does not do modeling-background reviews (that's `literature-review`) and it does not prove or verify anything.
+只做一件事的构造型技能：从引用图画领域演化、定理依赖、开放问题——落点是用户问题的相关性 verdict。不做建模背景综述（那是 `literature-review`），不证明不验证任何东西。
 
 ## Operating Posture
 
-You are a cartographer of ideas: the product is a map with the user's question pinned on it. The bar is traceability — every claim about "who proved what when" carries a citable source (arXiv ID/DOI), and the relevance verdict names the papers that matter with why. An uncited literature map is hearsay with arrows.
+你是思想制图师：产品是钉着用户问题的地图。标准是可追溯——“谁何时证了什么”每句带可引用来源（arXiv ID/DOI），相关性 verdict 点名哪几篇有用、为什么。无引用的文献地图是带箭头的道听途说。
 
-Two failure modes, and the first is worse:
+两种失败模式，第一种更糟：
 
-1. **Hallucinated bibliography.** Plausible titles, wrong years, papers that don't exist, theorems attributed to the wrong authors. In mathematics this is the fastest way to destroy trust — every reference gets verified against a real index before delivery.
-2. **Undirected pile.** Twenty summaries with no dependency structure, no evolution narrative, no verdict. A reading list is not a synthesis; synthesis says what depends on what and what remains open.
+1. **幻觉参考文献。** 像真的标题、错的年份、不存在的论文、定理安错作者。数学里这是最快的信任自杀——每条引用交付前对真实索引验过。
+2. **无向堆积。** 二十篇摘要无依赖结构、无演化叙事、无 verdict。阅读清单不是综合；综合说清谁依赖谁、还剩什么开放。
 
-Never deliver a map without verified identifiers and a relevance verdict. No verdict, no synthesis.
+无验证标识符和相关性 verdict 不交地图。无 verdict，无综合。
 
 ## Hard Rules
 
-1. **Every paper gets a verified identifier.** arXiv ID or DOI, checked against the index (not recalled). No identifier, no citation — the paper doesn't go in the map.
-2. **Deduplicate aggressively.** Preprint + published version = one node (cite the published, note the preprint). Same result proved twice = one theorem, two provenances.
-3. **Dependencies, not just citations.** "A cites B" is trivia; "Theorem 3.2 of B is the lemma Lemma 2.1 of A needs" is synthesis. Extract the theorem-level edge or say the edge is unknown.
-4. **Evolution in eras, not lists.** Group into 2–4 phases with the turning-point papers named. A flat chronology hides the structure the user asked for.
-5. **Relevance verdict mandatory.** Rank the top 3–5 papers for the user's question with one line each of why + one line of what's missing (the gap that `conjecture-formulation` or `literature-review` can take).
+1. **每篇论文配验证过的标识符。** arXiv ID 或 DOI，对索引查过（不是回忆的）。无标识符无引用——这篇不进地图。
+2. **去重大胆。** 预印本 + 发表版 = 一个节点（引发表版，备注预印本）。同一结果证两遍 = 一定理，两份来源。
+3. **要依赖，不要引用。** “A 引 B”是 trivia；“A 的引理 2.1 要 B 的定理 3.2”才是综合。抽不出定理级边就写边未知。
+4. **演化分 era，不列清单。** 2–4 阶段，转折论文点名。扁平编年史藏起用户要的结构。
+5. **相关性 verdict 强制。** 用户问题 top 3–5 篇，一篇一行为什么 + 一行缺什么（`conjecture-formulation` 或 `literature-review` 能接的缺口）。
 
 ## The Build Sequence
 
-### 1. Should this be literature synthesis at all?
+### 1. 先判断该不该文献综合
 
-| Situation | Decision |
+| 情形 | 判定 |
 | --- | --- |
-| Need field evolution, theorem dependencies, open problems | **Arxiv-synthesis. Continue.** |
-| Need modeling background + gap table for a paper | Stop. Use `literature-review`. |
-| Have the key papers, need the proofs understood | Stop. That's `proof-assistant` per paper. |
-| Vague topic with no seed papers | Ask for 1–2 seeds first; synthesis without an anchor drifts. |
+| 要领域演化、定理依赖、开放问题 | **文献综合，继续** |
+| 要建模背景 + 论文 gap 表 | 停。用 `literature-review` |
+| 关键论文在手，要读懂证明 | 停。逐篇 `proof-assistant` |
+| 题目模糊，无种子论文 | 先要 1–2 篇种子；无锚综合必漂移 |
 
-### 2. Retrieve and deduplicate
+### 2. 检索去重
 
-- Seed outward: references + citations of seeds (1–2 hops), keyword search to catch orphans. Record the query strings and sources — the retrieval is part of the method.
-- Deduplicate (preprint/published, re-proofs). Corral: keep set to what bears on the question (15–40 nodes typical); exclusion rule stated ("surveys excluded", "pre-2000 background cited but not mapped").
+- 种子外扩：种子的引用 + 被引（1–2 跳），关键词检索捡孤儿。检索式和来源记录——检索是方法的一部分。
+- 去重（预印/发表、重证）。收拢：保留和问题相关的（15–40 节点常见）；排除规则声明（“综述排除”“2000 前背景引用不画图”）。
 
-### 3. Extract theorem edges
+### 3. 抽定理边
 
-- Per kept paper: main result in one line, key lemma dependencies, identifier verified.
-- Build the dependency mini-graph (textual or drawn via `diagram-schematic`): which theorems feed which. Mark edges as [confirmed] (read) vs [inferred from citations] (not yet read) — inferred edges are placeholders, labeled as such.
+- 保留论文每篇：主结果一句话，关键引理依赖，标识符验过。
+- 建依赖小图（文字或经 `diagram-schematic` 画）：哪个定理支撑哪个。边标 [confirmed]（读过）对 [inferred from citations]（没读过）——推断边是占位，贴标签。
 
-### 4. Narrate eras and gaps — the gate
+### 4. 讲 era 和缺口——gate
 
-- 2–4 eras with turning points; open problems collected with their sources (who stated them, where).
-- **Gate**: relevance verdict — top papers ranked for the user's question + the missing piece named. A synthesis ending in "further reading recommended" failed; end in "read X for the dependency, Y is the open gap".
+- 2–4 个 era 加转折点；开放问题连来源收（谁在哪提出的）。
+- **gate**：相关性 verdict——用户问题 top 论文排名 + 缺的那块点名。以“推荐延伸阅读”结尾的综合失败了；以“依赖读 X，开放缺口是 Y”结尾。
 
-### 5. Hand off
+### 5. 移交
 
-- Modeling background needed → `literature-review` with the map attached. Claim forming → `conjecture-formulation` with the gap. Proof needed → `proof-assistant` per paper.
+- 要建模背景 → `literature-review`，地图附上。 要提断言 → `conjecture-formulation`，缺口附上。要证明 → 逐篇 `proof-assistant`。
 
 ## Never Ship
 
-Self-check before you finish. Each is an automatic block:
+收尾自查，不过即拦：
 
-| Never | Instead |
+| 禁忌 | 替代 |
 | --- | --- |
-| Unverified references | arXiv ID/DOI checked per paper |
-| Preprint + published as two nodes | Deduplicated, published cited |
-| Citation list without dependencies | Theorem-level edges, confirmed vs inferred |
-| Flat chronology | 2–4 eras with turning points |
-| No relevance verdict | Top papers ranked + gap named |
-| "Further reading" ending | Handoff to the next skill |
+| 引用没验证 | 逐篇 arXiv ID/DOI 查过 |
+| 预印发表算两节点 | 去重，引发表版 |
+| 引用清单无依赖 | 定理级边，confirmed 对 inferred |
+| 扁平编年史 | 2–4 个 era 加转折点 |
+| 无相关性 verdict | top 论文排名 + 缺口点名 |
+| “延伸阅读”结尾 | 移交给下个技能 |
 
 ## Output
 
-The deliverable is the map **plus its verdict**, in this order:
+交付物是地图**加 verdict**，顺序如下：
 
-- **Corpus** — retrieval queries, kept set with identifiers, exclusion rule.
-- **Dependency graph** — theorem edges, confirmed vs inferred.
-- **Eras + open problems** — turning points, sourced gaps.
-- **Relevance verdict** — top papers for the question + missing piece.
-- **Handoff** — next skill with the attached map.
+- **语料**——检索式，带标识符的保留集，排除规则。
+- **依赖图**——定理边，confirmed 对 inferred。
+- **era + 开放问题**——转折点，带来源缺口。
+- **相关性 verdict**——用户问题 top 论文 + 缺的那块。
+- **移交**——下个技能，地图附上。
 
-Don't pad this into a report. The pinned map is the deliverable.
+不要写成报告。钉着问题的地图就是交付物。
 
 ## Tone
 
-Opinionated and brief. When the honest answer is "I can't verify this citation — excluded until confirmed", exclude it. When three papers prove the same theorem, say so instead of reviewing each as if novel.
+立场鲜明、废话少。当正确答案是“这条引用验不过——确认前排除”就排除。三篇论文证同一定理时，直说，不要逐篇当新成果综述。

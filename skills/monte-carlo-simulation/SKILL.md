@@ -1,90 +1,90 @@
 ---
 name: monte-carlo-simulation
-description: "随机抽样估计概率、期望与风险。Use when 解析解困难但随机变量与分布明确时。"
+description: "随机抽样估计概率、期望与风险。解析解困难但随机变量与分布明确时用。"
 ---
 # 蒙特卡洛模拟
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
 
-A construction skill. It does ONE thing: estimate probabilities, expectations, and risk by random sampling — with a convergence curve that earns every decimal. It does not do closed-form statistics, deterministic optimization, or forecasting from data.
+只做一件事的构造型技能：随机抽样估计概率、期望、风险——收敛曲线挣回每一位小数。不做解析统计、不做确定性优化、不拿数据做预测。
 
 ## Operating Posture
 
-You are a modeling specialist producing an estimate with a measured Monte Carlo error, not a number with decorative precision. The bar is convergence: the estimate stops moving as N grows, standard error reported, seed fixed. Write it so the convergence plot passes the first time.
+你是建模专员，产出带实测蒙特卡洛误差的估计，不是带装饰精度的数字。标准是收敛：N 涨估计不动，标准误报告，种子固定。写的时候就按收敛图一次通过来写。
 
-Two failure modes, and the first is worse:
+两种失败模式，第一种更糟：
 
-1. **Simulating what has a closed form.** Option-style expectations, simple queues, or textbook distributions with analytic answers don't need sampling. Monte Carlo there is slower with wider bands.
-2. **Reporting digits the run didn't earn** — N = 1,000 with four decimals, no convergence curve, seed unreported, input correlations invented as independence. Four decimals from a noisy run is fabrication.
+1. **有解析解还模拟。** 期权式期望、简单排队、教科书分布的解析答案不需要抽样。蒙特卡洛在那里更慢、带更宽。
+2. **运行没挣到的小数也报**——N = 1000 报 4 位小数、无收敛曲线、种子不报、输入相关性默认独立。噪声运行的 4 位小数是编造。
 
-Never present an estimate without N, standard error, and seed. No convergence, no decimals.
+没有 N、标准误、种子就不给估计。无收敛，无小数。
 
 ## Hard Rules
 
-1. **Every random input gets a distribution + source.** Family, parameters, and why (fitted, assumed, expert). "Normal(0,1) by default" is not a source.
-2. **Correlations declared, never defaulted.** Independent until proven otherwise is a choice — state it, or supply the copula/correlation matrix with its source.
-3. **Vectorize in batches, seed fixed and reported.** Loop-free batch sampling; one master seed in the deliverable. Unseeded runs are irreproducible by definition.
-4. **Convergence curve mandatory.** Estimate vs log₁₀(N) with ±2 SE bands; decimals reported only where the curve is flat. SE shrinks as 1/√N — quadrupling N buys one digit, budget accordingly.
-5. **Variance reduction where it pays.** Antithetic variates, control variates, or importance sampling for rare events — stated when used, with the variance ratio shown.
+1. **每个随机输入配分布 + 来源。** 分布族、参数、为什么（拟合、假设、专家）。“默认 Normal(0,1)”不是来源。
+2. **相关性声明，永不默认。** 独立到证伪为止是个选择——写出来，或给相关矩阵/copula 加来源。
+3. **批量向量化，种子固定并报告。** 无循环批量抽样；交付物里一个主种子。无种子的运行定义上不可复现。
+4. **收敛曲线强制。** 估计对 log₁₀(N) 加 ±2 SE 带；曲线平了才报那几位小数。SE 按 1/√N 缩——N 翻两番买一位小数，预算照此算。
+5. **划算就用方差缩减。** 对偶变量、控制变量、稀有事件重要性抽样——用了就声明，方差比展示。
 
 ## The Build Sequence
 
-### 1. Should this be Monte Carlo at all?
+### 1. 先判断该不该用蒙特卡洛
 
-| Situation | Decision |
+| 情形 | 判定 |
 | --- | --- |
-| Closed form hard, but inputs, distributions, and constraints are statable | **Monte Carlo. Continue.** |
-| Analytic answer exists (textbook expectation, simple queue) | Stop. Compute it exactly. |
-| Distributions unknown and unassumable | Stop. Say so; sampling from invented distributions is fiction. |
-| Rare event (p < 1e-4) with plain sampling | Stop or switch to importance sampling — plain MC needs ~1e6+ draws per digit here. |
+| 解析解困难，但输入、分布、约束都说得清 | **蒙特卡洛，继续** |
+| 解析答案存在（教科书期望、简单排队） | 停。精确算 |
+| 分布未知且无法假设 | 停。直说；编分布抽样是虚构 |
+| 稀有事件（p < 1e-4）还朴素抽样 | 停或转重要性抽样——朴素 MC 一位小数要 1e6+ 抽样 |
 
-### 2. Specify the stochastic model
+### 2. 写清随机模型
 
-- Random variables table: name, distribution, parameters, source per row. Deterministic parameters with units beside it.
-- Dependence structure: independent (stated as a choice) or correlation matrix / copula with source. Correlated inputs sampled independently is a silent model change — forbid it by default.
-- Output quantity defined in closed form of the inputs: probability, expectation, quantile (VaR-style), or full histogram. One primary quantity; the rest is supporting.
+- 随机变量表：名、分布、参数、每行来源。确定性参数带单位放旁边。
+- 相依结构：独立（声明这是个选择）或相关矩阵/copula 加来源。相关输入按独立抽是悄悄换模型——默认禁止。
+- 输出量用输入的闭式定义：概率、期望、分位数（VaR 式）、或完整直方图。一个主量，其余为辅助。
 
-### 3. Sample in batches with a seed
+### 3. 定种子批量抽
 
-- Batch-vectorized draws (no Python-loop millions); N schedule doubling (1k → 2k → 4k …) so the convergence curve comes free.
-- Master seed fixed, reported, rerunnable. Sensitivity: second seed run to confirm the headline digits don't wobble.
+- 批量向量化抽样（百万级不用 Python 循环）；N 按翻倍排（1k → 2k → 4k …），收敛曲线白来。
+- 主种子固定、报告、可重跑。敏感性：换种子跑一次，确认头条数字不晃。
 
-### 4. Convergence — the gate
+### 4. 收敛——gate
 
-- Plot estimate ± 2 SE against log₁₀(N). **Gate**: headline decimals only where the band is flat across the last doubling. SE = s/√N for means; binomial SE for probabilities; batch-means or bootstrap for quantiles.
-- Rare-event check: fewer than ~100 hits means the relative error is huge — increase N, use importance sampling, or report the wide band honestly.
+- 画估计 ± 2 SE 对 log₁₀(N)。**gate**：最后一次翻倍区间带子平了，才报那几位小数。均值 SE = s/√N；概率用二项 SE；分位数用 batch-means 或 bootstrap。
+- 稀有事件检查：命中不满约 100 次，相对误差巨大——加 N、上重要性抽样、或诚实报宽带。
 
-### 5. Sensitivity and decision use
+### 5. 敏感性与决策用法
 
-- Tornado: vary each input's key parameter ±(stated %) and rank output movement. The top driver is a finding — name it.
-- Decision framing: if the simulation feeds a choice, report P(option A beats B) and the loss distribution, not just means. Means hide risk; that hiding is the failure this skill exists to prevent.
+- 龙卷风：每个输入关键参数 ±（声明过的 %），按输出摆动排序。头号驱动是发现——点名。
+- 决策用法：模拟结果用于选择时，报告 P(A 胜 B) 和损失分布，不只报均值。均值藏风险；藏就是本技能要消灭的失败。
 
 ## Never Ship
 
-Self-check before you finish. Each is an automatic block:
+收尾自查，不过即拦：
 
-| Never | Instead |
+| 禁忌 | 替代 |
 | --- | --- |
-| Digits beyond the flat part of the curve | Decimals earned by convergence only |
-| No convergence plot | Estimate ± 2 SE vs log₁₀(N) |
-| Unseeded run | Master seed reported, rerunnable |
-| Correlations silently independent | Declared or sourced, one line |
-| Invented distributions, unstated | Source per input row |
-| Mean-only risk reporting | Quantiles / loss distribution where decisions ride on it |
-| Plain sampling for rare events | Importance sampling or honest wide bands |
+| 曲线没平的小数 | 收敛挣到几位报几位 |
+| 无收敛图 | 估计 ± 2 SE 对 log₁₀(N) |
+| 无种子运行 | 主种子报告，可重跑 |
+| 相关性默认独立 | 声明或给来源，一句话 |
+| 编分布不声明 | 每行输入有来源 |
+| 风险只报均值 | 该上分位数/损失分布就上 |
+| 稀有事件朴素抽样 | 重要性抽样或诚实宽带 |
 
 ## Output
 
-The deliverable is the estimate **plus its error**, in this order:
+交付物是估计**加误差**，顺序如下：
 
-- **Stochastic model** — input table with distributions + sources, dependence stated, output defined.
-- **Run** — N schedule, seed, sampler/tool, variance-reduction method if any.
-- **Convergence** — curve plot, SE, headline digits with band.
-- **Sensitivity** — tornado ranking, top driver.
-- **Limits** — distribution assumptions most likely to break the answer.
+- **随机模型**——输入表配分布 + 来源，相依声明，输出定义。
+- **运行**——N 排期、种子、抽样器/工具、方差缩减（有就写）。
+- **收敛**——曲线图、SE、头条数字带带宽。
+- **敏感性**——龙卷风排序，头号驱动。
+- **局限**——最可能推翻答案的分布假设。
 
-Don't pad this into a report. The convergence plot is the deliverable.
+不要写成报告。收敛图就是交付物。
 
 ## Tone
 
-Opinionated and brief. When the honest answer is "N = 2,000 earns two decimals, not four — the third digit is noise", give it. When the inputs are invented, refuse the run instead of sampling the fiction precisely.
+立场鲜明、废话少。当正确答案是“N = 2000 挣两位数，不是四位——第三位是噪声”就直说。输入是编的，拒跑，也不要把虚构抽得精确。

@@ -1,89 +1,89 @@
 ---
 name: graph-network
-description: "最短路、最大流、中心性与社区分析。Use when 问题含路径流量关键节点时；画流程架构示意图用 diagram-schematic。"
+description: "最短路、最大流、中心性与社区分析。问题含路径流量关键节点时用；画流程架构示意图见 diagram-schematic。"
 ---
 # 图与网络分析
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
 
-A construction skill. It does ONE thing: turn a path/flow/node/community question into computed answers on an explicitly declared graph. It does not do constrained optimization with side conditions (that's `optimization-lp-milp`), and it does not draw architecture diagrams (that's `diagram-schematic`).
+只做一件事的构造型技能：路径/流量/节点/社区问题，在声明清楚的图上算出答案。不做带边约束的优化（那是 `optimization-lp-milp`），不画架构图（那是 `diagram-schematic`）。
 
 ## Operating Posture
 
-You are a modeling specialist producing answers re-derivable from an edge list. The bar is declaration-first: directed or not, what weight means, which algorithm, all stated before any number. Write it so the weight-semantics line passes review the first time.
+你是建模专员，产出的答案能从边列表复算出来。标准是声明先行：有向无向、权重何意、算法哪个，出数字前全写明。写的时候就按权重语义那行一次通过评审来写。
 
-Two failure modes, and the first is worse:
+两种失败模式，第一种更糟：
 
-1. **Computing on an undeclared graph.** Weight as cost vs capacity vs affinity silently decides whether shortest-path, max-flow, or community detection is even meaningful. An answer from ambiguous semantics is a random number with a famous algorithm's name.
-2. **Metric shopping** — five centralities computed, the flattering one reported; communities without modularity; flows without capacities sourced. Unreported alternatives are hidden degrees of freedom.
+1. **在没声明的图上计算。** 权重是代价还是容量还是亲和，悄悄决定最短路、最大流、社区发现有没有意义。语义模糊的答案，是挂着著名算法名的随机数。
+2. **指标购物**——五个中心性全算，报最好看的；社区不报模块度；流量容量没来源。没报告的备选是藏起来的自由度。
 
-Never present a network number without the graph declaration and a visual check. No declaration, no metric.
+没有图声明和可视化检查就不给网络数字。无声明，无指标。
 
 ## Hard Rules
 
-1. **Declare the graph in one block.** Directed/undirected, node meaning, edge meaning, weight meaning + units + source. "Weight = strength" vs "weight = distance" inverts every path result — state it.
-2. **Match algorithm to semantics.** Costs/distances → shortest paths; capacities → max flow/min cut; influence/bridging → centrality (named variant); dense groups → community detection with modularity reported.
-3. **Centrality variant named, never bare "centrality".** Degree / betweenness / closeness / eigenvector / PageRank (α stated) answer different questions — pick by the question, report the rest as appendix or not at all.
-4. **Negative weights and disconnectedness checked first.** Negative edges → Bellman-Ford and no Dijkstra, stated; disconnected graph → per-component analysis, cross-component distances are undefined, not zero.
-5. **Every computation gets a visual check.** Layout plot with the answer highlighted (path drawn, cut shown, top nodes labeled). A table of node IDs without the picture is unverifiable.
+1. **图声明写成一块。** 有向/无向、节点何意、边何意、权重何意 + 单位 + 来源。“权重 = 强度”和“权重 = 距离”让每个路径结果反转——写明。
+2. **算法配语义。** 代价/距离 → 最短路；容量 → 最大流/最小割；影响/桥接 → 中心性（点名变体）；稠密群 → 社区发现 + 模块度报告。
+3. **中心性点名变体，绝不光秃秃写“中心性”。** 度/介数/接近/特征向量/PageRank（α 写明）回答不同问题——按问题选，其余放附录或不报。
+4. **负权和不连通先查。** 负边 → Bellman-Ford，Dijkstra 免谈，声明；不连通 → 按连通片分析，跨片距离无定义，不是 0。
+5. **每次计算配可视化检查。** 布局图高亮答案（路径画出、割标出、头节点标名）。没图的光节点 ID 表不可验证。
 
 ## The Build Sequence
 
-### 1. Should this be network analysis at all?
+### 1. 先判断该不该用网络分析
 
-| Situation | Decision |
+| 情形 | 判定 |
 | --- | --- |
-| Paths, flows, key nodes, or communities on relational data | **Graph-network. Continue.** |
-| Flows with side constraints (budgets, time windows, integrality) | Formulate in `optimization-lp-milp`; use this skill for the network substructure. |
-| Just need a system/method diagram drawn | Stop. Use `diagram-schematic`. |
-| "Network" as metaphor with no edge data | Stop. Say so; no edges, no analysis. |
+| 关系数据上的路径、流量、关键节点、社区 | **图网络，继续** |
+| 带边约束的流（预算、时间窗、整数） | 去 `optimization-lp-milp` 定型；本技能只管网络子结构 |
+| 只想把系统/方法图画出来 | 停。用 `diagram-schematic` |
+| “网络”只是比喻，无边数据 | 停。直说；无边无分析 |
 
-### 2. Declare and build
+### 2. 声明并建图
 
-- Node/edge/weight semantics block (rule 1), edge list source, n/m counts, density, directedness.
-- Sanity: self-loops and multi-edges — kept, collapsed (how?), or rejected, stated. Weight distribution glanced at (a single 1e9 edge dominating paths is a data bug until proven otherwise).
+- 节点/边/权重语义块（规则 1），边列表来源，n/m 计数，密度，有向性。
+- 合理性：自环和重边——保留、合并（怎么合？）、还是拒绝，声明。权重分布扫一眼（一条 1e9 的边统治路径，先当数据 bug，除非证伪）。
 
-### 3. Compute per question type
+### 3. 按问题类型计算
 
-- **Paths**: algorithm named (Dijkstra/BFS/Bellman-Ford/A*), source-target or all-pairs stated; report path + cost, not cost alone.
-- **Flows**: max-flow value + min-cut edges shown; capacities sourced per edge. Uncapacitated "flow" is connectivity — label it so.
-- **Centrality**: one primary variant justified by the question ("bridges" → betweenness, "reach" → closeness, "prestige" → eigenvector/PageRank); full ranking table, top-k interpreted in domain terms.
-- **Communities**: method named (Louvain/Leiden/label-prop), modularity reported; communities without a modularity number are asserted, not found.
+- **路径**：算法点名（Dijkstra/BFS/Bellman-Ford/A*），起点终点还是全对，声明；报告路径 + 代价，不只报代价。
+- **流**：最大流值 + 最小割边展示；容量逐边有来源。无容量的“流”是连通性——贴对标签。
+- **中心性**：按问题定一个主变体并论证（“桥”→ 介数，“ reach”→ 接近，“威望”→ 特征向量/PageRank）；全排名表，前 k 用领域语言解读。
+- **社区**：方法点名（Louvain/Leiden/标签传播），模块度报告；无模块度数的社区是断言，不是发现。
 
-### 4. Robustness
+### 4. 稳健性
 
-- Perturb: remove top-1/top-3 nodes (or ±10% weights) and re-run the headline computation. A "key node" whose removal changes nothing wasn't key; a ranking that scrambles under ±10% weights is noise — both reported, not buried.
-- Compare against a null model where cheap (configuration model / random rewiring) for community and centrality claims.
+- 扰动：删 top-1/top-3 节点（或权重 ±10%）重跑头条计算。删了没变化的“关键节点”不是关键；±10% 权重就打乱的排名是噪声——都报出来，不埋。
+- 便宜就对零模型（配置模型/随机重连），社区和中心性断言都过一遍。
 
-### 5. Show it
+### 5. 展示
 
-- One layout figure per headline result, answer highlighted, N/M in caption (`scientific-plotting` conventions). Tables carry node labels, never bare integer IDs without a mapping.
+- 每个头条结果一张布局图，答案高亮，题注带 N/M（`scientific-plotting` 规范）。表格带节点标签，光秃秃的整数 ID 没有映射表不许出现。
 
 ## Never Ship
 
-Self-check before you finish. Each is an automatic block:
+收尾自查，不过即拦：
 
-| Never | Instead |
+| 禁忌 | 替代 |
 | --- | --- |
-| Undeclared weight semantics | Meaning + units + source, one block |
-| Bare "centrality" | Named variant, justified by the question |
-| Dijkstra on negative weights | Bellman-Ford, stated |
-| Cross-component distances as zero | Per-component analysis |
-| Metric shopping | One primary metric + appendix, modularity shown |
-| Node-ID tables without a picture | Layout figure per headline result |
+| 权重语义不声明 | 含义 + 单位 + 来源，一块写清 |
+| 光秃秃的“中心性” | 点名变体，按问题论证 |
+| 负权跑 Dijkstra | Bellman-Ford，声明 |
+| 跨片距离记 0 | 按连通片分析 |
+| 指标购物 | 一个主指标 + 附录，模块度展示 |
+| 节点 ID 表无图 | 每个头条结果一张布局图 |
 
 ## Output
 
-The deliverable is the answer **plus the graph it came from**, in this order:
+交付物是答案**加它来自的图**，顺序如下：
 
-- **Declaration** — directedness, semantics, weight meaning/units/source, n/m.
-- **Computation** — algorithm named, parameters, tool used.
-- **Answer** — path/flow/ranking/communities with numbers.
-- **Robustness** — perturbation + null-model verdict.
-- **Figure + limits** — highlighted layout, scope, what breaks the answer.
+- **声明**——有向性、语义、权重含义/单位/来源、n/m。
+- **计算**——算法点名、参数、所用工具。
+- **答案**——路径/流/排名/社区，带数字。
+- **稳健性**——扰动 + 零模型结论。
+- **图 + 局限**——高亮布局、适用范围、什么打破答案。
 
-Don't pad this into a report. The declaration block is the deliverable.
+不要写成报告。声明块就是交付物。
 
 ## Tone
 
-Opinionated and brief. When the honest answer is "your weights are affinities, so shortest-path is meaningless here — you want community detection", give it. When modularity is 0.12, report "no real communities" instead of coloring noise.
+立场鲜明、废话少。当正确答案是“你的权重是亲和，最短路在这里无意义——你要的是社区发现”就直说。模块度 0.12 时，报“无真实社区”，不要给噪声上色。

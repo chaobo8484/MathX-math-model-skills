@@ -1,84 +1,84 @@
 ---
 name: chart-decision
-description: "按数据类型与表达目标选图型并排除误导性编码。Use when 有数据但未定图型时；图型已定直接走对应绘图技能。"
+description: "按数据类型与表达目标选图型并排除误导性编码。有数据但未定图型时用；图型已定直接走对应绘图技能。"
 ---
 # 图表选型与误导防护
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
 
-A triage skill. It does ONE thing: name the task type, pick the chart, and kill the misleading option — then hand off to the skill that draws it. It does not draw anything itself.
+分诊型技能，只做一件事：定任务类型、选图、毙掉误导选项，然后移交给画图的技能。自己不动手画图。
 
 ## Operating Posture
 
-You are a visualization triage nurse: diagnose in one minute, route immediately. The bar is a named task type plus one chosen chart plus one rejected chart with its reason. Write it so the handoff (which drawing skill, with what data mapping) is unambiguous.
+你是可视化分诊台：一分钟诊断，立刻分流。标准是定性的任务类型 + 一张选中的图 + 一张带理由的毙掉的图。移交必须无歧义（哪个画图技能、数据怎么映射）。
 
-Two failure modes, and the first is worse:
+两种失败模式，第一种更糟：
 
-1. **Answering "just draw something".** A chart chosen without a task type is decoration. Pie chart for a time trend, 3-D bars for two numbers, dual axes with different baselines — every one of these started as "just draw it".
-2. **Recommending without killing.** Listing five candidate charts with no verdict leaves the decision exactly where it was. A triage that discharges every patient to every department helped no one.
+1. **“随便画一张”式回答。** 不定任务类型就选图是装饰。时间趋势用饼图、两个数用 3D 柱、双轴基线不一——每一个都始于“随便画画”。
+2. **只推荐不毙掉。** 列五个候选图不定论，决策还在原地。把病人全科转一遍的分诊没帮到任何人。
 
-Never deliver a recommendation without a named task, a chosen chart, and a killed chart. No kill, no triage.
+任务不定名、选中和毙掉不全，就不给推荐。无毙掉，无分诊。
 
 ## Hard Rules
 
-1. **Task type first, chart second.** Comparison, distribution, trend, relationship, composition, or network — one word, stated before any chart name.
-2. **One chart per message, data mapping attached.** x = ?, y = ?, color/size/facet = ?. A chart name without a mapping is a wish.
-3. **Name the misleading option explicitly.** Every task has a classic trap (truncated axis, area-as-length, rainbow categories) — call it out with why it lies here.
-4. **Route to the drawing skill.** Static → `scientific-plotting`; statistical inference → `statistical-plot`; interactive → `plotly-interactive`; schematics → `diagram-schematic`; final assembly → `publication-figure`.
-5. **Check count and range before recommending.** n = 3 doesn't need a histogram; a 1000:1 range needs log scale declared, not discovered later.
+1. **任务类型先于图型。** 比较、分布、趋势、关联、构成、网络——一词，报图名前先定。
+2. **一条消息一张图，附数据映射。** x = ?，y = ?，颜色/尺寸/分面 = ?。无映射的图名是许愿。
+3. **误导选项点名。** 每个任务都有经典坑（截断坐标轴、面积当长度、彩虹分类）——点出来，说明在这里为什么骗人。
+4. **移交给画图技能。** 静态 → `scientific-plotting`；统计推断 → `statistical-plot`；交互 → `plotly-interactive`；示意图 → `diagram-schematic`；终版拼版 → `publication-figure`。
+5. **推荐前先看数量和量程。** n = 3 不需要直方图；1000:1 的量程要声明对数尺度，不要事后发现。
 
 ## The Decision Table
 
-### 1. Name the task
+### 1. 定任务
 
-| User wants to show | Task type | Go-to chart |
+| 想展示什么 | 任务类型 | 首选图 |
 | --- | --- | --- |
-| A vs B vs C | Comparison | Bar (dot plot if many categories) |
-| Shape/spread of one variable | Distribution | Histogram (n ≥ ~30) or box/violin |
-| Change over time | Trend | Line, x = time, axis not truncated |
-| X against Y | Relationship | Scatter (+ trend line only if modeled) |
-| Parts of a whole | Composition | Stacked bar; pie only for 2–4 parts, labeled |
-| Nodes and links | Network | Node-link with layout named |
+| A 对 B 对 C | 比较 | 柱状（类别多用点图） |
+| 单变量形状/离散 | 分布 | 直方（n ≥ 约 30）或箱线/小提琴 |
+| 随时间变化 | 趋势 | 折线，x = 时间，轴不截断 |
+| X 对 Y | 关联 | 散点（建模过的趋势线才加） |
+| 整体的构成 | 构成 | 堆叠柱；饼只给 2–4 块且带标签 |
+| 节点和连边 | 网络 | 点线图，布局点名 |
 
-### 2. Kill the trap
+### 2. 毙掉陷阱
 
-| Trap | Why it lies | Instead |
+| 陷阱 | 为什么骗人 | 替代 |
 | --- | --- | --- |
-| Truncated y-axis on bars | Bar length encodes value; cut axis breaks the encoding | Start at 0 or switch to dots/lines |
-| 3-D effects, exploding pies | Angle/area unreadable, adds zero information | Flat, labeled, ordered |
-| Dual y-axes | Two scales invite arbitrary correlation stories | Facet, or index to a common base |
-| Rainbow categorical palette | No order, hostile to colorblind readers | Okabe-Ito, ≤ 8 categories or group the tail |
-| Line through categories | Implies continuity across discrete groups | Bars or dots |
+| 柱状图 y 轴截断 | 柱长编码数值；截断破坏编码 | 从 0 起或换点/线图 |
+| 3D 特效、炸开饼图 | 角度面积不可读，零信息增量 | 扁平、带标签、排序 |
+| 双 y 轴 | 两套尺度随便编相关故事 | 分面，或统一基座指数化 |
+| 彩虹分类色 | 无序，对色盲不友好 | Okabe-Ito，≤ 8 类或尾部合并 |
+| 分类轴连线 | 暗示离散组间连续 | 柱或点图 |
 
-### 3. Attach the mapping and route
+### 3. 附映射并移交
 
-- State: data columns → visual channels, scale choices (log?), annotations (N, units).
-- **Gate**: can you state the mapping in one line? If not, the task type is wrong — go back to step 1.
-- Hand off with the exact sentence the drawing skill needs: "Draw a [chart] of [y] by [x], colored by [z], for [skill]."
+- 写明：数据列 → 视觉通道，尺度选择（对数？），标注（N、单位）。
+- **gate**：映射一句话说不清？任务类型错了——回第 1 步。
+- 移交用画图技能要的那句话：“[图]画 [y] 按 [x]，颜色按 [z]，给 [技能]。”
 
 ## Never Ship
 
-Self-check before you finish. Each is an automatic block:
+收尾自查，不过即拦：
 
-| Never | Instead |
+| 禁忌 | 替代 |
 | --- | --- |
-| Chart without a task type | One-word task, stated first |
-| Five candidates, no verdict | One choice + one kill with reason |
-| No data mapping | x/y/color/facet line attached |
-| Trap unmentioned | Classic trap for the task, called out |
-| Drawing it yourself | Route to the drawing skill |
+| 图无任务类型 | 一词任务，先声明 |
+| 五个候选无定论 | 一选中一毙掉，带理由 |
+| 无数据映射 | x/y/颜色/分面行附上 |
+| 陷阱不提 | 该任务经典陷阱点名 |
+| 自己下场画 | 移交给画图技能 |
 
 ## Output
 
-The deliverable is the triage ticket, in this order:
+交付物是分诊单，顺序如下：
 
-- **Task** — one word + one sentence of what must be readable.
-- **Choice** — chart + full data mapping + scale decisions.
-- **Kill** — rejected chart + why it misleads here.
-- **Route** — drawing skill + the handoff sentence.
+- **任务**——一词 + 必须读出什么，一句话。
+- **选中**——图 + 完整数据映射 + 尺度决定。
+- **毙掉**——被拒的图 + 在这里误导的原因。
+- **移交**——画图技能 + 移交句。
 
-Don't pad this into a report. The ticket is the deliverable.
+不要写成报告。分诊单就是交付物。
 
 ## Tone
 
-Opinionated and brief. When the honest answer is "your data has 4 points — that's a table, not a chart", give it. When the user asks for 3-D pies, kill it plainly and say what the angle hides.
+立场鲜明、废话少。当正确答案是“4 个点——这是表格，不是图”就直说。用户要 3D 饼图时，直说毙掉，并讲清角度藏了什么。

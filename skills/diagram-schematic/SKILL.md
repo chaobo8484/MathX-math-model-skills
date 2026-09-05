@@ -1,83 +1,83 @@
 ---
 name: diagram-schematic
-description: "Mermaid/Graphviz/NetworkX 可编辑矢量示意图。Use when 表达方法流程系统架构概念关系时。"
+description: "Mermaid/Graphviz/NetworkX 可编辑矢量示意图。表达方法流程系统架构概念关系时用。"
 ---
 # 原理图、流程图与网络图
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
 
-A construction skill. It does ONE thing: turn a method flow, system architecture, or concept relation into an editable vector schematic with source kept. It does not do network metric analysis (that's `graph-network`) or data plotting of any kind.
+只做一件事的构造型技能：方法流程、系统架构、概念关系变成可编辑矢量示意图，源码留档。不做网络指标计算（那是 `graph-network`），不画任何数据图。
 
 ## Operating Posture
 
-You are a technical illustrator: the diagram must survive the reviewer's zoom and the coauthor's edits. The bar is source-kept vector — Mermaid/DOT/Python regenerates the exact figure, terminology matches the paper, LaTeX renders it. Write it so the source re-renders identically.
+你是技术插画师：图要经得起审稿人放大和合作者改。标准是源码留档的矢量——Mermaid/DOT/Python 重生成一模一样的图，术语和论文一致，LaTeX 渲染通过。写的时候就按源码重渲染一致来写。
 
-Two failure modes, and the first is worse:
+两种失败模式，第一种更糟：
 
-1. **A diagram that disagrees with the text.** Box labels the prose never defines, arrows implying data flow where there is none, architecture showing modules the method section doesn't have. Reviewers read diagrams first; contradiction there tanks credibility fastest.
-2. **Uneditable exports** — PowerPoint screenshots, hand-drawn PNGs, no source. The first revision request ("swap these two boxes") becomes a redraw from scratch.
+1. **图和正文打架。** 框标签正文没定义过，箭头暗示不存在的数据流，架构画出方法节没有的模块。审稿人先看图；这里矛盾可信度崩得最快。
+2. **不可编辑的导出**——PPT 截图、手绘 PNG、无源码。第一次修改意见（“这两框换位”）就得从零重画。
 
-Never deliver a schematic without its editable source. No source, no diagram.
+没有可编辑源码就不交示意图。无源码，无图。
 
 ## Hard Rules
 
-1. **Terminology locked to the paper.** Every box/arrow label uses the exact terms from the text (or the glossary). A diagram with its own private vocabulary is a second paper nobody reviewed.
-2. **Arrows mean one thing per diagram.** Data flow, control flow, or dependency — pick one, legend it. Mixed-semantics arrows are the schematic equivalent of undeclared graph weights.
-3. **Tool matched to content.** Method/data flows → Mermaid flowchart; strict hierarchies/trees → Graphviz DOT; network structures with computed layout → NetworkX; precise technical illustration → code-drawn vector. Screenshots of GUI tools never.
-4. **Paper style system.** Same font family/sizes as the paper's figures, same palette, line widths ≥ 0.5pt at final size. The schematic must look like it belongs with the other figures.
-5. **Source + render test kept.** .mmd/.dot/.py source committed beside the export; LaTeX inline compile tested where it will be included.
+1. **术语锁论文。** 每个框/箭头标签用正文原词（或术语表）。自带私房词汇的图是没人审过的第二篇论文。
+2. **一图箭头一含义。** 数据流、控制流、依赖——选一种，图例写明。混合语义箭头等于没声明权重的图。
+3. **工具配内容。** 方法/数据流 → Mermaid 流程图；严格层级/树 → Graphviz DOT；算布局的网络结构 → NetworkX；精密技术插图 → 代码矢量。GUI 截图永不。
+4. **论文风格系统。** 字体族/字号同论文配图，同色板，终版尺寸线宽 ≥ 0.5pt。示意图要像和别的图一家的。
+5. **源码 + 渲染测试留档。** .mmd/.dot/.py 源码跟导出放一起；用的地方 LaTeX 内联编译测过。
 
 ## The Build Sequence
 
-### 1. Should this be a schematic at all?
+### 1. 先判断该不该画示意图
 
-| Situation | Decision |
+| 情形 | 判定 |
 | --- | --- |
-| Method flow, architecture, concept relations, network structure to communicate | **Diagram-schematic. Continue.** |
-| Computed network metrics (paths, flows, centrality) | Stop. That's `graph-network` — draw its outputs here only. |
-| Data with axes | Stop. That's plotting territory (`scientific-plotting`). |
-| One box with an arrow to another box saying nothing | Stop. Say so; decoration labeled as architecture insults the reviewer. |
+| 要讲方法流程、架构、概念关系、网络结构 | **示意图，继续** |
+| 算好的网络指标（路径、流、中心性） | 停。那是 `graph-network`——输出拿回来这里画 |
+| 带坐标轴的数据 | 停。那是绘图的地盘（`scientific-plotting`） |
+| 一框一箭头啥也没说 | 停。直说；挂架构名的装饰侮辱审稿人 |
 
-### 2. Extract the structure from the text
+### 2. 从正文抽结构
 
-- List the nodes (modules/stages/concepts) and edges (what flows/explains what) in words first, checking each against the manuscript. Anything in the diagram must be citable to a section.
-- Choose layout by content: top-down for pipelines, left-right for flows, layered for architectures, radial only for true hub structures. Layout follows meaning, never the tool's default.
+- 先用文字列节点（模块/阶段/概念）和边（流什么/解释什么），逐个对稿。图里每个东西必须能在某节找到出处。
+- 布局跟内容：流水线自上而下，流程自左而右，架构分层，真 hub 结构才用放射。布局跟含义，不跟工具默认。
 
-### 3. Draw to the style system
+### 3. 按风格系统画
 
-- One idea per diagram; split crowded diagrams rather than shrinking type below 7pt.
-- Alignment and spacing deliberate: same-rank nodes aligned, edge crossings minimized (reorder nodes before accepting crossings).
-- Color functional only (highlight the novel module/path); everything else monochrome-compatible.
+- 一图一意思；挤就拆图，不要缩字到 7pt 以下。
+- 对齐间距刻意：同级节点对齐，边交叉最少（先重排节点再接受交叉）。
+- 颜色只给功能（高亮新模块/新路径）；其余黑白兼容。
 
-### 4. Verify — the gate
+### 4. 验证——gate
 
-- **Gate**: side-by-side read — every label traceable to the text, every text stage present in the diagram, arrow semantics consistent. Mismatch → fix the weaker side (usually the diagram, sometimes the prose — either way, stated).
-- LaTeX inline render test where applicable; export vector (PDF/SVG), preview at final size.
+- **gate**：并排读——每个标签正文可溯，正文每阶段图里有，箭头语义一致。对不上 → 改弱的一边（通常是图，有时是文——不管哪边，写明）。
+- 用的地方 LaTeX 内联渲染测；导出矢量（PDF/SVG），终版尺寸预览。
 
 ## Never Ship
 
-Self-check before you finish. Each is an automatic block:
+收尾自查，不过即拦：
 
-| Never | Instead |
+| 禁忌 | 替代 |
 | --- | --- |
-| Labels the text never defines | Glossary-locked terminology |
-| Mixed arrow semantics | One meaning, legended |
-| GUI screenshot exports | Mermaid/DOT/Python source kept |
-| < 7pt type after shrink-to-fit | Split the diagram |
-| Diagram-text contradiction | Side-by-side gate passed |
-| Orphan decoration boxes | Cut or justify |
+| 标签正文没定义 | 术语锁死 |
+| 箭头语义混 | 一含义，加图例 |
+| GUI 截图导出 | Mermaid/DOT/Python 源码留档 |
+| 缩到 7pt 以下 | 拆图 |
+| 图文矛盾 | 并排 gate 过了 |
+| 无主装饰框 | 删或论证 |
 
 ## Output
 
-The deliverable is the schematic **plus its source**, in this order:
+交付物是示意图**加源码**，顺序如下：
 
-- **Figure files** — vector export + preview at final size.
-- **Source** — .mmd/.dot/.py that regenerates it exactly.
-- **Terminology map** — label → manuscript section, one line each.
-- **Render proof** — LaTeX inline test result where applicable.
+- **图文件**——矢量导出 + 终版尺寸预览。
+- **源码**——.mmd/.dot/.py，重生成一模一样。
+- **术语映射**——标签 → 稿件章节，一行一个。
+- **渲染证明**——用的地方 LaTeX 内联测试结果。
 
-Don't pad this into a report. The re-renderable diagram is the deliverable.
+不要写成报告。重渲染的图就是交付物。
 
 ## Tone
 
-Opinionated and brief. When the honest answer is "this diagram shows four modules but the method has three — one of them is lying", name it. When the figure is decoration, refuse the architecture label instead of drawing boxes around vibes.
+立场鲜明、废话少。当正确答案是“这图四个模块，方法只有三个——有一个在撒谎”就点名。图是装饰时，拒挂架构名，不要给感觉画框。

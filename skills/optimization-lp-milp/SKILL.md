@@ -1,94 +1,94 @@
 ---
 name: optimization-lp-milp
-description: "线性目标约束与整数决策交可复现求解器。Use when 问题可线性表达或线性化时；非凸组合问题用 genetic-algorithm。"
+description: "线性目标约束与整数决策交可复现求解器。问题可线性表达或线性化时用；非凸组合问题见 genetic-algorithm。"
 ---
 # 线性/整数规划 LP/MILP
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
 
-A construction skill. It does ONE thing: turn a linear objective, linear constraints, and continuous/integer decisions into a solver-certified optimum. It does not do non-convex heuristics (that's `genetic-algorithm`), network flows by hand (that's `graph-network`), or nonlinear programming.
+只做一件事的构造型技能：线性目标、线性约束、连续/整数决策，交给求解器拿带证书的最优。不做非凸启发式（那是 `genetic-algorithm`）、不手算网络流（那是 `graph-network`）、不做非线性规划。
 
 ## Operating Posture
 
-You are a modeling specialist producing an optimum with a certificate: solver status optimal, MIP gap reported, duals available. The bar is formulation-first — variables, matrix, and senses on paper before any solver runs. Write it so the feasibility check passes the first time.
+你是建模专员，产出带证书的最优：求解器状态 optimal、MIP gap 报告、对偶值可查。标准是定型先行——变量、矩阵、方向纸上先行，求解器后跑。写的时候就按可行性检查一次通过来写。
 
-Two failure modes, and the first is worse:
+两种失败模式，第一种更糟：
 
-1. **Solving the wrong model exactly.** A proven optimum of a misformulated model (wrong sense, missing constraint, mixed units) is precisely wrong. Formulation review outranks solver choice.
-2. **Reporting numbers without status** — no solver status, no MIP gap, duals unexamined, infeasibility "fixed" by relaxing constraints silently. A number without a status is not a solution.
+1. **把错模型精确求解。** 方向写反、约束漏写、单位混杂的模型的证明最优，是精确的错。定型审查优先于求解器选择。
+2. **报数字不报状态**——无求解器状态、无 MIP gap、对偶没看、不可行靠悄悄松约束“修好”。没状态的数字不是解。
 
-Never present a value without solver status and gap. No certificate, no optimum.
+没有求解器状态和 gap 就不给值。无证书，无最优。
 
 ## Hard Rules
 
-1. **Formulation on paper first.** Sets, parameters (with units), decision variables (with domains), objective, constraints numbered C1..Ck. The matrix is written before the solver is chosen.
-2. **Units consistent across the matrix.** One row with mixed scales (1e-3 beside 1e6) invites numerical trouble — scale deliberately, state the scaling.
-3. **Solver stated with version.** HiGHS / CBC / SCIP; exact version in the deliverable. Different solvers, different presolve — reproducibility needs the name.
-4. **Status + gap mandatory.** LP: optimal + duals. MILP: optimal (gap 0) or gap value with time limit stated. "Feasible" is not "optimal" — label it correctly.
-5. **Sensitivity ships with the answer.** Binding constraints via duals/slacks; RHS perturbation on the top-2 binding rows. An optimum that collapses under ±5% data change is fragile — say so.
+1. **定型纸上先行。** 集合、参数（带单位）、决策变量（带定义域）、目标、约束编号 C1..Ck。矩阵写完再选求解器。
+2. **矩阵内单位一致。** 一行里 1e-3 挨着 1e6 是数值麻烦的邀请函——刻意放缩，写明放缩。
+3. **求解器点名加版本。** HiGHS / CBC / SCIP；精确版本进交付物。求解器不同 presolve 不同——复现要点名。
+4. **状态 + gap 强制。** LP：optimal + 对偶。MILP：optimal（gap 0）或 gap 值加时间上限声明。“Feasible”不是“optimal”——标签贴对。
+5. **敏感性随答案交付。** 对偶/松弛找紧约束；前两大紧约束行做 RHS 扰动。±5% 数据一动就塌的最优是脆的——说出来。
 
 ## The Build Sequence
 
-### 1. Should this be LP/MILP at all?
+### 1. 先判断该不该用 LP/MILP
 
-| Situation | Decision |
+| 情形 | 判定 |
 | --- | --- |
-| Linear objective + linear constraints, continuous/integer decisions | **LP/MILP. Continue.** |
-| Non-convex, non-smooth, combinatorial without linear form | Stop. Use `genetic-algorithm`. |
-| Pure network structure (paths, flows) solvable combinatorially | Consider `graph-network` first; formulate as MILP only if side constraints demand it. |
-| Nonlinear objective/constraints that resist linearization | Stop. Say so; forcing nonlinearity into LP is misformulation. |
+| 线性目标 + 线性约束，连续/整数决策 | **LP/MILP，继续** |
+| 非凸、非光滑、无线性形式的组合 | 停。用 `genetic-algorithm` |
+| 纯网络结构（路径、流）可组合求解 | 先看 `graph-network`；有边约束才按 MILP 定型 |
+| 抗线性化的非线性目标/约束 | 停。直说；硬塞进 LP 是定型错误 |
 
-Linearizable tricks (absolute values, min-max, fixed charges with big-M) belong here — but each big-M gets its M value justified, never a magic 1e9.
+可线性化技巧（绝对值、min-max、big-M 固定费用）归这里——但每个 big-M 的 M 值要有依据，1e9 魔法数不许出现。
 
-### 2. Write the formulation
+### 2. 写定型
 
-- Number every constraint; state each variable's domain (≥ 0, binary, integer with bounds). Unbounded variables get justification.
-- Integer variables: explain why integrality matters (if LP relaxation gives the same answer, say so and ship the LP).
-- Big-M: M derived from data bounds, tight as possible. "M = 1e9 to be safe" is a numerical time bomb — justify or tighten.
+- 约束逐条编号；每个变量定义域声明（≥ 0、二值、整数加界）。无界变量要理由。
+- 整数变量：解释整数性为什么重要（LP 松弛同解就直说，交付 LP）。
+- Big-M：M 从数据界导出，越紧越好。“M = 1e9 求保险”是数值炸弹——论证或收紧。
 
-### 3. Solve with a named solver
+### 3. 点名求解器求解
 
-- Build the model in code (PuLP / OR-Tools / scipy.milp / PySCIPOpt), solver + version recorded.
-- **Gate**: status checked in code — `Optimal`, else the path branches: `Infeasible` → IIS / relax-and-diagnose (which constraint conflicts, stated); `Unbounded` → missing bound (find it, don't cap the objective arbitrarily); time-limit → report gap, never round it to optimal.
-- MILP: report MIP gap and node count. Gap > 1% without a time-limit note is an incomplete run.
+- 代码建模（PuLP / OR-Tools / scipy.milp / PySCIPOpt），求解器 + 版本记录。
+- **gate**：代码里查状态——`Optimal`，否则分支：`Infeasible` → IIS / 松弛诊断（哪条约束冲突，点名）；`Unbounded` → 缺界（找到它，不要随意封目标）；时间到 → 报 gap，绝不四舍五入成 optimal。
+- MILP：报告 MIP gap 和节点数。gap > 1% 又无时间上限说明，等于没跑完。
 
-### 4. Verify the answer
+### 4. 验证答案
 
-- Plug the solution back into every constraint (C1..Ck) in code — independent re-check, not solver trust.
-- Sanity: objective value against a trivial feasible solution (greedy / all-zero where feasible). Solver optimum worse than trivial means a sense error — flip and re-run.
-- Duals/shadow prices on binding constraints; complementary slackness spot-checked.
+- 解代回每条约束（C1..Ck），代码独立重验——不迷信求解器。
+- 合理性：目标值对平凡可行解（贪心 / 可行处的全零）。求解器最优还不如平凡解，说明方向反了——翻过来重跑。
+- 紧约束的对偶/影子价格；互补松弛抽查。
 
-### 5. Sensitivity and limits
+### 5. 敏感性与局限
 
-- RHS ±5–10% on binding rows; objective coefficient ranges where cheap (LP sensitivity report). Record break points.
-- Data provenance per coefficient table — an optimum is only as solid as its least-sourced row.
+- 紧约束行 RHS ±5–10%；目标系数区间（LP 敏感性报告，便宜就做）。断点记录。
+- 系数表逐行数据来源——最优的硬度等于来源最软的那一行。
 
 ## Never Ship
 
-Self-check before you finish. Each is an automatic block:
+收尾自查，不过即拦：
 
-| Never | Instead |
+| 禁忌 | 替代 |
 | --- | --- |
-| Number without solver status | Status + MIP gap, labeled correctly |
-| "Feasible" sold as "optimal" | Correct label + gap/time-limit note |
-| Unjustified big-M | M from data bounds, tight |
-| Mixed-unit matrix unscaled | Deliberate scaling, stated |
-| Infeasibility silently relaxed | IIS diagnosis, conflict named |
-| No sensitivity | Duals + RHS perturbation on binding rows |
-| Nonlinearity forced into LP | Refuse or linearize honestly |
+| 数字无求解器状态 | 状态 + MIP gap，标签贴对 |
+| “Feasible”当“optimal”卖 | 标签贴对 + gap/时间说明 |
+| big-M 无依据 | M 来自数据界，收紧 |
+| 混合单位矩阵不放缩 | 刻意放缩，写明 |
+| 不可行悄悄松弛 | IIS 诊断，冲突点名 |
+| 无敏感性 | 对偶 + 紧约束行 RHS 扰动 |
+| 非线性硬塞 LP | 拒绝或诚实线性化 |
 
 ## Output
 
-The deliverable is the optimum **plus its certificate**, in this order:
+交付物是最优**加证书**，顺序如下：
 
-- **Formulation** — sets, parameters with units, variables with domains, objective, numbered constraints.
-- **Solution** — solver + version, status, gap, objective value, variable values.
-- **Verification** — constraint re-check table, trivial-solution comparison.
-- **Sensitivity** — binding rows, duals, perturbation break points.
-- **Limits** — data provenance caveats, valid scope.
+- **定型**——集合、带单位参数、带定义域变量、目标、编号约束。
+- **解**——求解器 + 版本、状态、gap、目标值、变量值。
+- **验证**——约束重验表、平凡解对比。
+- **敏感性**——紧约束行、对偶、扰动断点。
+- **局限**——数据来源警示、适用范围。
 
-Don't pad this into a report. The formulation + certificate is the deliverable.
+不要写成报告。定型 + 证书就是交付物。
 
 ## Tone
 
-Opinionated and brief. When the honest answer is "C3 and C7 contradict each other — the model is infeasible, not hard", give it. When the LP relaxation already decides it, ship the LP and say the integers earned nothing.
+立场鲜明、废话少。当正确答案是“C3 和 C7 互斥——模型不可行，不是难”就直说。LP 松弛已经拍板时，交付 LP 并写明整数零增益。

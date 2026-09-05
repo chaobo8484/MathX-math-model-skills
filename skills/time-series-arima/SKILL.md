@@ -1,94 +1,94 @@
 ---
 name: time-series-arima
-description: "带平稳性诊断与区间预测的 ARIMA/SARIMA 建模。Use when 等间隔 30 点以上、有趋势或季节性时；极小样本用 gray-prediction。"
+description: "带平稳性诊断与区间预测的 ARIMA/SARIMA 建模。等间隔 30 点以上、有趋势或季节性时用；极小样本见 gray-prediction。"
 ---
 # 时间序列 ARIMA/SARIMA
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
 
-A construction skill. It does ONE thing: turn an evenly-spaced series into a multi-step forecast whose residuals are white noise. It does not do tiny-sample extrapolation (that's `gray-prediction`), explanatory regression with covariates (that's `regression-family`), or causal inference.
+只做一件事的构造型技能：把等间隔序列变成多步预测，残差是白噪声。不做极小样本外推（那是 `gray-prediction`）、不做带协变量的解释性回归（那是 `regression-family`）、不做因果推断。
 
 ## Operating Posture
 
-You are a modeling specialist producing a forecast a reviewer can re-fit. The bar is diagnosed stationarity and clean residuals: every differencing order justified by a test, every order choice readable off ACF/PACF, residuals that pass Ljung-Box. Write it so the residual check passes the first time.
+你是建模专员，产出的预测审稿人能重拟合出来。标准是诊断过的平稳性和干净的残差：每个差分阶数都有检验依据，每个定阶都从 ACF/PACF 读得出，残差过 Ljung-Box。写的时候就按残差检查一次通过来写。
 
-Two failure modes, and the first is worse:
+两种失败模式，第一种更糟：
 
-1. **Fitting structure the data can't support.** Seasonal SARIMA on 20 points, 6 parameters on 40 observations, exogenous regressors that leak the future. An over-parameterized ARIMA is a memorization device with confidence bands.
-2. **Reporting the forecast without the diagnostics** — no ADF, no residual check, no backtest, intervals missing. A point forecast from an undiagnosed model is a guess with standard errors.
+1. **拟合数据撑不起的结构。** 20 个点上季节 SARIMA、40 个观测估 6 个参数、泄露未来的外生回归。过参数的 ARIMA 是带置信带的记忆机器。
+2. **不带诊断报预测**——无 ADF、无残差检查、无回测、无区间。没诊断过的模型的点预测，是带标准误的猜。
 
-Never present a forecast without residuals that test white and a backtest number. No diagnostics, no forecast.
+残差不白、回测没有，就不给预测。无诊断，无预测。
 
 ## Hard Rules
 
-1. **Even spacing and n ≥ ~30.** Gaps get stated and handled (interpolation method named) or the skill refuses. Under ~30 points with no seasonality, say so and consider `gray-prediction`.
-2. **Stationarity is tested, not eyeballed.** ADF (or KPSS) per differencing decision; d is the smallest order that stationarizes, usually 0–2. Seasonal D likewise with seasonal ADF.
-3. **Orders from ACF/PACF + information criteria, capped by data.** p+q (+P+Q) small relative to n; AICc/BIC choose among a handful of candidates, never a 50-model fishing trip.
-4. **Residuals must test white.** Ljung-Box p > 0.05 on the first several lags, ACF of residuals inside bands, zero-mean. Non-white residuals send you back to step 3, not to the report.
-5. **Intervals and backtest ship with the forecast.** Prediction intervals widen with horizon — report them; rolling-origin backtest (not in-sample fit) is the error number that counts.
+1. **等间隔且 n ≥ 约 30。** 缺口要声明和处理（插值方法点名），否则本技能拒绝。30 点以下又无季节性，直说并考虑 `gray-prediction`。
+2. **平稳性靠检验，不靠肉眼。** 每个差分决策配 ADF（或 KPSS）；d 取平稳所需的最小阶，通常 0–2。季节 D 同理配季节 ADF。
+3. **阶数来自 ACF/PACF + 信息准则，且被数据封顶。** p+q（+P+Q）相对 n 要小；AICc/BIC 在 handful 候选里选，不做 50 个模型的钓鱼。
+4. **残差必须白。** 前若干滞后 Ljung-Box p > 0.05，残差 ACF 落带内，均值零。残差不白就回第 3 步，不要进报告。
+5. **区间和回测随预测交付。** 预测区间随步长变宽——报出来；滚动回测（不是样本内拟合）才是算数的误差。
 
 ## The Build Sequence
 
-### 1. Should this be ARIMA at all?
+### 1. 先判断该不该用 ARIMA
 
-| Situation | Decision |
+| 情形 | 判定 |
 | --- | --- |
-| Evenly spaced, ~30+ points, trend/seasonality, multi-step forecast | **ARIMA/SARIMA. Continue.** |
-| 4–10 points, near-exponential | Stop. Use `gray-prediction`. |
-| Forecast driven by covariates (y ~ X over time) | Stop. That's `regression-family` with time features, or SARIMAX with strictly exogenous X. |
-| Irregular spacing, shock-driven, or regime breaks | Stop. Say so; ARIMA assumes the generating process is stable. |
+| 等间隔、约 30+ 点、有趋势或季节性、要多步预测 | **ARIMA/SARIMA，继续** |
+| 4–10 个点、近指数 | 停。用 `gray-prediction` |
+| 预测靠协变量驱动（随时间的 y ~ X） | 停。那是带时间特征的 `regression-family`，或外生 X 严格已知的 SARIMAX |
+| 不等间隔、冲击驱动、机制断裂 | 停。直说；ARIMA 假设生成过程稳定 |
 
-### 2. Plot, clean, and stationarize
+### 2. 画图、清洗、平稳化
 
-- Plot the raw series, ACF, PACF. Note trend, season length s (s = 1 if none), outliers, gaps.
-- Handle gaps/outliers explicitly: method named (linear interp, seasonal fill), count reported. Silent filling is fabrication.
-- ADF test on levels; difference (d = 1) and re-test; stop at the smallest d (rarely above 2) that rejects non-stationarity. If seasonal, same for D with seasonal differencing at lag s.
-- **Gate**: state d (and D, s) with the test statistics. "d = 1 because the plot trends up" is not a justification.
+- 画原始序列、ACF、PACF。记趋势、季节周期 s（无季节 s = 1）、异常值、缺口。
+- 缺口/异常值显式处理：方法点名（线性插值、季节填充），个数报告。悄悄填是编造。
+- 原序列 ADF；差分（d = 1）再检验；取拒绝非平稳的最小 d（很少超过 2）。有季节对 D 在滞后 s 做季节差分同理。
+- **gate**：d（及 D、s）连同检验统计量一起声明。“图看着往上走所以 d = 1”不是依据。
 
-### 3. Identify, fit, compare a few
+### 3. 定阶、拟合、少量比较
 
-- Read p from PACF cutoff, q from ACF cutoff; seasonal P/Q likewise at lags s, 2s.
-- Fit a small candidate set (3–5 models max), compare AICc/BIC. Prefer the simpler model within ~2 AICc points.
-- Exogenous X in SARIMAX only if strictly exogenous (no leakage: X known at forecast time, or forecasted separately with its own error).
-- **Gate**: total parameters ≪ n (rule of thumb: n ≥ 10 per parameter). More parameters than that and the bands are decoration.
+- p 从 PACF 截尾读，q 从 ACF 截尾读；季节 P/Q 同理在 s、2s 滞后读。
+- 拟合少量候选（最多 3–5 个），比 AICc/BIC。AICc 差 2 以内选简单的。
+- SARIMAX 的外生 X 必须是严格外生的（无泄露：预测时刻 X 已知，或 X 另行预测且自带误差）。
+- **gate**：总参数 ≪ n（经验：每个参数至少 10 个观测）。参数再多，区间就是装饰。
 
-### 4. Residual diagnosis — the gate
+### 4. 残差诊断——gate
 
-- Ljung-Box on residuals (first min(10, n/5) lags): p > 0.05 or revise.
-- ACF of residuals inside confidence bands; mean ≈ 0; QQ roughly straight (heavy tails → say so, widen intervals).
-- Fails → change orders (usually +1 MA for leftover autocorrelation, seasonal term for seasonal leftover), never proceed with dirty residuals.
+- 残差 Ljung-Box（前 min(10, n/5) 个滞后）：p > 0.05，否则回去改。
+- 残差 ACF 落置信带内；均值 ≈ 0；QQ 大致成直线（重尾就直说，区间放宽）。
+- 没过 → 改阶（残余自相关通常 MA +1，季节残余加季节项），绝不带脏残差往下走。
 
-### 5. Backtest, then forecast
+### 5. 先回测，再预测
 
-- Rolling-origin backtest over the last 1–2 seasonal cycles (or last 20%): report MAE/RMSE vs naive (carry-forward) and seasonal-naive baselines. If ARIMA can't beat seasonal-naive out of sample, the conclusion is that — not the forecast.
-- Forecast h steps with 80% and 95% intervals. State plainly that intervals widen and long-horizon point values are the model's drift, not knowledge.
+- 滚动回测覆盖最后 1–2 个季节周期（或最后 20%）：报告 MAE/RMSE，对朴素（顺延）和季节朴素基线。样本外打不过季节朴素，结论就是这个，不是预测。
+- 预测 h 步，带 80% 和 95% 区间。明说区间会变宽，远期点值是模型的漂移，不是知识。
 
 ## Never Ship
 
-Self-check before you finish. Each is an automatic block:
+收尾自查，不过即拦：
 
-| Never | Instead |
+| 禁忌 | 替代 |
 | --- | --- |
-| Forecast with no ADF/d justification | d (D, s) + test stats stated |
-| Order fishing across dozens of models | 3–5 candidates, AICc, simpler wins ties |
-| Residuals untested or non-white | Ljung-Box p > 0.05 + clean ACF |
-| Point forecast without intervals | 80%/95% bands, widening noted |
-| In-sample error presented as accuracy | Rolling backtest vs naive baselines |
-| Leaking exogenous regressors | X strictly known at forecast time |
-| 8 points into SARIMA | `gray-prediction` or refuse |
+| 预测无 ADF/d 依据 | d（D、s）+ 检验统计量声明 |
+| 几十个模型钓鱼定阶 | 3–5 个候选，AICc，打平选简单 |
+| 残差不查或不白 | Ljung-Box p > 0.05 + 干净 ACF |
+| 点预测无区间 | 80%/95% 带，变宽写明 |
+| 样本内误差当精度 | 滚动回测对朴素基线 |
+| 泄露的外生回归 | X 在预测时刻严格已知 |
+| 8 个点跑 SARIMA | `gray-prediction` 或拒绝 |
 
 ## Output
 
-The deliverable is the forecast **plus its diagnostics**, in this order:
+交付物是预测**加诊断**，顺序如下：
 
-- **Series + stationarity** — plot description, ADF stats, d (D, s).
-- **Model** — orders, AICc table (3–5 rows), fitting tool.
-- **Residuals** — Ljung-Block p, ACF verdict, QQ note.
-- **Backtest** — rolling MAE/RMSE vs naive and seasonal-naive.
-- **Forecast** — h steps with 80%/95% intervals + horizon caveat.
+- **序列 + 平稳性**——图形描述、ADF 统计量、d（D、s）。
+- **模型**——阶数、AICc 表（3–5 行）、拟合工具。
+- **残差**——Ljung-Box p、ACF 结论、QQ 说明。
+- **回测**——滚动 MAE/RMSE 对朴素与季节朴素。
+- **预测**——h 步带 80%/95% 区间 + 步长警示。
 
-Don't pad this into a report. The diagnostics are the deliverable.
+不要写成报告。诊断就是交付物。
 
 ## Tone
 
-Opinionated and brief. When the honest answer is "residuals still autocorrelated at lag 12 — this needs a seasonal term, not a forecast", give it. When the backtest loses to seasonal-naive, report the loss instead of burying it under in-sample R².
+立场鲜明、废话少。当正确答案是“12 阶还有自相关——这缺的是季节项，不是预测”就直说。回测输给季节朴素时，报这场失败，不要拿样本内 R² 埋了它。

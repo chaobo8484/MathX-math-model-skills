@@ -1,119 +1,119 @@
 ---
 name: ahp
-description: "用成对比较层次结构做主观多准则排序，经判断矩阵算特征权重并报告一致性。Use when 准则靠专家经验赋权时；全实测指标要客观赋权用 evaluation-entropy-topsis。"
+description: "用成对比较层次结构做主观多准则排序，经判断矩阵算特征权重并报告一致性。准则靠专家经验赋权时用；全实测指标要客观赋权见 evaluation-entropy-topsis。"
 ---
 # 层次分析法 AHP
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
 
-A construction skill. It does ONE thing: turn a multi-criteria ranking problem into weights that survive a consistency check. It does not do objective weighting (that's `evaluation-entropy-topsis`), time-series forecasting, or optimization.
+只做一件事的构造型技能：把多准则排序问题变成经得起一致性检验的权重。不做客观赋权（那是 `evaluation-entropy-topsis`）、不做时间序列预测、不做优化。
 
 ## Operating Posture
 
-You are a modeling specialist producing a ranking a reviewer can re-derive. The bar is a defensible number: every weight traces back to a stated pairwise judgment, and every judgment matrix passes consistency. Write it so the CR check passes the first time.
+你是建模专员，产出的排序必须让审稿人复算出来。标准只有一个：每个权重都能追溯到一条写明的成对判断，每张判断矩阵都通过一致性检验。写的时候就按一次通过 `CR` 检查来写。
 
-Two failure modes, and the first is worse:
+两种失败模式，第一种更糟：
 
-1. **Weighting something that shouldn't be weighted subjectively.** If the criteria have hard measured data and the user distrusts expert judgment, stop and use `evaluation-entropy-topsis`. AHP with fabricated pairwise numbers is numerology, not modeling.
-2. **Running the right method with skipped checks** — no CR reported, scale abused, hierarchy flattened into one giant matrix, sensitivity never tested.
+1. **给不该主观赋权的东西赋权。** 准则全是硬实测数据、用户又不信任专家打分时，停下来用 `evaluation-entropy-topsis`。编造成对数字跑出来的 AHP 是命理学，不是建模。
+2. **方法对、检查全跳过**——不报告 `CR`、标度乱用、层次拍平成一张大矩阵、敏感性从没做过。
 
-Never present the ranking without the consistency evidence. No CR, no conclusion.
+没有一致性证据就不给排序结论。无 `CR`，无结论。
 
 ## Hard Rules
 
-1. **Hierarchy first, numbers second.** Goal → criteria (≤7 per level, Miller's law) → alternatives. Don't build one n×n matrix for everything.
-2. **Saaty 1–9 scale only**, with reciprocals. Every entry comes from a stated reason or source, never from vibes. Document the reason per comparison.
-3. **CR < 0.1 gates everything.** A matrix that fails consistency gets revised (find the most inconsistent triple), never shipped with an excuse.
-4. **Compute, don't assert.** Weights come from the principal eigenvector (or geometric mean), calculated in code from the matrix the user confirmed — never hand-typed.
-5. **Sensitivity ships with the ranking**, not as a follow-up. If swapping two plausible judgments flips the winner, say so.
+1. **先层次，后数字。** 目标 → 准则（每层 ≤7 个，Miller 定律）→ 方案。不要把所有东西塞进一张 n×n 矩阵。
+2. **只用 Saaty 1–9 标度**，带倒数。每格数字都要有写明的理由或来源，凭感觉填的不算数。每个比较附一句理由。
+3. **`CR < 0.1` 是一切的门禁。** 通不过一致性的矩阵就回去改（找出最不一致的三元组），不许找借口放行。
+4. **权重算出来，不是断言出来。** 权重来自用户确认过的矩阵，用代码算主特征向量（或几何平均），手敲的不算数。
+5. **敏感性和排序一起交付**，不做后续补充。两个看似合理的判断换一换就翻盘赢家，这种事必须写出来。
 
 ## The Build Sequence
 
-### 1. Should this be AHP at all?
+### 1. 先判断该不该用 AHP
 
-| Situation | Decision |
+| 情形 | 判定 |
 | --- | --- |
-| Criteria need expert judgment, data is qualitative or mixed | **AHP. Continue.** |
-| All criteria are measured numbers, user wants objectivity | Stop. Use `evaluation-entropy-topsis`. |
-| Sequence of 30+ evenly spaced observations to extrapolate | Stop. That's forecasting, not ranking. |
-| Single objective with constraints (LP/MILP-shaped) | Stop. That's optimization, not weighting. |
+| 准则靠专家经验赋权，数据是定性或混合型 | **用 AHP，继续** |
+| 准则全是实测数字，用户要客观 | 停。用 `evaluation-entropy-topsis` |
+| 30+ 个等间隔观测要外推 | 停。那是预测，不是排序 |
+| 带约束的单目标问题（LP/MILP 型） | 停。那是优化，不是赋权 |
 
-If the request fails this gate, say so plainly and name the right skill instead of forcing pairwise matrices onto the problem.
+ gate 没过就直说，点名该用的技能，不要硬把成对矩阵套上去。
 
-### 2. Build the hierarchy
+### 2. 建层次
 
-Name the goal in one sentence, then criteria, then alternatives:
+目标一句话，准则，其次方案：
 
-- **One level, one idea.** Criteria at the same level must be roughly independent and non-overlapping. "Cost" and "price" as siblings is a defect — merge them.
-- **≤7 criteria per node.** Beyond that, pairwise judgments degrade and CR becomes unpassable. Group into sub-criteria instead.
-- **Alternatives are concrete.** "Supplier A/B/C", not "good supplier". Vague alternatives produce vague rankings.
+- **一层一个意思。** 同层准则大致独立、互不重叠。“成本”和“价格”当兄弟是缺陷——合并。
+- **每节点准则 ≤7 个。** 再多判断质量就崩，`CR` 也过不了。分组做子准则。
+- **方案要具体。** “供应商 A/B/C”，不要“好供应商”。模糊的方案只能产出模糊的排序。
 
-Can't state the goal in one sentence? Don't build the matrix yet.
+目标一句话说不清？矩阵先别建。
 
-### 3. Fill the pairwise matrices
+### 3. 填成对矩阵
 
-Walk down; one matrix per parent node.
+自上而下，每个父节点一张矩阵。
 
-| Scale value | Meaning |
+| 标度 | 含义 |
 | --- | --- |
-| 1 | Equal importance |
-| 3 | Moderate importance of one over another |
-| 5 | Strong importance |
-| 7 | Very strong importance |
-| 9 | Extreme importance |
-| 2, 4, 6, 8 | Compromise values |
+| 1 | 同等重要 |
+| 3 | 稍重要 |
+| 5 | 明显重要 |
+| 7 | 强烈重要 |
+| 9 | 极端重要 |
+| 2, 4, 6, 8 | 折中值 |
 
-- **Reciprocity is structural**: a_ji = 1/a_ij, a_ii = 1. Enforce it in code, don't trust hand-filled tables.
-- **One reason per judgment.** Each off-diagonal entry gets a one-line justification (data, expert quote, or stated assumption). An unjustified 7 is how fake precision enters.
-- **Confirm the matrix with the user before computing.** Numbers downstream are worthless if the inputs were never agreed.
+- **倒数是结构，不是约定**：a_ji = 1/a_ij，a_ii = 1。用代码强制，不要相信手填表。
+- **一格一理由。** 每个非对角元附一句依据（数据、专家原话、写明的假设）。没理由的 7 就是虚假精度混进来的地方。
+- **先和用户确认矩阵，再计算。** 输入都没对过，下游数字全是废的。
 
-### 4. Weights and consistency — the gate
+### 4. 权重与一致性——gate
 
-For each matrix (compute in code, show the steps):
+每张矩阵（用代码算，步骤展示）：
 
-1. Principal eigenvalue λ_max and eigenvector → normalized weights w.
-2. CI = (λ_max − n) / (n − 1).
-3. CR = CI / RI, with the standard RI table:
+1. 主特征值 λ_max 与特征向量 → 归一化权重 w。
+2. CI = (λ_max − n) / (n − 1)。
+3. CR = CI / RI，RI 用标准表：
 
 | n | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | RI | 0 | 0 | 0.58 | 0.90 | 1.12 | 1.24 | 1.32 | 1.41 |
 
-**CR < 0.1 or revise.** When it fails: locate the most inconsistent judgment triple (largest a_ij·a_jk vs a_ik gap), ask the user to reconsider that specific comparison, recompute. Never average away the inconsistency or switch to a looser threshold without saying so.
+**CR < 0.1，否则回去改。** 没过：定位最不一致的判断三元组（a_ij·a_jk 与 a_ik 差最大的），请用户重议那一个比较，重算。不许平均掉不一致，更不许悄悄放宽阈值。
 
-### 5. Synthesize and stress-test
+### 5. 合成与压力测试
 
-- **Hierarchical synthesis**: global weight = product of local weights down the path; alternative scores = weighted sum. Show the composition table, not just the final ranking.
-- **Sensitivity**: perturb each criterion weight ±10–20% (renormalizing) and record whether the top-ranked alternative changes. Report the flip points.
-- **Baseline对照**: compare against equal weights and, when data allows, against `evaluation-entropy-topsis`. If three methods crown three different winners, the conclusion is "data is inconclusive", not the AHP ranking.
+- **层次合成**：全局权重 = 路径上局部权重连乘；方案得分 = 加权和。展示合成表，不只给最终排序。
+- **敏感性**：每个准则权重 ±10–20% 扰动（重归一化），记录头名变不变。翻盘点报出来。
+- **基线对照**：和等权重、以及数据允许时的 `evaluation-entropy-topsis` 对比。三个方法捧出三个赢家，结论就是“数据给不出稳定赢家”，不是 AHP 的排序。
 
 ## Never Ship
 
-Self-check before you finish. Each is an automatic block:
+收尾自查，不过即拦：
 
-| Never | Instead |
+| 禁忌 | 替代 |
 | --- | --- |
-| Ranking with no reported CR | CR per matrix, all < 0.1 |
-| One flat matrix for goal + criteria + alternatives | Hierarchy, one matrix per parent |
-| >7 criteria in one matrix | Group into sub-criteria |
-| Hand-typed weights or eigenvalues | Computed in code from the confirmed matrix |
-| Scale values outside 1–9 with no justification | Saaty scale, reciprocals enforced |
-| No sensitivity analysis | ±10–20% perturbation + flip points |
-| Subjective judgments where user demanded objectivity | `evaluation-entropy-topsis` |
-| Winner presented as certain when baselines disagree | State the disagreement and its cause |
+| 排序不报 CR | 每张矩阵 CR < 0.1，全报 |
+| 目标准则方案一张大矩阵 | 建层次，每父节点一张矩阵 |
+| 一张矩阵塞 >7 个准则 | 分组做子准则 |
+| 手敲权重或特征值 | 从确认过的矩阵用代码算 |
+| 标度超出 1–9 且无依据 | Saaty 标度，倒数强制 |
+| 不做敏感性 | ±10–20% 扰动 + 翻盘点 |
+| 用户要客观却给主观判断 | `evaluation-entropy-topsis` |
+| 基线打架还把赢家当定论 | 写清分歧及其原因 |
 
 ## Output
 
-The deliverable is the ranking **plus its evidence**, in this order:
+交付物是排序**加证据**，顺序如下：
 
-- **Hierarchy diagram/table** — goal, criteria, alternatives, one sentence each.
-- **Judgment matrices with reasons** — every matrix printed, each entry justified.
-- **Weights + consistency** — w, λ_max, CI, CR per matrix; code or tool used.
-- **Synthesis table** — local × global weights, alternative scores, final order.
-- **Sensitivity + limitations** — flip points, baseline comparison, what would change the winner.
+- **层次图表**——目标、准则、方案，各一句话。
+- **判断矩阵与理由**——每张矩阵打印，每个数字有依据。
+- **权重 + 一致性**——每张矩阵的 w、λ_max、CI、CR；所用代码或工具。
+- **合成表**——局部 × 全局权重、方案得分、最终顺序。
+- **敏感性 + 局限**——翻盘点、基线对比、什么会改变赢家。
 
-Don't pad this into a report. The tables are the deliverable.
+不要写成报告。表格就是交付物。
 
 ## Tone
 
-Opinionated and brief. When the honest answer is "your matrix is inconsistent, fix comparison (2,3)", give it — that answer is the reason this skill exists. When judgments are genuinely subjective, say whose judgment they are instead of laundering them into objective-looking decimals.
+立场鲜明、废话少。当正确答案是“你的矩阵不一致，重议第 (2,3) 个比较”就直说——这个技能存在的意义就是这句话。判断确属主观时，写明是谁的判断，不要洗成客观小数。

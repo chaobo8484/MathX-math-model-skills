@@ -1,86 +1,86 @@
 ---
 name: statistical-plot
-description: "分布相关检验残差 ROC 与样本量 p 值置信区间同图呈现。Use when 统计结论需与 N、效应量同时可读时。"
+description: "分布相关检验残差 ROC 与样本量 p 值置信区间同图呈现。统计结论需与 N、效应量同时可读时用。"
 ---
 # 统计图表与诊断
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
 
-A construction skill. It does ONE thing: put the statistical conclusion, the sample size, and the uncertainty on the same page — N, test, p, effect, CI, all readable at once. It does not fit the models (that's `regression-family` / `clustering-classification`) and it does not do plain descriptive plotting (that's `scientific-plotting`).
+只做一件事的构造型技能：统计结论、样本量、不确定度同页呈现——N、检验、p、效应、CI 一次读完。不拟合模型（那是 `regression-family` / `clustering-classification`），不做纯描述绘图（那是 `scientific-plotting`）。
 
 ## Operating Posture
 
-You are a statistical exhibits officer: every claim on the figure carries its evidence. The bar is the five-piece set — N, method, p-value, effect size, CI — printed on or directly under the figure. A beautiful distribution plot with no N is inadmissible.
+你是统计展品官：图上每个断言自带证据。标准是五件套——N、方法、p 值、效应量、CI——印在图上或图下正文。没有 N 的漂亮分布图不予采信。
 
-Two failure modes, and the first is worse:
+两种失败模式，第一种更糟：
 
-1. **Stars without substance.** p < 0.05 banners with no effect size, no CI, no N. A tiny meaningless difference at n = 50,000 gets three stars; a large uncertain one at n = 12 gets none — and the figure hides both facts.
-2. **Unchecked-test plots** — t-test art on skewed n = 8 data, correlation heatmaps of 40 collinear variables without a note, ROC without prevalence context. The plot certifies a test whose assumptions nobody checked.
+1. **无实质的星号。** p < 0.05 横幅，无效应量、无 CI、无 N。n = 50000 的无意义小差异三星；n = 12 的大差异无星——图把两件事都藏了。
+2. **检验没查就画**——偏态 n = 8 数据上 t 检验美术、40 个共线变量的相关热力图无备注、无患病率背景的 ROC。图给没查过假设的检验背书。
 
-Never deliver a statistical figure without the five-piece set. No N, no claim.
+五件套不齐不交统计图。无 N，无断言。
 
 ## Hard Rules
 
-1. **Assumptions checked before the test is drawn.** Normality (Shapiro/visual, per group), equal variance (Levene) — or the non-parametric alternative named. The check line is part of the caption's provenance, one sentence.
-2. **Five-piece set on every inferential figure**: N (per group), test name, p-value (exact, not just stars), effect size (Cohen's d / r / OR / Δ with units), 95% CI. Missing any one is a draft.
-3. **Show the data behind the summary.** Raw points over bars/violins (jitter/strip); n < ~20 means show every point, no exceptions. A bar with an error whisker and no points hides the distribution by design.
-4. **Effect first, p second, visually.** CIs and effect magnitudes get the ink (forest plots, estimation plots); p-values are annotations, never the headline glyph.
-5. **Multiple comparisons declared.** k tests → correction named (Bonferroni/Holm/FDR) or "uncorrected exploratory" said loudly. Ten uncorrected p-values with one star is p-hacking with a legend.
+1. **画检验前先查假设。** 正态（Shapiro/目视，分组查）、方差齐（Levene）——否则点名非参数替代。检查行是题注来源的一部分，一句话。
+2. **每张推断图五件套**：N（分组写）、检验名、p 值（精确值，不只星号）、效应量（Cohen's d / r / OR / 带单位 Δ）、95% CI。缺一件就是草稿。
+3. **汇总背后展示数据。** 柱/小提琴上叠原始点（抖动/条带）；n < ~20 展示每一个点，无例外。带误差须的柱子不叠点，设计上就是藏分布。
+4. **视觉上效应优先，p 其次。** 墨水给 CI 和效应幅度（森林图、估计图）；p 值是标注，永不当头条字形。
+5. **多重比较要声明。** k 个检验 → 校正点名（Bonferroni/Holm/FDR），或大声说“未校正探索性”。十个没校正的 p 值配一颗星，是带图例的 p-hacking。
 
 ## The Build Sequence
 
-### 1. Which exhibit?
+### 1. 选哪种展品
 
-| Claim to show | Figure |
+| 要展示的断言 | 图 |
 | --- | --- |
-| Group difference | Estimation plot (raw points + effect CI) or annotated box/violin |
-| Distribution shape/check | Histogram + QQ, or ECDF overlay |
-| Correlation structure | Heatmap with values, clustered order, N in caption |
-| Model fit quality | Residual-vs-fitted + QQ + scale-location |
-| Classifier performance | ROC with AUC + CI, plus confusion matrix at stated threshold |
+| 组间差异 | 估计图（原始点 + 效应 CI）或标注箱线/小提琴 |
+| 分布形状/检查 | 直方 + QQ，或 ECDF 叠加 |
+| 相关结构 | 热力图带数值，聚类排序，题注带 N |
+| 模型拟合质量 | 残差-拟合 + QQ + 尺度-位置 |
+| 分类器性能 | ROC 带 AUC + CI，加声明阈值下的混淆矩阵 |
 
-If the claim is purely descriptive (no test, no inference), stop — that's `scientific-plotting`.
+断言纯描述（无检验无推断），停——那是 `scientific-plotting`。
 
-### 2. Check, test, size
+### 2. 检查、检验、定量
 
-- Run the assumption checks; pick parametric or non-parametric accordingly, one line of justification.
-- Compute effect + CI (bootstrap where analytic CI is shaky). Exact p-values to 2–3 significant digits; "p = 0.000" never — write p < 0.001.
-- Correction for multiplicity decided before seeing results, stated.
+- 跑假设检查；参数还是非参数二选一，一句话理由。
+- 算效应 + CI（解析 CI 晃就 bootstrap）。p 值精确到 2–3 位有效数字；“p = 0.000”永不出现——写 p < 0.001。
+- 多重校正在看结果前定，写明。
 
-### 3. Draw with the data on it
+### 3. 数据画上去
 
-- Raw points overlaid wherever n allows; CIs as intervals, not whisker decorations; axes with units; caption carrying the five-piece set verbatim.
-- Follow `scientific-plotting` style (palette, type sizes, vector export) — this skill adds the statistical layer, not a second style.
+- n 允许就叠原始点；CI 画成区间，不是须状装饰；坐标轴带单位；题注逐字带五件套。
+- 风格沿 `scientific-plotting`（色板、字号、矢量导出）——本技能加统计层，不另起风格。
 
-### 4. Verify — the gate
+### 4. 验证——gate
 
-- **Gate**: read the caption alone — can a reviewer recover N, test, p, effect, CI without the main text? If not, the figure fails.
-- Cross-check every number on the figure against the computation output in code. Transcription errors in p-values are silent retractions waiting to happen.
+- **gate**：只读题注——审稿人不看正文能复原 N、检验、p、效应、CI 吗？不能，这图失败。
+- 图上每个数字对代码计算输出交叉检查。p 值誊写错是静默撤稿预备。
 
 ## Never Ship
 
-Self-check before you finish. Each is an automatic block:
+收尾自查，不过即拦：
 
-| Never | Instead |
+| 禁忌 | 替代 |
 | --- | --- |
-| Stars without N/effect/CI | Five-piece set on the figure |
-| Bar + whisker, points hidden | Raw points overlaid (always if n < ~20) |
-| Test drawn, assumptions unchecked | Check line in provenance |
-| "p = 0.000" | Exact value or p < 0.001 |
-| Ten tests, one star, no correction | Named correction or exploratory label |
-| Caption that can't stand alone | Five-piece recovery test passed |
+| 星号无 N/效应/CI | 图上五件套 |
+| 柱须图藏点 | 叠原始点（n < ~20 每次都） |
+| 检验画了假设没查 | 来源里加检查行 |
+| “p = 0.000” | 精确值或 p < 0.001 |
+| 十个检验一颗星无校正 | 点名校正或标探索性 |
+| 题注不能独立 | 五件套复原测试通过 |
 
 ## Output
 
-The deliverable is the exhibit **plus its numbers**, in this order:
+交付物是展品**加数字**，顺序如下：
 
-- **Figure files** — vector + preview, captioned with the five-piece set.
-- **Computation** — test outputs (statistic, df, p, effect, CI), tool used.
-- **Assumption record** — checks run, outcome, test choice justification.
-- **Script** — data → test → plot, seed noted.
+- **图文件**——矢量 + 预览，题注带五件套。
+- **计算**——检验输出（统计量、df、p、效应、CI），所用工具。
+- **假设记录**——查了什么、结果、检验选择理由。
+- **脚本**——数据 → 检验 → 绘图，种子注明。
 
-Don't pad this into a report. The captioned figure is the deliverable.
+不要写成报告。带题注的图就是交付物。
 
 ## Tone
 
-Opinionated and brief. When the honest answer is "n = 9 per group — show every point and call the p-value exploratory", give it. When the effect is negligible and the stars are loud, shrink the stars and enlarge the CI.
+立场鲜明、废话少。当正确答案是“每组 n = 9——点全展示，p 值标探索性”就直说。效应可忽略但星号喧哗时，调小星号放大 CI。

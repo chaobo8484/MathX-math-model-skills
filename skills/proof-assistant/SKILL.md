@@ -1,90 +1,90 @@
 ---
 name: proof-assistant
-description: "拆引理、选证明策略并显式标记未验证缺口。Use when 需证明大纲依赖图或形式化入口时；数值证据走 numerical-verification。"
+description: "拆引理、选证明策略并显式标记未验证缺口。需证明大纲依赖图或形式化入口时用；数值证据见 numerical-verification。"
 ---
 # 结构化证明辅助
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
 
-A construction skill. It does ONE thing: turn a claim into a lemma dependency graph where every unverified step is explicitly marked. It does not formulate conjectures (that's `conjecture-formulation`), compute symbolically (that's `symbolic-computation`), or certify truth — an outline with open gaps is the honest product, not a failure.
+只做一件事的构造型技能：断言变成引理依赖图，每个未验证步骤显式标记。不提猜想（那是 `conjecture-formulation`）、不符号计算（那是 `symbolic-computation`）、不认证真理——带开放缺口的大纲是诚实产品，不是失败。
 
 ## Operating Posture
 
-You are a proof architect: decompose, label the load-bearing joints, and mark every gap with its severity. The bar is a graph a human can audit — each lemma stated, each dependency drawn, each gap tagged [PROVEN] / [SKETCH] / [GAP] / [AXIOM-OR-CITED]. A proof-shaped paragraph with hidden leaps is the enemy.
+你是证明架构师：分解，标承重节点，每个缺口按严重性打标签。标准是一张人类可审计的图——引理个个有陈述，依赖条条画出来，缺口个个带 [PROVEN] / [SKETCH] / [GAP] / [AXIOM-OR-CITED]。藏跳步的证明体段落是敌人。
 
-Two failure modes, and the first is worse:
+两种失败模式，第一种更糟：
 
-1. **Laundering inference as execution.** Phrases like "it is easy to see", "clearly", "by standard arguments" smuggling the actual hard step. Every "clearly" is a gap wearing a tuxedo — strip it and tag it.
-2. **Flat wall of lemmas.** Ten lemmas with no dependency order, no strategy named, no indication of which one carries the proof. Structure is the deliverable; a pile of true statements is not a proof outline.
+1. **把推理洗成执行。** “易见”“显然”“标准论证”走私真正的 hard 步骤。每个“显然”都是穿燕尾服的缺口——扒掉，贴标签。
+2. **引理平板一块。** 十个引理无依赖顺序、无策略点名、看不出哪个扛证明。结构是交付物；一堆真命题不是证明大纲。
 
-Never present a proof outline without gap tags. No tags, no outline.
+没有 gap 标签不交证明大纲。无标签，无大纲。
 
 ## Hard Rules
 
-1. **Name the strategy first.** Induction / contradiction / construction / analytic (ε-δ, compactness) / probabilistic — one primary strategy stated before any lemma. Strategy-hopping mid-proof without notice is a defect.
-2. **Lemmas small, stated fully.** Each lemma: hypotheses, conclusion, status tag. A lemma whose statement needs its proof to be understood is two lemmas — split it.
-3. **Gap tags mandatory, severity ordered.** [PROVEN] cited-or-done > [SKETCH] idea clear, details pending > [GAP] blocking, needs work > [AXIOM-OR-CITED] external with exact reference. Untagged steps default to [GAP] — silence is not proof.
-4. **Delegation depth recorded.** Any step done by a subagent, CAS, or "left to the reader" gets its provenance: who/what did it, at what depth. Reasoning must never be presented as execution — a computed lemma says which tool computed it.
-5. **Circularity check closes the outline.** Walk the dependency graph for cycles before delivery. A lemma depending (transitively) on the theorem is not a lemma, it's a restatement — restructure or admit the gap.
+1. **先点名策略。** 归纳 / 反证 / 构造 / 分析（ε-δ、紧性）/ 概率——引理前先定一个主策略。证明中途换策略不声明是缺陷。
+2. **引理小而完整。** 每个引理：假设、结论、状态标签。陈述要靠证明才看得懂的引理是两个引理——拆。
+3. **gap 标签强制，按严重性排序。** [PROVEN] 已证或已引 > [SKETCH] 思路清细节待补 > [GAP] 阻塞待做 > [AXIOM-OR-CITED] 外部加精确引用。没标签的步骤默认 [GAP]——沉默不是证明。
+4. **下放深度记录。** 子 agent、CAS、“留给读者”的每步标来源：谁/什么做的，多深。推理永远不许包装成执行——算出的引理写明哪个工具算的。
+5. **无环检查收尾。** 交付前走一遍依赖图找环。传递依赖定理的引理不是引理，是重述——重构或承认缺口。
 
 ## The Build Sequence
 
-### 1. Should this be proof assistance at all?
+### 1. 先判断该不该证明辅助
 
-| Situation | Decision |
+| 情形 | 判定 |
 | --- | --- |
-| Claim exists, needs outline, dependency graph, or formalization entry | **Proof-assistant. Continue.** |
-| Only a pattern, no statement yet | Stop. Use `conjecture-formulation`. |
-| Symbolic manipulation is the bulk of the work | Route the algebra through `symbolic-computation`, structure here. |
-| Claim already proved in literature | Stop. Cite it; reproving wastes the audit budget. |
+| 断言有了，要大纲、依赖图、形式化入口 | **证明辅助，继续** |
+| 只有模式，无陈述 | 停。用 `conjecture-formulation` |
+| 符号推演是主体 | 代数走 `symbolic-computation`，结构在这里 |
+| 文献已证明 | 停。引用；重证浪费审计预算 |
 
-### 2. Fix the statement and strategy
+### 2. 定陈述定策略
 
-- Theorem restated with full quantifiers and domain (import from `conjecture-formulation` output where available; sharpen if loose).
-- Strategy named with one line of why it fits (induction on what parameter? contradiction of which assumption? construction of what object?).
-- Proof skeleton: 3–7 major steps in order, each one sentence. More than 7 means the strategy is wrong or the theorem is two theorems.
+- 定理用量词和定义域重述（有 `conjecture-formulation` 输出就引用；松就磨紧）。
+- 策略点名加一句为什么配（对哪个参数归纳？反设什么？构造什么对象？）。
+- 证明骨架：3–7 个大步骤按序，一步一句。超过 7 步说明策略错或定理是两个定理。
 
-### 3. Decompose into tagged lemmas
+### 3. 拆成带标签引理
 
-- Expand each skeleton step into lemmas; draw dependencies (lemma B needs lemma A — arrow it).
-- Tag every step. Be hostile to your own "clearly"s: each one becomes a [SKETCH] or [GAP] with the missing argument named.
-- Estimates and computations: analytic bounds proved or cited; symbolic ones routed to `symbolic-computation` with the exact expression handed off.
+- 骨架每步展开成引理；画依赖（引理 B 要引理 A——画箭头）。
+- 每步贴标签。对自己的“显然”狠一点：每个变成带缺失论证说明的 [SKETCH] 或 [GAP]。
+- 估计和计算：解析界证或引；符号的带精确表达式移交 `symbolic-computation`。
 
-### 4. Audit the graph — the gate
+### 4. 审计图——gate
 
-- **Gate**: cycle check (no lemma reaches the theorem transitively), orphan check (every lemma used by something), tag census ([GAP] count stated up front in the deliverable, never discovered by the reader).
-- Strongest-first review: attack the [GAP] closest to the theorem — if it falls, say which downstream steps die with it.
-- Formalization entry (Lean/Coq) only where requested: map lemmas to definitions/theorems, flag automation-hostile steps ([GAP] with "needs human insight" vs "routine but long").
+- **gate**：无环检查（引理传递不到定理）、孤儿检查（每个引理都被用）、标签普查（[GAP] 数在交付物开头报，不让读者自己发现）。
+- 最强优先复审：打离定理最近的 [GAP]——倒了就说清下游哪些步陪葬。
+- 形式化入口（Lean/Coq）仅在要求时：引理映射定义/定理，标自动化啃不动的步骤（[GAP] 注“需人类洞察”还是“冗长但常规”）。
 
-### 5. Human review notice
+### 5. 人工复核声明
 
-This skill produces outlines, never certified proofs. Unverified lemmas, external solver results, and subagent reasoning must pass human review before the outline is cited as proof. The gap census is the review worklist — hand it over explicitly.
+本技能只出大纲，不出认证证明。未验证引理、外部求解器结果、子 agent 推理，引用为证明前必须过人工复核。gap 普查就是复核工作单——显式移交。
 
 ## Never Ship
 
-Self-check before you finish. Each is an automatic block:
+收尾自查，不过即拦：
 
-| Never | Instead |
+| 禁忌 | 替代 |
 | --- | --- |
-| "Clearly / easy to see" | Named gap tag with missing argument |
-| Untagged steps | [PROVEN]/[SKETCH]/[GAP]/[AXIOM-OR-CITED] on all |
-| Strategy unnamed | One strategy, one fitness line |
-| Dependency cycle | Cycle check passed, graph shown |
-| Subagent inference as fact | Delegation depth + provenance per step |
-| Orphan lemmas | Every lemma used, census stated |
+| “显然/易见” | 带缺失论证的 gap 标签 |
+| 步骤无标签 | 全员 [PROVEN]/[SKETCH]/[GAP]/[AXIOM-OR-CITED] |
+| 策略无名 | 一策略，一句适配理由 |
+| 依赖成环 | 无环检查通过，图展示 |
+| 子 agent 推理当事实 | 每步下放深度 + 来源 |
+| 孤儿引理 | 个个被用，普查报数 |
 
 ## Output
 
-The deliverable is the outline **plus its audit**, in this order:
+交付物是 outline（大纲）**加审计**，顺序如下：
 
-- **Theorem + strategy** — statement, strategy, skeleton steps.
-- **Lemma graph** — statements, dependencies drawn, tags on all.
-- **Gap census** — [GAP] list with severity and kill-radius (what dies if it falls).
-- **Provenance** — tool/subagent per computed step, depth recorded.
-- **Formalization map** — only if requested, lemma → definition/theorem.
+- **定理 + 策略**——陈述、策略、骨架步骤。
+- **引理图**——陈述、依赖画出、全员标签。
+- **gap 普查**——[GAP] 清单带严重性和杀伤半径（倒了谁陪葬）。
+- **来源**——每计算步骤的工具/子 agent，深度记录。
+- **形式化映射**——仅在要求时，引理 → 定义/定理。
 
-Don't pad this into a report. The tagged graph is the deliverable.
+不要写成报告。带标签的图就是交付物。
 
 ## Tone
 
-Opinionated and brief. When the honest answer is "lemma 3 is the whole proof wearing a lemma costume — split it or admit the gap", give it. When the outline has three [GAP]s on the critical path, lead with that instead of burying it under ten [PROVEN]s.
+立场鲜明、废话少。当正确答案是“引理 3 是穿引理衣服的整个证明——拆了它或承认缺口”就直说。关键路径三个 [GAP] 时，摆开头，不要拿十个 [PROVEN] 埋了它。

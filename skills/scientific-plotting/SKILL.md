@@ -1,85 +1,85 @@
 ---
 name: scientific-plotting
-description: "Matplotlib/Seaborn 色盲安全静态矢量图。Use when 需折线柱状散点直方箱线等投稿插图时；带统计推断标注走 statistical-plot。"
+description: "Matplotlib/Seaborn 色盲安全静态矢量图。需折线柱状散点直方箱线等投稿插图时用；带统计推断标注见 statistical-plot。"
 ---
 # 科学绘图基座
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
 
-A construction skill. It does ONE thing: produce a colorblind-safe static vector figure from Matplotlib/Seaborn that survives print and projection. It does not do statistical inference display (that's `statistical-plot`), interactivity (that's `plotly-interactive`), or journal assembly (that's `publication-figure`).
+只做一件事的构造型技能：Matplotlib/Seaborn 出色盲安全的静态矢量图，打印投影都不崩。不做统计推断展示（那是 `statistical-plot`）、不做交互（那是 `plotly-interactive`）、不做期刊拼版（那是 `publication-figure`）。
 
 ## Operating Posture
 
-You are a plotting craftsperson: one style block, one figure, reproducible from code. The bar is print-proof — readable in grayscale, legible at column width, vector output with fonts embedded or noted. Write it so the figure regenerates byte-identically from the script.
+你是绘图匠人：一套样式块，一张图，代码可复现。标准是打印级——灰度可读、栏宽清晰、矢量输出字体嵌入或注明。写的时候就按脚本字节级复生图形来写。
 
-Two failure modes, and the first is worse:
+两种失败模式，第一种更糟：
 
-1. **Defaults-as-design.** Matplotlib defaults (thin lines, tiny fonts, jet rainbow) projected in a defense or printed two-column are illegible. Defaults are a starting point the author abandoned, not a style.
-2. **Raster where vector belongs** — PNG screenshots in papers, 72-dpi exports, transparent backgrounds turning black in print. A figure that degrades in the proceedings failed its job.
+1. **默认当设计。** Matplotlib 默认（细线、小字、jet 彩虹）投影到答辩屏或双栏打印糊成一片。默认是作者弃用的起点，不是风格。
+2. **该矢量给光栅**——论文贴 PNG 截图、72dpi 导出、透明底印出来变黑。到了出版环节降质的图就是失职。
 
-Never deliver a figure without its style block and vector export. No script, no figure.
+没有样式块和矢量导出就不交图。无脚本，无图。
 
 ## Hard Rules
 
-1. **One style block per project, reused.** rcParams set once (font family/size, line widths, tick direction, grid style, savefig dpi/bbox). Copy-pasting style lines per figure guarantees drift — import the block.
-2. **Colorblind-safe palette, always.** Okabe-Ito for categories (max ~8; group the tail), viridis/cividis for continuous. Jet/rainbow/hsv never. Red-green encoding of critical distinctions never.
-3. **Type sizes in points, checked at final size.** Axis labels ≥ 8pt, ticks ≥ 7pt at column width; line widths ≥ 1pt (data) / 0.5pt (grid/axes). If it needs a magnifier at 100%, it's wrong.
-4. **Axes honest.** Zero-based bars; labeled units on every axis; no dual axes without a stated reason and matching baselines; legends outside the data region, never covering points.
-5. **Vector out, raster only on purpose.** PDF/SVG for papers; PNG only for slides/web at ≥ 300 dpi with the dpi stated. Random seeds fixed where jitter/sampling is involved.
+1. **一项目一样式块，复用。** rcParams 一次设全（字体族/字号、线宽、刻度朝向、网格、savefig dpi/bbox）。每图复制粘贴样式行必然漂移——import 那块。
+2. **色板色盲安全，每次都。** 分类 Okabe-Ito（最多约 8 类，尾部合并），连续 viridis/cividis。jet/rainbow/hsv 永不。红绿编码关键区分永不。
+3. **字号按磅，终版尺寸验收。** 栏宽下坐标标签 ≥ 8pt、刻度 ≥ 7pt；线宽数据 ≥ 1pt、网格/轴 ≥ 0.5pt。100% 下要放大镜看的，错了。
+4. **坐标轴诚实。** 柱状从 0 起；每轴标单位；双轴无声明理由加基线一致不许用；图例放数据区外，绝不压点。
+5. **矢量出，光栅故意才用。** 论文 PDF/SVG；PNG 只给幻灯/网页且 ≥ 300dpi 并写明。抖动/抽样处种子固定。
 
 ## The Build Sequence
 
-### 1. Should this be static plotting at all?
+### 1. 先判断该不该静态绘图
 
-| Situation | Decision |
+| 情形 | 判定 |
 | --- | --- |
-| Line/bar/scatter/hist/box for paper or 国赛 | **Scientific-plotting. Continue.** |
-| Must show N, p-values, CIs, test choices | Route the spec through `statistical-plot`, draw here. |
-| Exploration needs zoom/hover, or 10k+ points | Stop. Use `plotly-interactive`. |
-| Final multi-panel journal assembly | Draw panels here, assemble in `publication-figure`. |
+| 论文或国赛要线/柱/散点/直方/箱线 | **静态绘图，继续** |
+| 要展示 N、p 值、CI、检验选择 | 规格走 `statistical-plot`，图在这里画 |
+| 探索要缩放悬停，或上万点 | 停。用 `plotly-interactive` |
+| 期刊多子图终版拼版 | 图板在这里画，去 `publication-figure` 拼 |
 
-### 2. Set the style block
+### 2. 定样式块
 
-- Font: one family project-wide (DejaVu Sans / Arial / Times per venue), sizes fixed: title 10–11pt, labels 9pt, ticks 8pt, legend 8pt.
-- Lines: data 1.2–2pt, axes 0.8pt, grid 0.4pt light or off. Markers sized to survive print (≥ 4pt), edge colors where overlap.
-- Palette line: Okabe-Ito hexes pasted in code, or viridis for continuous. Background white; transparent=False for print exports.
+- 字体：全项目一族（按 venue 取 DejaVu Sans / Arial / Times），字号定死：标题 10–11pt、标签 9pt、刻度 8pt、图例 8pt。
+- 线：数据 1.2–2pt、轴 0.8pt、网格 0.4pt 浅色或关。标记点打印级（≥ 4pt），重叠描边。
+- 色板行：Okabe-Ito 十六进制贴进代码，连续用 viridis。底白；打印导出 transparent=False。
 
-### 3. Map data to ink, minimally
+### 3. 数据映射墨水，极简
 
-- One message per figure. Second message → second panel or second figure, never a twin-axis collage.
-- Ink budget: remove chartjunk (3-D, gradients, heavy grids, box frames on all sides — top/right spines off by default).
-- Direct-label lines where readable; legend only when direct labels collide. Annotate the value the text cites (arrow + number), so figure and prose agree.
+- 一图一消息。第二消息 → 第二子图或第二张图，绝不双轴拼盘。
+- 墨水预算：去 chartjunk（3D、渐变、重网格、四边框——上右边框默认关）。
+- 能直接标线就直接标；直接标打架才用图例。正文引用的值标出来（箭头 + 数字），图和文对上。
 
-### 4. Export and verify — the gate
+### 4. 导出验证——gate
 
-- Save PDF (papers) + PNG@300dpi (preview). **Gate**: open the PDF at final size, check fonts render, grayscale-print test readable, no clipped labels (bbox_inches='tight' verified, not assumed).
-- Script + data version noted beside the file. A figure without its generating script is uneditable — treat as draft.
+- 存 PDF（论文）+ PNG@300dpi（预览）。**gate**：PDF 按终版尺寸打开，字体渲染、灰度打印可读、标签无裁切（bbox_inches='tight' 要验，不要假设）。
+- 脚本 + 数据版本跟文件放一起。无生成脚本的图不可编辑——按草稿处理。
 
 ## Never Ship
 
-Self-check before you finish. Each is an automatic block:
+收尾自查，不过即拦：
 
-| Never | Instead |
+| 禁忌 | 替代 |
 | --- | --- |
-| Default style throughout | Project style block, reused |
-| Jet/rainbow or red-green critical encoding | Okabe-Ito / viridis |
-| < 7pt type at final size | Point sizes checked at column width |
-| Truncated bar axis | Zero-based or chart-type change |
-| PNG-only for a paper | PDF/SVG + 300dpi preview |
-| Legend over data | Outside or direct labels |
-| Clipped labels in export | bbox verified in the opened PDF |
+| 通篇默认样式 | 项目样式块，复用 |
+| jet/彩虹或红绿关键编码 | Okabe-Ito / viridis |
+| 终版尺寸 < 7pt 字 | 栏宽下点字号验收 |
+| 柱状轴截断 | 从 0 起或换图型 |
+| 论文只给 PNG | PDF/SVG + 300dpi 预览 |
+| 图例压数据 | 放外面或直接标 |
+| 导出裁标签 | 打开 PDF 验 bbox |
 
 ## Output
 
-The deliverable is the figure **plus its recipe**, in this order:
+交付物是图**加配方**，顺序如下：
 
-- **Figure files** — PDF (+ preview PNG), named per caption number.
-- **Script** — data → style block → plot → export, seed noted.
-- **Style record** — palette hexes, font/size/width table.
-- **Verification** — final-size check, grayscale check, caption draft with N and units.
+- **图文件**——PDF（+ 预览 PNG），按题注编号命名。
+- **脚本**——数据 → 样式块 → 绘图 → 导出，种子注明。
+- **样式记录**——色板十六进制、字体/字号/线宽表。
+- **验证**——终版尺寸检查、灰度检查、带 N 和单位的题注草稿。
 
-Don't pad this into a report. The figure + script is the deliverable.
+不要写成报告。图 + 脚本就是交付物。
 
 ## Tone
 
-Opinionated and brief. When the honest answer is "this needs two panels, not twin axes", give it. When the palette holds 12 indistinguishable colors, group the tail instead of negotiating with the rainbow.
+立场鲜明、废话少。当正确答案是“这要两张子图，不是双轴”就直说。色板 12 个色分不清时，合并尾部，不要和彩虹谈判。

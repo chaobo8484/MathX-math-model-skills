@@ -1,93 +1,93 @@
 ---
 name: regression-family
-description: "OLS、岭、Lasso、Logistic 的拟合选择与诊断。Use when 需解释变量关系、做变量选择或概率分类时；无监督分群用 clustering-classification。"
+description: "OLS、岭、Lasso、Logistic 的拟合选择与诊断。需解释变量关系、做变量选择或概率分类时用；无监督分群见 clustering-classification。"
 ---
 # 回归族与正则化
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
 
-A construction skill. It does ONE thing: fit OLS, ridge, Lasso, or Logistic with assumption checks a reviewer can re-run. It does not do nonlinear black-box fitting (that's `bp-neural-network`), unsupervised grouping (that's `clustering-classification`), or time-series dynamics (that's `time-series-arima`).
+只做一件事的构造型技能：OLS、岭、Lasso、Logistic 带着审稿人能重跑的假设检查做拟合。不做非线性黑箱（那是 `bp-neural-network`）、不做无监督分组（那是 `clustering-classification`）、不做时间序列动态（那是 `time-series-arima`）。
 
 ## Operating Posture
 
-You are a modeling specialist producing coefficients that mean what they say. The bar is checked assumptions: EDA done, collinearity handled, regularization chosen by CV, residuals or calibration inspected. Write it so the residual plot passes the first time.
+你是建模专员，产出的系数说的是真话。标准是查过的假设：EDA 做过、共线性处理过、正则化强度 CV 选过、残差或校准看过。写的时候就按残差图一次通过来写。
 
-Two failure modes, and the first is worse:
+两种失败模式，第一种更糟：
 
-1. **Interpreting coefficients the data can't support.** VIF in the stratosphere, p ≫ n with plain OLS, stepwise-selected variables presented with naive p-values. A coefficient from a violated model is a rumor with standard errors.
-2. **Fitting without selecting or checking** — λ hand-picked, no CV curve, no residual/QQ/calibration plot, classification threshold unmentioned. An unchecked fit is a claim without evidence.
+1. **解释数据撑不起的系数。** VIF 上天、p ≫ n 还用普通 OLS、逐步回归选出的变量配着天真的 p 值展示。违反假设的模型的系数，是带标准误的谣言。
+2. **拟合不选也不查**——λ 手拍、无 CV 曲线、无残差/QQ/校准图、分类阈值不提。不检查的拟合是无证据的断言。
 
-Never present a coefficient or a class prediction without its check. No diagnostics, no interpretation.
+没有检查就不给系数、不给类别预测。无诊断，无解释。
 
 ## Hard Rules
 
-1. **EDA + VIF before any fit.** Distributions, missingness, outliers, pairwise correlations; VIF per predictor — above 10 means act (drop, combine, or regularize), not proceed-and-interpret.
-2. **Regularization strength by cross-validation, always.** λ (ridge/Lasso) or C (Logistic) from a CV curve, 1-SE rule preferred for sparser models. Hand-picked λ is a confession, not a method.
-3. **Match the model to the target.** Continuous → OLS/ridge/Lasso; binary → Logistic (never OLS on 0/1 and never a 0.5 threshold without saying why).
-4. **Residuals for regression, calibration for classification.** Residual-vs-fitted, QQ, scale-location; for Logistic, calibration curve + ROC/AUC and the confusion matrix at the stated threshold.
-5. **Report in original units with uncertainty.** Coefficients with CIs; predictions with intervals where affordable. Standardized-only coefficients hide the story.
+1. **拟合前先 EDA + VIF。** 分布、缺失、异常值、两两相关；每个预测变量的 VIF——超过 10 就动手（删、合并、正则化），不要一边解读一边装没看见。
+2. **正则化强度每次都用交叉验证选。** λ（岭/Lasso）或 C（Logistic）来自 CV 曲线，要稀疏优先 1-SE 原则。手拍 λ 是自首，不是方法。
+3. **模型配目标。** 连续 → OLS/岭/Lasso；二分类 → Logistic（0/1 目标不用 OLS，0.5 阈值不说理由也不用）。
+4. **回归看残差，分类看校准。** 残差-拟合图、QQ、尺度-位置图；Logistic 看校准曲线 + ROC/AUC 和声明阈值下的混淆矩阵。
+5. **原始单位报告，带不确定度。** 系数带 CI；负担得起就给预测区间。只报标准化的系数是藏故事。
 
 ## The Build Sequence
 
-### 1. Should this be regression at all?
+### 1. 先判断该不该用回归
 
-| Situation | Decision |
+| 情形 | 判定 |
 | --- | --- |
-| Explain y ~ X, select variables, or probabilistic classification | **Regression family. Continue.** |
-| Complex nonlinearity, prediction only, n in the hundreds+ | Stop. Use `bp-neural-network` — but only if it beats this skill's baseline. |
-| No target variable, looking for groups | Stop. Use `clustering-classification`. |
-| Time-ordered target with autocorrelation | Stop. Use `time-series-arima`; plain regression CIs will lie. |
+| 解释 y ~ X、变量选择、概率分类 | **回归族，继续** |
+| 复杂非线性、只要预测、n 几百以上 | 停。用 `bp-neural-network`——但它得先打赢本技能的基线 |
+| 无目标变量、找群组 | 停。用 `clustering-classification` |
+| 目标按时间排列且自相关 | 停。用 `time-series-arima`；普通回归的 CI 会撒谎 |
 
-### 2. EDA and collinearity gate
+### 2. EDA 与共线性 gate
 
-- Table: n, p, missing rate per column, handling named. Skewed targets (|skew| > 1) → consider log/Box-Cox, stated.
-- Correlation matrix + VIF table. **Gate**: max VIF > 10 → drop/merge/regularize before interpreting anything. Report what you did, per variable.
-- Categorical encoding stated (one-hot/drop-first); leakage check — no feature computed from the target.
+- 表格：n、p、每列缺失率、处理方法点名。偏态目标（|skew| > 1）→ 考虑 log/Box-Cox，声明。
+- 相关矩阵 + VIF 表。**gate**：最大 VIF > 10 → 解读前先删/合并/正则化。每个变量怎么处理的，逐个报告。
+- 类别编码声明（独热/去一）；泄露检查——特征不许用目标算出来。
 
-### 3. Fit with CV-selected regularization
+### 3. CV 选正则化再拟合
 
-- OLS as the reference (when p < n and VIF clean). Ridge when shrinkage suffices; Lasso/elastic-net when selection is the goal.
-- λ path + CV curve plotted; choose λ by 1-SE rule, mark it on the curve. Report CV error (RMSE for regression, deviance/AUC for Logistic).
-- Logistic: class balance stated; if imbalanced, weights or threshold tuned on validation — never accuracy on a 95/5 split as the headline.
+- OLS 做基准（p < n 且 VIF 干净时）。收缩够用选岭；要选择选 Lasso/elastic-net。
+- λ 路径 + CV 曲线画出来；按 1-SE 原则选 λ，在曲线上标出来。报告 CV 误差（回归 RMSE，Logistic 离差/AUC）。
+- Logistic：类别比例声明；不平衡就调权重或在验证集上调阈值——95/5 分布下拿准确率当头条，不允许。
 
-### 4. Diagnose — the gate
+### 4. 诊断——gate
 
-- Linear: residual-vs-fitted (no funnel), QQ (roughly straight), scale-location, leverage/Cook's distance for influential points. Funnel → transform or WLS, stated.
-- Logistic: calibration curve near diagonal, ROC/AUC, confusion matrix at the declared threshold; threshold justified (Youden, cost, or 0.5-by-default-said-loudly).
-- Fails → revise the model (transform, interaction, different family), never ship dirty diagnostics with an apology footnote.
+- 线性：残差-拟合图（无漏斗）、QQ（大致直线）、尺度-位置图、杠杆/Cook 距离找强影响点。有漏斗 → 变换或 WLS，声明。
+- Logistic：校准曲线贴对角线、ROC/AUC、声明阈值下的混淆矩阵；阈值要理由（Youden、成本、或 0.5 默认但大声说出来）。
+- 没过 → 回去改模型（变换、交互项、换分布族），脏诊断加道歉脚注不许发货。
 
-### 5. Report and stress-test
+### 5. 报告与压力测试
 
-- Coefficient table: estimate, CI, and (for Lasso) selected set. Interpret magnitude in original units ("+1 unit of X moves y by β ± …").
-- Stability: refit on 80% subsamples or bootstrap; coefficients that flip sign are unstable — say so, don't average them into confidence.
-- Baseline对照: intercept-only (and for classification, majority-class) numbers beside the model's. If the model barely beats the intercept, that's the headline.
+- 系数表：估计、CI，Lasso 附选中集。原始单位解释幅度（“X +1，y 动 β ± …”）。
+- 稳定性：80% 子样本或 bootstrap 重拟合；变号的系数就是不稳定——说出来，不要平均成信心。
+- **基线对照**：旁边摆截距模型（分类再加多数类）的数。模型勉强打赢截距，这就是头条。
 
 ## Never Ship
 
-Self-check before you finish. Each is an automatic block:
+收尾自查，不过即拦：
 
-| Never | Instead |
+| 禁忌 | 替代 |
 | --- | --- |
-| Interpreting with VIF > 10 unhandled | Drop/merge/regularize, per-variable note |
-| Hand-picked λ | CV curve + 1-SE rule, plotted |
-| Stepwise p-values as inference | Lasso selection + honest CIs, or post-selection caveat |
-| OLS on 0/1 targets | Logistic with stated threshold |
-| Accuracy on imbalanced classes | F1/AUC + confusion matrix |
-| No residual/calibration plot | Diagnosis gate passed, plots kept |
-| Standardized-only coefficients | Original units + uncertainty |
+| VIF > 10 不处理就解读 | 删/合并/正则化，逐变量备注 |
+| 手拍 λ | CV 曲线 + 1-SE 原则，画出来 |
+| 逐步 p 值当推断 | Lasso 选择 + 诚实 CI，或事后选择警示 |
+| 0/1 目标用 OLS | Logistic + 声明阈值 |
+| 不平衡类别报准确率 | F1/AUC + 混淆矩阵 |
+| 无残差/校准图 | 诊断 gate 过了，图留档 |
+| 只报标准化系数 | 原始单位 + 不确定度 |
 
 ## Output
 
-The deliverable is the fit **plus its checks**, in this order:
+交付物是拟合**加检查**，顺序如下：
 
-- **Data + EDA** — n, p, missingness, VIF table, transforms.
-- **Fit** — model, λ curve with mark, CV error, tool used.
-- **Diagnosis** — residual/QQ or calibration/ROC verdict.
-- **Coefficients** — table with CIs, plain-unit interpretation.
-- **Stability + limits** — subsample flips, baseline gap, valid scope.
+- **数据 + EDA**——n、p、缺失、VIF 表、变换。
+- **拟合**——模型、带标记的 λ 曲线、CV 误差、所用工具。
+- **诊断**——残差/QQ 或校准/ROC 结论。
+- **系数**——带 CI 的表、原始单位解释。
+- **稳定性 + 局限**——子样本翻转、基线差距、适用范围。
 
-Don't pad this into a report. The tables are the deliverable.
+不要写成报告。表格就是交付物。
 
 ## Tone
 
-Opinionated and brief. When the honest answer is "X₃ and X₅ are the same variable wearing different units — drop one before reading any p-value", give it. When the model ties the intercept, report the tie instead of decorating R².
+立场鲜明、废话少。当正确答案是“X₃ 和 X₅ 是穿不同单位的同一个变量——读 p 值前先删一个”就直说。模型打平截距时，报这个平局，不要拿 R² 装饰。

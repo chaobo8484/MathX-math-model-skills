@@ -7,65 +7,65 @@ disable-model-invocation: true
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
 
-A production skill, human-invoked. It does ONE thing: turn a pile of papers into a traceable gap table the paper's introduction can cite. It does not map theorem dependencies (that's `arxiv-literature-synthesis`) and it does not write the paper (that's `paper-outline`).
+人触发的生产型技能，只做一件事：把一堆论文变成引言能引用的可追溯缺口表。不画定理依赖（那是 `arxiv-literature-synthesis`），不写论文（那是 `paper-outline`）。
 
 ## Operating Posture
 
-You run this when the user types it, once per paper. The product is a gap table where every row traces to a verified identifier (DOI/arXiv ID). The bar is citability: a reviewer following any row lands on a real paper saying what the table claims. An uncited gap is an opinion with a table border.
+用户键入时运行，一篇论文一次。产品是缺口表，每行追溯到验证过的标识符（DOI/arXiv ID）。标准是可引用：审稿人顺任何一行摸过去，落到真实论文，且论文说的和表格写的一致。无引用的缺口是有表格边框的意见。
 
-Two failure modes, and the first is worse:
+两种失败模式，第一种更糟：
 
-1. **Fabricated bibliography.** Plausible titles, wrong years, nonexistent papers. Verify every identifier against a real index before it enters the table — no identifier, no row.
-2. **Summary pile with no gap.** Ten paper summaries ending in "more research is needed". A review that doesn't name the specific missing piece (method × scenario × evidence) produced reading notes, not a gap.
+1. **编造参考文献。** 像真的标题、错的年份、不存在的论文。每条标识符进表前对真实索引验过——无标识符，无行。
+2. **无缺口的综述堆。** 十篇摘要结尾“有待进一步研究”。点不出具体缺失（方法 × 场景 × 证据）的综述产出的是读书笔记，不是缺口。
 
-Never deliver the table without verified identifiers and a named gap. No gap, no review.
+无验证标识符和点名的缺口不交表。无缺口，无综述。
 
 ## Hard Rules
 
-1. **Search strings recorded.** Database + query + date + hit count per string. "Searched widely" is not a method section.
-2. **Inclusion/exclusion criteria before screening.** Years, venues, languages, method families — decided first, applied consistently, counts reported (retrieved → screened → kept).
-3. **One row per paper, four columns minimum.** Method family, scenario/data, key result with numbers, limitation in the authors' or your tested terms. Rows without numbers are placeholders, labeled as such.
-4. **Gap stated as method × scenario × evidence.** "No study applies [method] to [scenario] with [evidence level]" — three slots filled, each traceable to table rows. A gap none of the rows supports is invented.
-5. **Theme, don't enumerate.** Group into 2–4 method families or schools; within-family comparison (what beats what, under which conditions) is the synthesis. Chronological listing without comparison is a catalog.
+1. **检索式记录。** 数据库 + 检索式 + 日期 + 命中数，每串都有。“广泛检索过”不是方法节。
+2. **筛选标准先于筛选。** 年限、 venue、语言、方法族——先定，一致执行，数量报告（检出 → 筛选 → 保留）。
+3. **一文一行，四列起步。** 方法族、场景/数据、带数字的关键结果、作者原话或你验过的局限。无数字的行是占位，贴标签。
+4. **缺口写成方法 × 场景 × 证据。**“尚无研究把 [方法] 用于 [场景] 并给出 [证据等级]”——三槽填满，槽槽追溯到表行。行支撑不了的缺口是编的。
+5. **主题归纳，不枚举。** 归 2–4 个方法族或学派；族内比较（谁在哪赢、哪全败——全败区住着缺口）是综合。无比较的编年罗列是目录。
 
 ## The Production Sequence
 
-### 1. Scope with the user first
+### 1. 先和用户定范围
 
-- Research question in one sentence, venue type (MCM/国赛/journal), target gap use (introduction motivation vs method choice justification).
-- **Gate**: can't state the question in one sentence → ask, don't retrieve. Retrieval without a question drifts by construction.
+- 研究问题一句话，venue 类型（MCM/国赛/journal），缺口用途（引言动机还是方法选择依据）。
+- **gate**：问题一句话说不清 → 问，不检索。无问题的检索注定漂移。
 
-### 2. Retrieve, screen, keep
+### 2. 检索、筛选、保留
 
-- Run the recorded strings; screen titles → abstracts → full text with counts at each funnel stage.
-- Deduplicate (preprint/published = one row). Verify identifiers. Note the stop rule (saturation: new strings add no kept papers).
+- 跑记录过的检索式；标题 → 摘要 → 全文逐级筛，每级计数。
+- 去重（预印/发表算一行）。标识符验证。停止规则备注（饱和：新检索式无新增保留）。
 
-### 3. Tabulate and theme
+### 3. 制表归纳
 
-- Fill the four-column rows; group into families; write the within-family verdicts (which method wins where, and where all fail — the failure zone is where the gap lives).
+- 填四列表；归族；写族内 verdict（谁在哪赢、哪全败——全败区住着缺口）。
 
-### 4. Name the gap — the gate
+### 4. 点名缺口——gate
 
-- **Gate**: gap sentence with all three slots traceable to rows. Then the paper's entry point: which section of `paper-outline` this gap feeds, in one line.
+- **gate**：缺口句三槽追溯到行。再写论文入口：这个缺口 feed 大纲哪节，一句话。
 
 ## Never Ship
 
-| Never | Instead |
+| 禁忌 | 替代 |
 | --- | --- |
-| Unverified references | Identifier checked per row |
-| Unrecorded search | Strings + counts + dates |
-| Post-hoc criteria | Criteria before screening |
-| Numberless rows undisclosed | Labeled as placeholders |
-| "More research needed" | method × scenario × evidence gap |
-| Catalog without comparison | Family verdicts + failure zone |
+| 引用没验证 | 逐行标识符查过 |
+| 检索没记录 | 检索式 + 数量 + 日期 |
+| 标准事后定 | 筛选前定标准 |
+| 无数字行不声明 | 贴占位标签 |
+| “有待进一步研究” | 方法 × 场景 × 证据缺口 |
+| 无比较的目录 | 族 verdict + 全败区 |
 
 ## Output
 
-- **Gap table** — rows with identifiers, grouped by family.
-- **Funnel numbers** — retrieved → screened → kept.
-- **Gap sentence** — traceable, feeding the outline.
-- **Handoff** — which outline section it serves.
+- **缺口表**——带标识符的行，按族分组。
+- **漏斗数**——检出 → 筛选 → 保留。
+- **缺口句**——可追溯，喂大纲。
+- **移交**——服务大纲哪节。
 
 ## Tone
 
-Opinionated and brief. When the honest answer is "the gap you want is already filled by these two papers — here's the real adjacent gap", say so. When the funnel kept 3 papers, report 3 instead of padding with near-misses.
+立场鲜明、废话少。当正确答案是“你要的缺口这两篇已经填了——真正的相邻缺口在这”就直说。漏斗只剩 3 篇就报 3 篇，不要拿擦边凑数。

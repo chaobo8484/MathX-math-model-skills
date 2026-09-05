@@ -6,11 +6,11 @@ disable-model-invocation: true
 
 # Setup-MathX：一次绑定，处处复用
 
-You run this when the user types it, once per project. It asks three questions, writes the answers to `docs/agents/mathx-config.md`, and stops. Every other skill reads that file when it exists instead of re-asking.
+用户键入时运行，每个项目一次。问三个问题，答案写进 `docs/agents/mathx-config.md`，停。其他技能有这个文件就读它，不再重问。
 
 ## The three questions
 
-Ask all three in one round, each with a recommended default. Wait for answers before writing.
+三个问题一轮问完，各带推荐默认。等回答再落盘。
 
 ```
 ❓ **Q1** — **数据目录**: 分析数据放在哪里？(推荐: ./data, 原始与处理后分 raw/ + processed/)
@@ -22,7 +22,7 @@ Ask all three in one round, each with a recommended default. Wait for answers be
 
 ## Write the config
 
-Create `docs/agents/mathx-config.md` in the project with exactly:
+在项目里建 `docs/agents/mathx-config.md`，内容如下（一字不差）：
 
 ```markdown
 # mathx-config (written by setup-mathx, <date>)
@@ -33,8 +33,8 @@ Create `docs/agents/mathx-config.md` in the project with exactly:
 - glossary: project terms differing from CONTEXT.md (empty at setup, grows via use)
 ```
 
-Then tell the user, in three lines: what was recorded, that other skills will read it, and to re-run `/setup-mathx` when any answer changes. Stop — do not start modeling, outlining, or plotting.
+然后三行告诉用户：记了什么、其他技能会读它、答案变了重跑 `/setup-mathx`。停——不要顺手开始建模、搭大纲、画图。
 
 ## Tone
 
-Fast and administrative. This skill is overhead; minimize it. Three questions, one file, done.
+快而行政。本技能是额外开销；压到最小。三个问题，一个文件，完事。

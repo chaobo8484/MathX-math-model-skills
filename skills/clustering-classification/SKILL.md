@@ -1,95 +1,95 @@
 ---
 name: clustering-classification
-description: "KMeans/DBSCAN 分群与随机森林分类。Use when 为样本发现群组或打标签时；解释变量关系用 regression-family。"
+description: "KMeans/DBSCAN 分群与随机森林分类。为样本发现群组或打标签时用；解释变量关系见 regression-family。"
 ---
 # 聚类与分类
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
 
-A construction skill. It does ONE thing: find groups in unlabeled data or label new samples, with the cluster count and the error both earned. It does not do explanatory modeling (that's `regression-family`), nonlinear black-box fitting (that's `bp-neural-network`), or plotting for its own sake (that's `statistical-plot`).
+只做一件事的构造型技能：无标签数据找群组，或给新样本打标签，聚类数和误差都挣回来。不做解释性建模（那是 `regression-family`）、不做非线性黑箱（那是 `bp-neural-network`）、不为画图而画图（那是 `statistical-plot`）。
 
 ## Operating Posture
 
-You are a modeling specialist producing groups a skeptic can re-derive and labels with a measured error. The bar is two-sided: unsupervised side needs a justified K and stability; supervised side needs stratified-CV error with a confusion matrix. Write it so both checks pass the first time.
+你是建模专员，产出的群组怀疑者能复算出来，标签自带测过的误差。标准是双面的：无监督一侧 K 要有依据加稳定性；有监督一侧要分层 CV 误差加混淆矩阵。写的时候就按两边检查一次通过来写。
 
-Two failure modes, and the first is worse:
+两种失败模式，第一种更糟：
 
-1. **Clustering noise and naming it.** K picked by wish, unscaled features letting one variable dictate distance, DBSCAN eps unexamined. A KMeans partition always exists — that doesn't mean groups exist.
-2. **Classification accuracy without context** — no stratification on imbalance, test leakage via preprocessing, single split, confusion matrix missing. Accuracy on a 90/10 split is a majority-class celebration.
+1. **给噪声聚类还命名。** K 许愿、特征不标准化让一个变量统治距离、DBSCAN eps 没看过。KMeans 的划分永远存在——不等于群组存在。
+2. **无上下文的分类准确率**——不平衡不分层、预处理泄露测试集、单次划分、没有混淆矩阵。90/10 分布下的准确率是多数类的庆功会。
 
-Never present groups without stability evidence, or labels without a confusion matrix. No evidence, no claim.
+没有稳定性证据就不给群组，没有混淆矩阵就不给标签。无证据，无断言。
 
 ## Hard Rules
 
-1. **Standardize before any distance.** Z-score (or robust scaling with outliers) from training data. Euclidean distance on raw mixed units is dominated by the largest scale — that choice must never be accidental.
-2. **K is chosen by elbow + silhouette, both shown.** One of them alone is weak; a K with silhouette < ~0.25 is a warning to report, not a result to decorate.
-3. **DBSCAN eps from the k-distance plot, minPts stated.** eps hand-picked with no plot is guessing; report the noise fraction as a finding.
-4. **Supervised side: stratified k-fold CV + confusion matrix, always.** Imbalance stated up front; accuracy never the lone headline on skewed classes.
-5. **No leakage through preprocessing.** Scaling, encoding, feature selection fit on train folds only. Leakage check is part of the deliverable, stated in one line.
+1. **算距离前先标准化。** Z 分数（有异常值用稳健标准化），基于训练数据。原始混合单位上的欧氏距离被最大量纲统治——这个选择绝不能是意外。
+2. **K 用肘部 + 轮廓系数定，两个都展示。** 只用一个是弱证据；轮廓 < ~0.25 的 K 是警告，要报告，不是拿来装饰的结果。
+3. **DBSCAN 的 eps 来自 k 距离图，minPts 写明。** 无图手拍 eps 是猜；噪声比例当发现报告。
+4. **有监督一侧：分层 k 折 CV + 混淆矩阵，每次都有。** 不平衡先声明；偏态类别下准确率永不当唯一头条。
+5. **预处理不许泄露。** 标准化、编码、特征选择只在训练折上拟合。泄露检查是交付物的一部分，一句话写明。
 
 ## The Build Sequence
 
-### 1. Which side — and should this skill fire at all?
+### 1. 先分边，再判断该不该触发
 
-| Situation | Decision |
+| 情形 | 判定 |
 | --- | --- |
-| No labels, looking for groups (tens to tens of thousands of samples) | **Clustering side. Continue.** |
-| Labels exist, need to tag new samples | **Classification side. Continue.** |
-| Need to explain drivers or select variables | Stop. Use `regression-family`. |
-| Complex nonlinearity, prediction only | Stop. Use `bp-neural-network` if it beats a forest baseline. |
+| 无标签、找群组（几十到几万样本） | **聚类一侧，继续** |
+| 有标签、给新样本打标签 | **分类一侧，继续** |
+| 要解释驱动或选变量 | 停。用 `regression-family` |
+| 复杂非线性、只要预测 | 停。用 `bp-neural-network`（先打赢森林基线） |
 
-If both sides apply (cluster then classify), run them as two stages with separate checks — never let the clustering's K leak into the classifier's CV unexamined.
+两边都沾（先聚类后分类），就当两阶段跑、检查分开——聚类的 K 不许未经审查漏进分类器的 CV。
 
-### 2. Preprocess once, loudly
+### 2. 预处理，一次说清
 
-- Missing values, categoricals, obvious outliers: handling named per column.
-- Scale: z-score default; robust (median/IQR) with heavy tails. State which and why.
-- Dimensionality: if p is large relative to n, PCA/t-SNE/UMAP for visualization only — cluster in a stated space, and say which.
+- 缺失、类别、明显异常值：每列处理方法点名。
+- 标准化：默认 z 分数；重尾用稳健（中位数/IQR）。用哪种、为什么，写明。
+- 降维：p 相对 n 太大时，PCA/t-SNE/UMAP 只用于可视化——聚类在哪个空间做，声明。
 
-### 3a. Clustering: earn the K
+### 3a. 聚类：把 K 挣回来
 
-- KMeans over a K range: elbow plot (inertia) + silhouette per K, both shown. DBSCAN alternative: k-distance plot for eps, minPts ≈ dimensionality-aware default, stated.
-- **Gate**: chosen K has both elbow support and the best-or-tied silhouette; silhouette < ~0.25 → report "weak structure" instead of naming personas for the clusters.
-- Stability: bootstrap/jitter reruns, adjusted Rand index across runs. Unstable partitions get reported as unstable, not averaged into false confidence.
-- Profile each cluster (centroids, sizes, distinguishing features) — a cluster you can't describe in one sentence is a shard, not a segment.
+- KMeans 扫 K 值区间：肘部图（惯量）+ 每个 K 的轮廓系数，两个都展示。DBSCAN 方案：k 距离图定 eps，minPts 按维度给默认值并声明。
+- **gate**：选中的 K 肘部支撑 + 轮廓最好或并列；轮廓 < ~0.25 → 报“结构弱”，不要给群组起人设。
+- 稳定性：bootstrap/抖动重跑，轮次间 adjusted Rand 指数。不稳定的划分报不稳定，不要平均成虚假信心。
+- 每个群组画像（质心、规模、区分特征）——一句话说不清的群是碎片，不是细分。
 
-### 3b. Classification: earn the error
+### 3b. 分类：把误差挣回来
 
-- Model: random forest default (stated n_estimators, max_depth); compare against Logistic baseline from `regression-family`.
-- Stratified k-fold CV (k = 5 typical), seed reported. Metrics per fold: accuracy + F1 (macro) + AUC where binary; confusion matrix aggregated.
-- Imbalance: class weights or resampling stated; headline is F1/AUC, never bare accuracy on skew.
-- **Gate**: CV error beats both majority-class and Logistic baselines, or the deliverable is "forest adds nothing" with numbers.
+- 模型：默认随机森林（n_estimators、max_depth 写明）；对 `regression-family` 的 Logistic 基线。
+- 分层 k 折 CV（常用 k = 5），种子报告。每折指标：准确率 + F1（macro）+ 二分类再加 AUC；混淆矩阵汇总。
+- 不平衡：类别权重或重采样声明；头条是 F1/AUC，偏态下绝不是光秃秃的准确率。
+- **gate**：CV 误差打赢多数类和 Logistic 两个基线，否则交付物就是“森林零增益”连同数字。
 
-### 4. Visualize the verdict (not the decoration)
+### 4. 可视化的是结论，不是装饰
 
-- 2-D embedding (PCA/UMAP) colored by cluster/label for the report — via `statistical-plot` conventions (N in caption).
-- Confusion matrix heatmap for classification. These two figures are required; additional plots only if they change a decision.
+- 报告用二维嵌入（PCA/UMAP）按群组/标签着色——按 `statistical-plot` 规范（题注带 N）。
+- 分类配混淆矩阵热力图。这两张图是必交；别的图只有改变决策才加。
 
 ## Never Ship
 
-Self-check before you finish. Each is an automatic block:
+收尾自查，不过即拦：
 
-| Never | Instead |
+| 禁忌 | 替代 |
 | --- | --- |
-| Distance on unscaled mixed units | Standardized, method stated |
-| K by wish or single metric | Elbow + silhouette, both shown |
-| Silhouette < ~0.25 presented as segments | Weak-structure verdict |
-| Bare accuracy on skewed classes | F1/AUC + confusion matrix |
-| Preprocessing fit on full data | Train-fold-only, leakage line stated |
-| Cluster names without profiles | One-sentence per-cluster description |
-| Unstable partition averaged quiet | ARI stability reported |
+| 混合单位不标准化算距离 | 标准化，方法声明 |
+| K 许愿或单指标 | 肘部 + 轮廓，两个都展示 |
+| 轮廓 < ~0.25 还当细分讲 | 报结构弱 |
+| 偏态类别报光准确率 | F1/AUC + 混淆矩阵 |
+| 全量数据拟合预处理 | 只在训练折上，泄露检查写明 |
+| 群组命名无画像 | 每群一句话描述 |
+| 不稳定划分悄悄平均 | ARI 稳定性报告 |
 
 ## Output
 
-The deliverable is the grouping or the classifier **plus its evidence**, in this order:
+交付物是分组或分类器**加证据**，顺序如下：
 
-- **Data + preprocess** — n, p, handling, scaling, seed.
-- **Clustering**: K-range plots, chosen K with both metrics, stability ARI, cluster profiles. **Classification**: CV scheme, per-fold metrics, confusion matrix, baseline gaps.
-- **Figures** — embedding plot + confusion heatmap with N.
-- **Limits** — weak structure or unstable signs, valid scope, what would change the grouping.
+- **数据 + 预处理**——n、p、处理、标准化、种子。
+- **聚类**：K 区间图、双指标选中的 K、稳定性 ARI、群组画像。**分类**：CV 方案、每折指标、混淆矩阵、基线差距。
+- **图**——嵌入图 + 混淆热力图，带 N。
+- **局限**——结构弱或不稳定迹象、适用范围、什么会改变分组。
 
-Don't pad this into a report. The evidence is the deliverable.
+不要写成报告。证据就是交付物。
 
 ## Tone
 
-Opinionated and brief. When the honest answer is "silhouette 0.18 — there are no real groups here, only partitions", give it. When the forest ties Logistic, ship Logistic and say the forest earned nothing.
+立场鲜明、废话少。当正确答案是“轮廓 0.18——这里没有真群组，只有划分”就直说。森林打平 Logistic 时，交付 Logistic 并写明森林零增益。

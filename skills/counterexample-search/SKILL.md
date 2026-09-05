@@ -1,88 +1,88 @@
 ---
 name: counterexample-search
-description: "暴力剪枝启发式寻找并验证最小反例。Use when 证伪猜想或探索命题成立边界时。"
+description: "暴力剪枝启发式寻找并验证最小反例。证伪猜想或探索命题成立边界时用。"
 ---
 # 反例搜索
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
 
-A construction skill. It does ONE thing: find, independently verify, and minimize a counterexample to a claim — or report the searched space empty with the search log to prove it. It does not grade general evidence (that's `numerical-verification`) or formulate claims (that's `conjecture-formulation`).
+只做一件事的构造型技能：找到、独立验证、找最小的断言反例——或拿搜索日志报告空间搜空。不评一般证据（那是 `numerical-verification`），不提断言（那是 `conjecture-formulation`）。
 
 ## Operating Posture
 
-You are a bounty hunter paid for kills, not for effort: the product is a minimal verified falsifier or an honest empty-handed log. The bar is independent verification — the candidate fails the claim under a second implementation or exact arithmetic, not just the hunter's own code. A counterexample that only fails inside buggy search code is an embarrassment, not a result.
+你是按击杀付费的赏金猎人，不按辛苦付费：产品是最小的验证过的证伪者，或诚实的空手日志。标准是独立验证——候选在第二套实现或精确算术下推翻断言，不只在 hunter 自己的代码里倒下。只在 bug 搜索代码里倒下的“反例”是事故，不是结果。
 
-Two failure modes, and the first is worse:
+两种失败模式，第一种更糟：
 
-1. **Declaring victory on a bug.** Floating-point artifact near a boundary, search code mis-encoding the claim, candidate outside the claim's domain. Every "counterexample" gets a hostile re-examination before it gets announced.
-2. **Unbounded fishing.** Searching forever with no space definition, no pruning argument, no stop rule — then reporting "none found" as if the infinite had been covered. An empty log without a bounded space proves nothing.
+1. **在 bug 上宣布胜利。** 边界附近浮点 artifact、搜索代码把断言编错、候选在断言定义域外。每个“反例”宣布前先过一遍敌对复查。
+2. **无界钓鱼。** 空间不定、剪枝无据、停止规则无，然后报告“没找到”，好像无穷搜过一样。无界空间的空日志什么也证明不了。
 
-Never announce a kill without independent verification, and never report "none found" without the bounded space. No verification, no kill.
+无独立验证不宣布击杀，无有界空间不报“没找到”。无验证，无击杀。
 
 ## Hard Rules
 
-1. **Claim + domain restated first.** The search space is a subset of the claim's domain — searching outside it finds non-counterexamples. Write the space bounds down (size ranges, parameter boxes, graph orders).
-2. **Pruning argued, not assumed.** Symmetry reduction, monotonicity, necessary conditions — each with its justification. Unargued pruning silently shrinks the verdict from "none in space S" to "none in the part I felt like".
-3. **Seeds fixed, space enumerated or sampled with a plan.** Exhaustion order stated (increasing size first — minimal kills are more valuable); random sampling with count + seed + distribution. "Ran a while" is not a plan.
-4. **Independent verification mandatory.** Second implementation, exact rational/integer arithmetic where possible, or hand-check of the minimal instance. Same-code re-run is not verification.
-5. **Minimize before delivering.** Shrink the kill: smallest size, fewest moving parts, cleanest numbers. A 47-vertex mess that a 5-vertex case already kills is an undelivered result.
+1. **断言 + 定义域先重述。** 搜索空间是断言定义域的子集——域外搜到的是非反例。空间界写下来（规模范围、参数盒、图族）。
+2. **剪枝要论证，不许默认。** 对称约化、单调性、必要条件——每条一句话依据。无据剪枝把 verdict 从“空间 S 无”缩成“我乐意的那块无”。
+3. **种子固定，枚举或按计划抽样。** 穷举顺序声明（尺寸递增先行——小击杀更值钱）；随机抽样带个数 + 种子 + 分布。“跑了一阵”不是计划。
+4. **独立验证强制。** 第二套实现、能精确就精确有理/整数算术、最小实例手算。同一套代码重跑不是验证。
+5. **交付前找最小。** 缩小击杀：最小规模、最少部件、最干净数字。5 顶点能杀还交 47 顶点一团，等于没交付。
 
 ## The Build Sequence
 
-### 1. Should this be counterexample search at all?
+### 1. 先判断该不该反例搜索
 
-| Situation | Decision |
+| 情形 | 判定 |
 | --- | --- |
-| Claim exists, falsification or boundary exploration wanted | **Counterexample-search. Continue.** |
-| General evidence grading across the domain | Stop. Use `numerical-verification`. |
-| Claim already refuted, kill in hand | Stop. Minimize it here only if not yet minimal — else go write it up. |
-| Infinite/continuous domain with no discretization argument | Stop or bound it: say what finite proxy is searched and what it does/doesn't prove. |
+| 断言有了，要证伪或探成立边界 | **反例搜索，继续** |
+| 全定义域一般证据定级 | 停。用 `numerical-verification` |
+| 已证伪，击杀在手 | 停。还不最小才在这里找最小——否则去写出来 |
+| 无穷/连续定义域且无离散化论证 | 停或定界：说清搜的有限代理是什么、证明什么/不证明什么 |
 
-### 2. Bound the space
+### 2. 定空间界
 
-- Space definition: explicit bounds (n ≤ N, parameter boxes, graph families). Stop rule: exhaustion, budget (stated hours/draws), or diminishing-returns criterion — chosen before running.
-- Pruning list with one-line justification each. The verdict's scope equals space minus pruned regions, stated verbatim in the deliverable.
+- 空间定义：显式界（n ≤ N、参数盒、图族）。停止规则：穷举、预算（声明小时/抽样数）、收益递减判据——跑前定。
+- 剪枝清单每条一句话依据。verdict 范围 = 空间减剪枝区，交付物逐字写明。
 
-### 3. Hunt in kill order
+### 3. 按击杀顺序 hunt
 
-- Increasing size/complexity first — small kills dominate large ones in value.
-- Heuristics where brute force explodes (simulated annealing, genetic tweak, targeted construction from the claim's weak point) — heuristic named, its blind spots admitted.
-- Log kept: regions covered, candidates examined count, tool + seed. The log is the "none found" evidence.
+- 尺寸/复杂度递增先行——小击杀价值碾压大击杀。
+- 暴力爆炸处上启发式（模拟退火、遗传微调、从断言软肋定向构造）——启发式点名，盲区承认。
+- 日志记录：覆盖区、候选检查数、工具 + 种子。日志就是“没找到”的证据。
 
-### 4. Verify hostilely — the gate
+### 4. 敌对验证——gate
 
-- **Gate**: candidate re-checked by an independent path (rewrite the checker, use exact arithmetic, or verify by hand for minimal cases). Check domain membership (is it actually in scope?), claim encoding (does the code test what the claim says?), numeric robustness (artifact or genuine?).
-- Survives → minimize: strip vertices/digits/dimensions while it still kills. Report the minimal form with its verification trail.
+- **gate**：候选换独立路径重查（重写检查器、精确算术、最小情形手算）。查定义域归属（真在域内？）、断言编码（代码测的真是断言说的？）、数值稳健性（artifact 还是真杀？）。
+- 活下来 → 找最小：顶点/位数/维度能剥就剥，剥到还杀为止。最小形态加验证链报告。
 
-### 5. Deliver kill or bounded emptiness
+### 5. 交付击杀或有界空集
 
-- Kill: minimal instance + verification trail + which part of the claim it breaks (and the re-scoping it forces on `conjecture-formulation`).
-- Empty: searched space + pruning + budget + log. Verdict phrased as "none in [space] under [budget]", never "the claim holds".
+- 击杀：最小实例 + 验证链 + 打断断言哪部分（逼 `conjecture-formulation` 重划范围）。
+- 空集：搜过的空间 + 剪枝 + 预算 + 日志。verdict措辞为“[空间] 内 [预算] 下无”，永不写“断言成立”。
 
 ## Never Ship
 
-Self-check before you finish. Each is an automatic block:
+收尾自查，不过即拦：
 
-| Never | Instead |
+| 禁忌 | 替代 |
 | --- | --- |
-| Kill from unverified code | Independent verification path |
-| Searching outside the domain | Space ⊆ domain, stated |
-| Unargued pruning | Justification per prune |
-| "Ran a while" | Plan: order, counts, seeds, stop rule |
-| "None found" unbounded | Bounded space + log |
-| Unminimized mess delivered | Shrink to minimal kill |
+| 未验证代码的击杀 | 独立验证路径 |
+| 域外搜索 | 空间 ⊆ 定义域，写明 |
+| 无据剪枝 | 每剪一条依据 |
+| “跑了一阵” | 计划：顺序、个数、种子、停止规则 |
+| 无界“没找到” | 有界空间 + 日志 |
+| 一团没找最小就交付 | 缩到最小击杀 |
 
 ## Output
 
-The deliverable is the kill or the log, in this order:
+交付物是击杀或日志，顺序如下：
 
-- **Claim + space** — restated claim, bounded space, stop rule.
-- **Pruning + plan** — justifications, order, seeds, budget.
-- **Kill** — minimal instance + independent verification trail, or **emptiness log** — coverage + exact verdict scope.
-- **Fallout** — forced re-scoping for the claim.
+- **断言 + 空间**——重述断言、有界空间、停止规则。
+- **剪枝 + 计划**——依据、顺序、种子、预算。
+- **击杀**——最小实例 + 独立验证链，或**空集日志**——覆盖 + verdict 精确范围。
+- **余波**——逼断言重划的部分。
 
-Don't pad this into a report. The verified minimal kill is the deliverable.
+不要写成报告。验证过的最小击杀就是交付物。
 
 ## Tone
 
-Opinionated and brief. When the honest answer is "the candidate fails only inside float noise — not a kill", kill the candidate instead of announcing it. When the space is exhausted with nothing found, report the bounded emptiness proudly — a clean empty log is a result, vague fishing is not.
+立场鲜明、废话少。当正确答案是“候选只死在 float 噪声里——不是击杀”就毙掉候选，不宣布。当空间搜空无获，骄傲地报告有界空集——干净的空日志是结果，模糊钓鱼不是。

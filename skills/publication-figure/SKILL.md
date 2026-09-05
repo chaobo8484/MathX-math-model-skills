@@ -1,98 +1,98 @@
 ---
 name: publication-figure
-description: "按单双栏尺寸 DPI 字体嵌入组装多子图投稿图。Use when 定稿前需合规矢量插图时。"
+description: "按单双栏尺寸 DPI 字体嵌入组装多子图投稿图。定稿前需合规矢量插图时用。"
 ---
 # 期刊级版式与投稿图
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
 
-A construction skill. It does ONE thing: assemble panel figures that pass a journal's production checks on the first submission — size, DPI, fonts, colorblind safety, LaTeX inline. It does not draw the panels (that's `scientific-plotting` / `statistical-plot` / `diagram-schematic`) and it does not write captions' statistics (that's `figure-table-generation`).
+只做一件事的构造型技能：拼出一次过期刊生产检查的多子图——尺寸、DPI、字体、色盲安全、LaTeX 内联。不画子图（那是 `scientific-plotting` / `statistical-plot` / `diagram-schematic`），不写题注里的统计（那是 `figure-table-generation`）。
 
 ## Operating Posture
 
-You are the last checkpoint before submission: the person production never emails back about. The bar is the spec sheet — every number below verified against the target venue, panel labels consistent, fonts embedded, grayscale-safe. Write it so the compliance table passes the first time.
+你是投稿前最后一道关：生产部门永远不会为你的图发邮件回来。标准是 spec 表——下面每个数字都对目标 venue 验过，子图标签一致，字体嵌入，灰度安全。写的时候就按合规表一次通过来写。
 
-Two failure modes, and the first is worse:
+两种失败模式，第一种更糟：
 
-1. **Assembling without the spec.** Guessed column widths, unknown DPI requirement, Type 3 bitmap fonts from an old toolchain. A figure bounced by production costs a revision cycle for a preventable line in a checklist.
-2. **Panels that disagree with each other** — mixed fonts, mixed palettes, (a)(b) labels in three styles, caption citing values the panels don't show. A composite of individually fine panels can still read as three papers stapled together.
+1. **无 spec 拼版。** 栏宽靠猜、DPI 要求不知道、旧工具链的 Type 3 点阵字体。生产打回一张图，烧掉一个修改周期，就为 checklist 里本可避免的一行。
+2. **子图互相打架**——字体混、色板混，(a)(b) 标签三种风格，题注引用的值子图里没有。单个都好的子图拼在一起，能读出三篇订在一起的论文。
 
-Never deliver a composite without the venue spec pinned and the compliance table filled. No spec, no assembly.
+venue spec 不钉、合规表不填，就不交付拼版。无 spec，无拼版。
 
 ## Hard Rules
 
-1. **Pin the venue spec first.** Column widths (single ≈ 89mm / double ≈ 183mm typical — verify per venue), max height, DPI minima (line art 600–1200, halftone 300), accepted formats (PDF/EPS/TIFF), font rules. One spec block, quoted, before any layout.
-2. **Panels drawn to size, not scaled into size.** Each panel generated at its final physical dimensions with final point sizes — scaling a 6-inch figure into 89mm shrinks 9pt type to 6pt. Check type at final size, always.
-3. **Fonts embedded, Type 3 forbidden.** PDF with embedded subset fonts; LaTeX text via the document's own toolchain where inline math appears. Verify with pdffonts, don't assume.
-4. **One visual system across panels.** Same palette, same font family/sizes, panel labels (a), (b), (c) in one style and position logic. A composite reads as one figure or it fails.
-5. **LaTeX inline test.** \includegraphics at column width, compiles clean, no overfull boxes, caption numbers match in-text citations. The figure isn't done until the document builds with it.
+1. **先钉 venue spec。** 栏宽（单栏约 89mm / 双栏约 183mm 常见——按 venue 核实）、最大高度、DPI 下限（线图 600–1200，半调 300）、接收格式（PDF/EPS/TIFF）、字体规则。一块 spec 原文引用，排版前先行。
+2. **子图按终版尺寸画，不缩进去。** 每子图按最终物理尺寸加终版字号生成——6 英寸图缩进 89mm，9pt 字变 6pt。字号终版尺寸验收，每次都。
+3. **字体嵌入，Type 3 禁止。** PDF 嵌入子集字体；内联数学走文档自带工具链。pdffonts 验证，不要假设。
+4. **跨子图一套视觉系统。** 同色板、同字体族/字号，子图标签 (a)(b)(c) 同风格同位置逻辑。拼版读成一张图才算过，否则失败。
+5. **LaTeX 内联测试。** \includegraphics 按栏宽引入，编译干净，无 overfull，题注编号对正文引用。文档带着它编过，图才算完。
 
 ## The Build Sequence
 
-### 1. Should this be journal assembly at all?
+### 1. 先判断该不该期刊拼版
 
-| Situation | Decision |
+| 情形 | 判定 |
 | --- | --- |
-| Final multi-panel vector figure for submission | **Publication-figure. Continue.** |
-| Single panel still being iterated | Stop. Finish it in `scientific-plotting` / `statistical-plot` first. |
-| Exploration or slides | Stop. Use `plotly-interactive` or plain exports — no spec needed. |
-| Schematic/flow content | Panels from `diagram-schematic`, assembled here. |
+| 投稿用终稿多子图矢量图 | **期刊拼版，继续** |
+| 单子图还在迭代 | 停。先在 `scientific-plotting` / `statistical-plot` 收尾 |
+| 探索或幻灯 | 停。用 `plotly-interactive` 或普通导出——无 spec 也行 |
+| 示意/流程内容 | 子图出自 `diagram-schematic`，在这里拼 |
 
-### 2. Pin spec, plan layout
+### 2. 钉 spec，规划版式
 
-- Spec block: widths, heights, DPI, formats, font rules, color policy (charges for color? then grayscale-safe is mandatory, not nice).
-- Layout sketch: panel order follows the argument order in text; each panel earns its place (cut any panel the text never cites — uncited panels get flagged by reviewers).
-- Caption draft started now, not after: numbers the panels must show get listed, so step 4 is verification, not discovery.
+- spec 块：宽、高、DPI、格式、字体规则、彩色政策（彩色收费？那灰度安全是强制，不是加分）。
+- 版式草图：子图顺序跟正文论证顺序；每子图挣位置——正文没引用的子图删（审稿人专盯这个）。
+- 题注现在就起草，不收尾再写：子图必须展示的数字列出来，第 4 步就是验证，不是发现。
 
-### 3. Build panels to size
+### 3. 按尺寸建子图
 
-- Regenerate (not screenshot, not upscale) each panel at final dimensions via its drawing skill, same style block.
-- Panel labels (a)(b)(c): same font/size/weight, same corner logic, never covering data. Shared axis labels where panels share scales — repeated labels are clutter, mismatched scales are deception (state either).
+- 每个子图按终版尺寸重生成（不截图、不放大），经画图技能，同样式块。
+- 子图标签 (a)(b)(c)：同字体/字号/字重，同角落逻辑，不压数据。同尺度子图共享轴标签——重复标签是杂物，尺度不一是欺骗（选一种就声明）。
 
-### 4. Compliance — the gate
+### 4. 合规——gate
 
-Fill the table, every row verified, not assumed:
+填表，每行实测，不是假设：
 
-| Check | Requirement (per spec) | Actual |
+| 检查 | 要求（按 spec） | 实际 |
 | --- | --- | --- |
-| Width / height | ≤ spec | measured |
-| DPI (raster parts) | ≥ spec | measured |
-| Fonts | embedded, no Type 3 | pdffonts output |
-| Grayscale print | readable | printed/converted check |
-| Colorblind safety | palette passes | simulator check |
-| LaTeX build | clean compile | log checked |
-| Caption ↔ panels | every cited value visible | cross-read |
-| Caption ↔ text | citations match numbers | grep checked |
+| 宽 / 高 | ≤ spec | 实测 |
+| DPI（光栅部分） | ≥ spec | 实测 |
+| 字体 | 嵌入，无 Type 3 | pdffonts 输出 |
+| 灰度打印 | 可读 | 打印/转换检查 |
+| 色盲安全 | 色板通过 | 模拟器检查 |
+| LaTeX 编译 | 干净 | 日志检查 |
+| 题注 ↔ 子图 | 引用的值都看得见 | 对读 |
+| 题注 ↔ 正文 | 引用对编号 | grep 检查 |
 
-Any row failing → fix and re-verify that row. A composite with one unchecked row is a draft.
+一行没过 → 修那行、重验那行。一行没验的拼版是草稿。
 
 ## Never Ship
 
-Self-check before you finish. Each is an automatic block:
+收尾自查，不过即拦：
 
-| Never | Instead |
+| 禁忌 | 替代 |
 | --- | --- |
-| Guessed venue spec | Pinned spec block, quoted |
-| Scale-to-fit assembly | Panels generated at final size |
-| Type 3 / unembedded fonts | pdffonts-verified embedding |
-| Mixed panel styles | One palette, one font system, one label style |
-| Uncited panels | Cut or cite |
-| Caption written after | Drafted at layout, verified at gate |
+| venue spec 靠猜 | spec 块原文引用 |
+| 缩放拼装 | 子图按终版尺寸生成 |
+| Type 3 / 未嵌入字体 | pdffonts 验证嵌入 |
+| 子图风格混 | 一套色板、一套字体、一种标签 |
+| 无引用子图 | 删或引用 |
+| 题注后补 | 排版时起草，gate 处验证 |
 
 ## Output
 
-The deliverable is the composite **plus its compliance**, in this order:
+交付物是拼版**加合规**，顺序如下：
 
-- **Figure files** — final format(s) per spec, named per figure number.
-- **Spec block** — venue requirements quoted.
-- **Compliance table** — filled, measured values.
-- **Panel sources** — regenerating scripts per panel.
-- **Caption** — cross-checked against panels and text.
+- **图文件**——按 spec 的终版格式，按图号命名。
+- **spec 块**——venue 要求原文引用。
+- **合规表**——填满，实测值。
+- **子图来源**——每子图重生成脚本。
+- **题注**——对子图和正文交叉检查过。
 
-Don't pad this into a report. The passing composite is the deliverable.
+不要写成报告。过审的拼版就是交付物。
 
 ## Tone
 
-Opinionated and brief. When the honest answer is "panel (c) is never cited — cut it, the figure gets stronger", cut it. When the venue wants 600 DPI line art and the export is 150, re-export instead of hoping production won't notice.
+立场鲜明、废话少。当正确答案是“子图 (c) 从没被引用——删了，图更强”就删。venue 要 600 DPI 线图而导出只有 150，重导出，不要赌生产看不出来。
 
 模板文件见 assets/templates/publication-figure.tex（随本技能分发；改动前先核对 venue spec）。

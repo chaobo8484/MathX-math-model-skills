@@ -1,102 +1,102 @@
 ---
 name: gray-prediction
-description: "GM(1,1) 外推近指数趋势的极小样本。Use when 只有 4-10 个观测点时；30 点以上等间隔序列用 time-series-arima。"
+description: "GM(1,1) 外推近指数趋势的极小样本。只有 4-10 个观测点时用；30 点以上等间隔序列见 time-series-arima。"
 ---
 # 灰色预测 GM(1,1)
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
 
-A construction skill. It does ONE thing: extrapolate a tiny sample with a near-exponential trend, with the admissibility checks stated up front. It does not do general time-series modeling (that's `time-series-arima`), regression, or long-horizon forecasting.
+只做一件事的构造型技能：4–10 个点的近指数趋势做短期外推，准入检查先摆出来。不做一般时间序列建模（那是 `time-series-arima`）、不做回归、不做长周期预测。
 
 ## Operating Posture
 
-You are a modeling specialist squeezing a short-horizon forecast out of 4–10 points where nothing else has enough data to fit. The bar is honesty about fragility: every forecast ships with its grade (good / barely / refuse). Write it so the grade is computed, not felt.
+你是建模专员，别的方法都没数据可拟合时，从 4–10 个点里挤出短期预测。标准只有一个：对脆弱性诚实——每个预测自带等级（好 / 勉强 / 拒绝）。等级是算出来的，不是感觉出来的。
 
-Two failure modes, and the first is worse:
+两种失败模式，第一种更糟：
 
-1. **Forecasting what GM(1,1) cannot see.** Oscillating, saturated, or shock-driven data forced through an exponential mold. A forecast from data that fails the level-ratio check is fiction with decimals.
-2. **Reporting the point forecast without the grade** — no level-ratio coverage, no posterior error ratio, no horizon cap, extrapolation 10 steps out from 5 points.
+1. **预测 GM(1,1) 看不见的东西。** 振荡、饱和、冲击驱动的数据硬套指数模具。级比检验没过的数据算出的预测，是带小数点的虚构。
+2. **只报点预测，不报等级**——无级比覆盖率、无后验差比、无步长上限，5 个点外推 10 步。
 
-Never present a number without its accuracy grade and horizon. No grade, no forecast.
+没有精度等级和步长就不给数字。无等级，无预测。
 
 ## Hard Rules
 
-1. **n = 4–10, non-negative, roughly exponential.** Fewer than 4 can't estimate; more than ~10 with structure deserves `time-series-arima`; negatives or zeros need a stated shift first.
-2. **Level-ratio gate before fitting.** σ(k) = x(k−1)/x(k) must fall in (e^(−2/(n+1)), e^(2/(n+1))) for all k. Coverage below ~80% → transform (translation) or stop.
-3. **Fit on AGO, check on IAGO.** One accumulation, least squares for a/b, whiten the response, then subtract back. Residuals are computed on the original scale, never the accumulated one.
-4. **Grade every fit.** Posterior error ratio C = S₂/S₁ and small-error probability P = P(|ε − mean ε| < 0.6745·S₁). C < 0.35 and P > 0.95 is good; C > 0.65 or P < 0.70 is refuse.
-5. **Horizon cap: at most 2–3 steps past n.** GM(1,1) error compounds exponentially — forecasting 10 steps from 6 points is not modeling, it's drawing a line.
+1. **n = 4–10，非负，近似指数。** 少于 4 个估不出；10 个以上且有结构该去 `time-series-arima`；负数或零先做声明过的平移。
+2. **先过级比 gate 再拟合。** σ(k) = x(k−1)/x(k) 对所有 k 落在 (e^(−2/(n+1)), e^(2/(n+1))) 内。覆盖率低于约 80% → 做变换（平移）或停。
+3. **累加拟合，还原检验。** 一次累加、最小二乘估 a/b、白化求解再做减还原。残差在原始尺度上算，永远不在累加尺度上算。
+4. **每个拟合都定级。** 后验差比 C = S₂/S₁，小误差概率 P = P(|ε − mean ε| < 0.6745·S₁)。C < 0.35 且 P > 0.95 为好；C > 0.65 或 P < 0.70 为拒绝。
+5. **步长上限：n 之后最多 2–3 步。** GM(1,1) 误差指数累积——6 个点预测 10 步不是建模，是画直线。
 
 ## The Build Sequence
 
-### 1. Should this be GM(1,1) at all?
+### 1. 先判断该不该用 GM(1,1)
 
-| Situation | Decision |
+| 情形 | 判定 |
 | --- | --- |
-| 4–10 points, monotone-ish, near-exponential, short horizon | **GM(1,1). Continue.** |
-| 30+ evenly spaced points with trend/seasonality | Stop. Use `time-series-arima`. |
-| Oscillating / saturated / shock-driven data | Stop. Say so; no transform rescues a wrong mold. |
-| Need explanatory variables (y ~ X) | Stop. That's regression, not grey prediction. |
+| 4–10 个点、单调近似、近指数、短期 | **用 GM(1,1)，继续** |
+| 30+ 等间隔点，有趋势或季节性 | 停。用 `time-series-arima` |
+| 振荡 / 饱和 / 冲击驱动的数据 | 停。直说；错模具靠变换救不回来 |
+| 需要解释变量（y ~ X） | 停。那是回归，不是灰色预测 |
 
-If the request fails this gate, say so plainly — "too few points for ARIMA" does not automatically mean "GM(1,1) works".
+gate 没过就直说——“点太少跑不了 ARIMA”不等于“GM(1,1) 就行”。
 
-### 2. Data check and level-ratio gate
+### 2. 数据检查与级比 gate
 
-- Confirm: n in [4, 10], all x(k) ≥ 0 (or state the shift c and work with x + c), equal spacing.
-- Compute σ(k) = x(k−1)/x(k) for k = 2..n and the admissible interval (e^(−2/(n+1)), e^(2/(n+1))).
-- **Gate**: every σ(k) inside → proceed. One or two outside → try a translation (add constant c, re-check, report c). Systematic failure → refuse GM(1,1) and say why; suggest collecting data or switching methods.
+- 确认：n 在 [4, 10]，所有 x(k) ≥ 0（否则声明平移量 c，对 x + c 建模），等间隔。
+- 算 σ(k) = x(k−1)/x(k)（k = 2..n）与容许区间 (e^(−2/(n+1)), e^(2/(n+1)))。
+- **gate**：全落区间内 → 继续；一两个在外 → 试平移（加常数 c，重检，报告 c）；系统性失败 → 拒绝 GM(1,1) 并说明原因，建议补数据或换方法。
 
-### 3. Fit (compute in code, show the steps)
+### 3. 拟合（用代码算，步骤展示）
 
-1. AGO: X⁽¹⁾(k) = Σᵢ₌₁ᵏ x⁽⁰⁾(i).
-2. Background values: z⁽¹⁾(k) = 0.5·(X⁽¹⁾(k) + X⁽¹⁾(k−1)).
-3. Least squares on x⁽⁰⁾(k) + a·z⁽¹⁾(k) = b → development coefficient a, grey input b.
-4. Whitened response: dx⁽¹⁾/dt + a·x⁽¹⁾ = b → X̂⁽¹⁾(k+1) = (x⁽⁰⁾(1) − b/a)·e^(−a·k) + b/a.
-5. IAGO back: x̂⁽⁰⁾(k+1) = X̂⁽¹⁾(k+1) − X̂⁽¹⁾(k).
+1. 累加：X⁽¹⁾(k) = Σᵢ₌₁ᵏ x⁽⁰⁾(i)。
+2. 背景值：z⁽¹⁾(k) = 0.5·(X⁽¹⁾(k) + X⁽¹⁾(k−1))。
+3. 最小二乘解 x⁽⁰⁾(k) + a·z⁽¹⁾(k) = b → 发展系数 a，灰色作用量 b。
+4. 白化解：dx⁽¹⁾/dt + a·x⁽¹⁾ = b → X̂⁽¹⁾(k+1) = (x⁽⁰⁾(1) − b/a)·e^(−a·k) + b/a。
+5. 还原：x̂⁽⁰⁾(k+1) = X̂⁽¹⁾(k+1) − X̂⁽¹⁾(k)。
 
-**Sanity gate**: −a should be small (|a| typically < 0.3 for usable forecasts; a ≤ −1 means the mold is broken). Report a and b with the fit, always.
+**合理性 gate**：−a 应该小（可用预测通常 |a| < 0.3；a ≤ −1 说明模具崩了）。a 和 b 每次都和拟合一起报告。
 
-### 4. Grade the fit
+### 4. 拟合定级
 
-- Residuals ε(k) = x⁽⁰⁾(k) − x̂⁽⁰⁾(k) on the original scale; mean relative error.
-- S₁ = std of data, S₂ = std of residuals; C = S₂/S₁; P = P(|ε − mean ε| < 0.6745·S₁).
+- 残差 ε(k) = x⁽⁰⁾(k) − x̂⁽⁰⁾(k) 在原始尺度上算；平均相对误差。
+- S₁ = 数据标准差，S₂ = 残差标准差；C = S₂/S₁；P = P(|ε − mean ε| < 0.6745·S₁)。
 
-| Grade | C | P | Verdict |
+| 等级 | C | P | 结论 |
 | --- | --- | --- | --- |
-| Good | < 0.35 | > 0.95 | Forecast up to 2–3 steps, with interval |
-| Barely | 0.35–0.65 | 0.70–0.95 | Forecast 1 step, label it fragile |
-| Refuse | > 0.65 | < 0.70 | No forecast. Report the failure. |
+| 好 | < 0.35 | > 0.95 | 可预测 2–3 步，带区间 |
+| 勉强 | 0.35–0.65 | 0.70–0.95 | 只预测 1 步，标脆弱 |
+| 拒绝 | > 0.65 | < 0.70 | 不预测。报告失败 |
 
-### 5. Forecast inside the cap and cross-check
+### 5. 上限内预测与交叉验证
 
-- Forecast at most n+1 .. n+3, each with the grade attached. Never a bare point.
-- **Baseline对照**: naive carry-forward and linear trend on the same horizon. If GM(1,1) can't beat linear trend on fitted error, the exponential mold adds nothing — say so.
+- 最多预测 n+1 到 n+3，每个带等级。不给光秃秃的点。
+- **基线对照**：同视野的朴素顺延和线性趋势。拟合误差打不过线性趋势，指数模具就是零贡献——说出来。
 
 ## Never Ship
 
-Self-check before you finish. Each is an automatic block:
+收尾自查，不过即拦：
 
-| Never | Instead |
+| 禁忌 | 替代 |
 | --- | --- |
-| Fitting without the level-ratio check | σ(k) coverage reported first |
-| Residuals on the accumulated scale | IAGO back, original scale only |
-| Forecast without C and P | Grade table, every time |
-| Horizon far past n | ≤ 2–3 steps, capped |
-| −a out of range, unmentioned | Report a; refuse if mold broken |
-| Bare point forecast | Number + grade + horizon + baseline |
+| 不查级比直接拟合 | 先报告 σ(k) 覆盖率 |
+| 累加尺度上算残差 | 还原回原始尺度 |
+| 预测不带 C 和 P | 每次附等级表 |
+| 步长远超 n | ≤ 2–3 步封顶 |
+| −a 越界不提 | 报告 a；模具崩了就拒绝 |
+| 光秃秃的点预测 | 数字 + 等级 + 步长 + 基线 |
 
 ## Output
 
-The deliverable is the forecast **plus its grade**, in this order:
+交付物是预测**加等级**，顺序如下：
 
-- **Data + gate** — n, values, σ(k) coverage, any shift c.
-- **Fit** — a, b, fitted values, mean relative error.
-- **Grade** — C, P, verdict (good / barely / refuse).
-- **Forecast** — ≤ 3 steps, each labeled with the grade.
-- **Limits** — baseline comparison, what would invalidate the forecast.
+- **数据 + gate**——n、数值、σ(k) 覆盖率、平移量 c。
+- **拟合**——a、b、拟合值、平均相对误差。
+- **等级**——C、P、结论（好 / 勉强 / 拒绝）。
+- **预测**——≤ 3 步，每步贴等级。
+- **局限**——基线对比、什么会推翻预测。
 
-Don't pad this into a report. The table is the deliverable.
+不要写成报告。表格就是交付物。
 
 ## Tone
 
-Opinionated and brief. When the honest answer is "your data fails the level-ratio gate — GM(1,1) refuses", give it; that refusal is the reason this skill exists. When the grade is "barely", label the forecast fragile instead of rounding it into confidence.
+立场鲜明、废话少。当正确答案是“你的数据没过级比 gate——GM(1,1) 拒绝”就直说；拒绝对了就是这个技能的价值。等级是“勉强”时，把脆弱标出来，不要四舍五入出信心。

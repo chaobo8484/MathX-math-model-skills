@@ -7,7 +7,13 @@ Read this file before running any skill in this repo. It holds the vocabulary ev
 - Time variables: `t` in days unless stated; rates per day. State any deviation in the deliverable.
 - Matrices: uppercase (`X` data, `W` weights); vectors lowercase; estimates wear hats (`x̂`).
 - Random seeds: integer, recorded in code. "Seed 42" with no code location is not a seed.
-- Language: skill bodies are bilingual (English structure, Chinese detail). Paper prose follows the venue; code comments in English.
+- Language policy（结构英文 + 表述中文 + 句内不混写）:
+  1. 结构词固定英文：Operating Posture / Hard Rules / Build Sequence / Never Ship / Output / Tone，以及 gate / probe / baseline / verdict 等执行关键词，不许自创新词或翻成中文。
+  2. 解释、例子、表格内容用中文；方法名、工具名、阈值符号保持英文原文。
+  3. 一句话一种语言；代码与反引号内术语算英文，不计入混写。
+  4. description 纯中文 + 英文方法关键词，不出现 Use when / Trigger phrases 等英文残留。
+  5. 禁止中英同义复读：同一意思只讲一遍，以中文为准。
+- Paper prose follows the venue; code comments in English.
 
 ## Venues and templates
 

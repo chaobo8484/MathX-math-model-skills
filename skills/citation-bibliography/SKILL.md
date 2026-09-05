@@ -7,62 +7,62 @@ disable-model-invocation: true
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
 
-A production skill, human-invoked. It does ONE thing: make in-text citations and the reference list agree with each other and with the venue style — every key cited, every entry real. It does not find the literature (that's `literature-review` / `arxiv-literature-synthesis`).
+人触发的生产型技能，只做一件事：文内引用和文末列表双向对上，且合 venue 体例——引的键个个有出处，条目个个真实。不找文献（那是 `literature-review` / `arxiv-literature-synthesis`）。
 
 ## Operating Posture
 
-You run this when the user types it, on a near-final draft. The product is a two-way-clean bibliography: every \cite resolves, every .bib entry is cited (or knowingly kept), every entry has the fields the style needs. The bar is the compiler plus a manual pass — BibTeX warnings at zero and a human eye on author names.
+用户键入时运行，稿件近终稿。产品是双向干净的参考文献：每个 \cite 落地，每个 .bib 条目被引（或知情保留），每条有所需字段。标准是编译器加人工：BibTeX 警告归零，作者名过人眼。
 
-Two failure modes, and the first is worse:
+两种失败模式，第一种更糟：
 
-1. **Ghost references.** Entries that don't exist, wrong years, mangled author names (especially transliterated CJK names), DOIs pointing nowhere. One ghost reference tells a reviewer the whole list is untrustworthy.
-2. **One-way integrity.** In-text keys with no .bib entry ([?] in the PDF) or .bib entries nothing cites. Either direction broken means the document wasn't built clean — see `latex-typesetting`'s log gate.
+1. **幽灵引用。** 不存在的条目、错年份、写烂的作者名（音译中文名重灾区）、无处可去的 DOI。一条幽灵引用告诉审稿人整单不可信。
+2. **单向完整。** 文内键无 .bib 条目（PDF 挂 [?]），或 .bib 条目无人引用。任一方向断了，文档就没干净构建过——看 `latex-typesetting` 的日志 gate。
 
-Never deliver a bibliography without the two-way check. Unresolved keys, unfinished job.
+双向检查不过不交参考文献。键悬空，活没干完。
 
 ## Hard Rules
 
-1. **Style fixed first.** GB/T 7714 / APA / venue .bst / biblatex style — one style, recorded. Mixed styles (numbered in text, author-year in list) fail instantly.
-2. **Two-way check, both directions counted.** Text→list: every citation key resolves (grep the log for undefined). List→text: every entry cited at least once, or explicitly marked as further-reading with user approval.
-3. **Author names verified by eye.** Initials vs full names consistent per style; CJK transliterations checked against the source; "et al." thresholds per style (know yours). Automated tools mangle names routinely — this line item is manual by design.
-4. **Required fields per entry type.** Article: journal, volume, pages, year, DOI. Book: publisher, address/year. Online: access date + URL. Missing-field warnings driven to zero, not scrolled past.
-5. **Keys stable and meaningful.** AuthorYearTitle-word keys; no auto-generated gibberish that collides after edits. Key changes get a full-document recheck.
+1. **体例先定。** GB/T 7714 / APA / venue .bst / biblatex 体例——一种，记录。混合体例（文内数字、文末著者年）当场失败。
+2. **双向检查，两边计数。** 文→表：每个引用键落地（日志 grep undefined）。表→文：每条至少被引一次，或经用户同意标延伸阅读。
+3. **作者名过人眼。** 缩写全称按体例统一；中文音译对来源核；“et al.” 阈值按体例（查你的）。自动化工具 routinely 写烂人名——这行人工是设计，不是偷懒。
+4. **必填字段按条目类型。** Article：刊、卷、页、年、DOI。Book：出版社、地址/年。Online：访问日期 + URL。缺字段警告清零，不滑过去。
+5. **键稳定可读。** 作者年标题词键；编辑后碰撞的自动乱码键不要。改键全篇重查。
 
 ## The Production Sequence
 
-### 1. Fix style and inventory
+### 1. 定体例盘库存
 
-- Style recorded; .bib file(s) located; entry count + key list extracted. Duplicates merged (same DOI twice under different keys is the classic).
+- 体例记录；.bib 文件定位；条目数 + 键清单摘出。重复合并（同 DOI 两键是经典）。
 
-### 2. Clean entries
+### 2. 洗条目
 
-- Normalize fields per type; verify DOIs resolve (spot-check, especially pasted ones); author names eye-checked. BibTeX/biber warnings to zero.
+- 按类型规范字段；DOI 可解析性抽查（尤其粘贴来的）；作者名过眼。BibTeX/biber 警告归零。
 
-### 3. Two-way integrity — the gate
+### 3. 双向完整——gate
 
-- **Gate**: full compile; undefined-citation warnings zero; uncited entries zero-or-approved; a final grep for [?] in the PDF. Any failure → fix, recompile, re-grep.
+- **gate**：全编译；未定义引用警告零；未被引条目零或已批准；PDF 终检 grep [?]。不过 → 修、重编、重 grep。
 
-### 4. Hand off
+### 4. 移交
 
-- Back to `latex-typesetting` for the final build proof; forward to `polish-proofread` (citation prose around the keys still needs reading) and `reproducibility-checklist`.
+- 回 `latex-typesetting` 出终版构建证明；去 `polish-proofread`（键周围引用文字还要读）；去 `reproducibility-checklist`。
 
 ## Never Ship
 
-| Never | Instead |
+| 禁忌 | 替代 |
 | --- | --- |
-| Mixed citation styles | One style, recorded first |
-| [?] in the PDF | Two-way check to zero |
-| Unverified author names | Manual eye pass |
-| Missing-field warnings ignored | Driven to zero per type |
-| Gibberish keys | Meaningful stable keys |
+| 体例混合 | 一种体例，先记录 |
+| PDF 挂 [?] | 双向检查清零 |
+| 作者名没验 | 人工过眼 |
+| 缺字段警告无视 | 按类型清零 |
+| 乱码键 | 可读稳定键 |
 
 ## Output
 
-- **Clean .bib** — deduplicated, field-complete.
-- **Integrity report** — both directions counted, warnings zero, evidence shown.
-- **Style record** — style name + any venue deviations.
-- **Handoff** — rebuild + polish + gate chain.
+- **干净 .bib**——去重，字段齐。
+- **完整性报告**——两边计数，警告零，证据展示。
+- **体例记录**——体例名 + venue 偏差。
+- **移交**——重构建 + 润色 + 门禁链。
 
 ## Tone
 
-Opinionated and brief. When the honest answer is "three of these DOIs don't resolve — they're ghosts until proven otherwise", say so. When the author list has four transliteration variants of one name, unify and note it.
+立场鲜明、废话少。当正确答案是“这三个 DOI 不 resolv——证伪前都是幽灵”就直说。一人名四种音译并存时，统一并备注。

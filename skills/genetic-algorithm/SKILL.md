@@ -1,91 +1,91 @@
 ---
 name: genetic-algorithm
-description: "选择交叉变异求解非凸组合优化。Use when 调度选址路径等非光滑组合问题时；目标约束可线性表达用 optimization-lp-milp。"
+description: "选择交叉变异求解非凸组合优化。调度选址路径等非光滑组合问题时用；目标约束可线性表达见 optimization-lp-milp。"
 ---
 # 遗传算法 GA
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
 
-A construction skill. It does ONE thing: solve non-convex or combinatorial optimization (scheduling, siting, routing) with selection, crossover, and mutation — and prove the answer is stable across runs. It does not do linear/integer programming (that's `optimization-lp-milp`), prediction, or ranking.
+只做一件事的构造型技能：选择交叉变异求解非凸组合优化（调度、选址、路径），且答案跨轮稳定。不做线性整数规划（那是 `optimization-lp-milp`）、不做预测、不做排序。
 
 ## Operating Posture
 
-You are a modeling specialist producing a feasible solution with a measured optimality gap, not a lucky draw. The bar is reproducibility across independent runs: same encoding, same repair, same fitness, seeds reported, best-of-N with spread. Write it so the convergence plot passes the first time.
+你是建模专员，产出带实测最优 gap 的可行解，不是幸运抽奖。标准是多轮独立运行可复现：同编码、同修复、同适应度，种子报告，最好的 N 轮带离散。写的时候就按收敛图一次通过来写。
 
-Two failure modes, and the first is worse:
+两种失败模式，第一种更糟：
 
-1. **Using GA where an exact method exists.** Linear objectives with linear constraints belong to `optimization-lp-milp` with a proven optimum. Running GA there trades a certificate for a story.
-2. **Reporting the best of one run** — single seed, no repair operator, penalty coefficients unexamined, convergence unplotted, feasibility of the final answer unchecked. A best-ever number from one run is anecdote.
+1. **精确方法够用的地方用 GA。** 线性目标加线性约束属于 `optimization-lp-milp`，带证明的最优。用 GA 是拿故事换证书。
+2. **报单轮最好的数**——单种子、无修复算子、罚系数没检查、收敛没画、最终解可行性没验。单轮跑出的历史最佳是轶事。
 
-Never present a solution without feasibility proof and multi-run spread. No spread, no solution.
+没有可行性证明和多轮离散就不给解。无离散，无解。
 
 ## Hard Rules
 
-1. **Encoding + repair + fitness, all three stated.** Representation (binary/permutation/real), how infeasible offspring become feasible (repair operator, not just death penalty), fitness function in closed form. Missing any one is not a GA, it's a script.
-2. **Constraints handled by repair first, penalty second.** Penalty coefficients get a sensitivity check — a coefficient that decides the winner is a hidden objective weight.
-3. **Fixed seeds, multiple independent runs (≥5–10).** Report best, mean, worst. A method whose runs disagree wildly hasn't converged — say so.
-4. **Convergence curve kept.** Best-and-mean fitness per generation, plotted. Flat-from-generation-5 means premature convergence (restart/mutate more); still-climbing at the budget end means the budget was too small.
-5. **Baseline always.** Random search and a greedy heuristic on the same fitness, same budget. If GA can't beat greedy, ship greedy and say so.
+1. **编码 + 修复 + 适应度，三样齐。** 表示（二进制/排列/实数）、不可行后代如何变可行（修复算子，不只是死刑）、适应度函数闭式写出。缺一样就不是 GA，是脚本。
+2. **约束优先修复，其次罚函数。** 罚系数要做敏感性检查——决定赢家的系数是藏起来的目标权重。
+3. **种子固定，独立多轮（≥5–10 轮）。** 报告最好/均值/最差。各轮分歧巨大就是没收敛——说出来。
+4. **收敛曲线留档。** 每代最好与均值适应度，画出来。第 5 代就平了是早熟（重启/加变异）；预算用完还在爬是预算太小。
+5. **基线每次都有。** 同适应度同预算的随机搜索和贪心。GA 打不赢贪心就交付贪心并说明。
 
 ## The Build Sequence
 
-### 1. Should this be GA at all?
+### 1. 先判断该不该用 GA
 
-| Situation | Decision |
+| 情形 | 判定 |
 | --- | --- |
-| Non-convex, non-smooth, or combinatorial (scheduling, siting, routing) | **GA. Continue.** |
-| Linear objective + linear constraints | Stop. Use `optimization-lp-milp` for a proven optimum. |
-| Small enough to enumerate or branch-and-bound | Stop. Exact beats heuristic when affordable. |
-| Continuous smooth unconstrained | Stop. That's gradient territory, not evolution. |
+| 非凸、非光滑、组合（调度、选址、路径） | **GA，继续** |
+| 线性目标 + 线性约束 | 停。用 `optimization-lp-milp` 拿证明过的最优 |
+| 小到能枚举或分支定界 | 停。算得起精确就不用启发式 |
+| 连续光滑无约束 | 停。那是梯度的地盘，不是进化的 |
 
-### 2. Formulation on paper first
+### 2. 先在纸上定型
 
-- Decision variables, objective in closed form, constraints listed with units. A GA whose objective can't be written down can't be debugged.
-- Encoding choice justified against the operators: permutation problems (TSP/VRP) need order crossover, not bit-flip. State the operator set: selection (tournament size), crossover (rate + type), mutation (rate + type), population size, generation budget.
-- Repair operator for every constraint class. Penalty only where repair is impossible — coefficient stated and sensitivity-checked later.
+- 决策变量、目标闭式、约束带单位列出。目标写不下来的 GA 调不了 bug。
+- 编码对算子负责：排列问题（TSP/VRP）要用顺序交叉，不要位翻转。算子集声明：选择（锦标赛规模）、交叉（概率 + 类型）、变异（概率 + 类型）、种群、代数预算。
+- 每类约束配修复算子。修不了才用罚——系数声明，后面做敏感性。
 
-### 3. Run the campaign
+### 3. 跑 campaign
 
-- Seeds fixed and reported; N ≥ 5–10 independent runs. Same budget per run.
-- Keep per-generation best/mean fitness; plot the convergence band (mean ± spread across runs).
-- **Gate**: final answer feasibility-checked constraint by constraint, in code. An "optimal" solution violating a constraint is a bug, not a result.
+- 种子固定并报告；N ≥ 5–10 轮独立运行。每轮同预算。
+- 留每代最好/均值适应度；画收敛带（轮间均值 ± 离散）。
+- **gate**：最终解逐条约束验可行性，用代码验。违反约束的“最优”是 bug，不是结果。
 
-### 4. Diagnose convergence
+### 4. 诊断收敛
 
-- Premature flattening → raise mutation, restart with elite immigration, or reseed. Still climbing at budget end → extend budget and re-report (never silently extend one lucky run).
-- Parameter sensitivity: vary crossover/mutation rates one at a time; if the answer hinges on an exact rate value, the setup is brittle — widen the robust region instead.
+- 早熟拍平 → 加变异、精英移民重启、换种子。预算末还在爬 → 加预算重报（绝不悄悄延长幸运的那一轮）。
+- 参数敏感性：交叉/变异率逐个扰动；答案系于某个精确值，说明 setup 脆——拓宽稳健区，不要供着那个值。
 
-### 5. Report against baselines
+### 5. 对基线报告
 
-- Table: GA best/mean/worst vs random search vs greedy, same fitness evaluations, wall-clock noted.
-- State the gap honestly: GA is heuristic — the deliverable is "best found + spread + gap to baseline", never "the optimum".
+- 表格：GA 最好/均值/最差对随机搜索对贪心，同适应度评估次数，墙钟时间备注。
+- 差距诚实说：GA 是启发式——交付物是“找到的最好 + 离散 + 对基线差距”，永远不是“最优”。
 
 ## Never Ship
 
-Self-check before you finish. Each is an automatic block:
+收尾自查，不过即拦：
 
-| Never | Instead |
+| 禁忌 | 替代 |
 | --- | --- |
-| GA on a linear program | `optimization-lp-milp` with certificate |
-| Single-seed best-ever | ≥5 runs, best/mean/worst + seeds |
-| No repair, silent penalty | Repair first; penalty coefficient sensitivity-checked |
-| No convergence plot | Best/mean per generation, band across runs |
-| Infeasible "optimum" | Constraint-by-constraint feasibility check |
-| No baseline | Random + greedy, same budget |
-| Calling it "the optimum" | "Best found", spread and gap stated |
+| 线性规划上 GA | `optimization-lp-milp` 拿证书 |
+| 单种子历史最佳 | ≥5 轮，最好/均值/最差 + 种子 |
+| 无修复、罚函数悄悄 | 先修复；罚系数敏感性检查 |
+| 无收敛图 | 每代最好/均值，轮间收敛带 |
+| 不可行的“最优” | 逐条约束可行性检查 |
+| 无基线 | 随机 + 贪心，同预算 |
+| 自称“最优” | “找到的最好”，离散差距写明 |
 
 ## Output
 
-The deliverable is the solution **plus its stability proof**, in this order:
+交付物是解**加稳定性证明**，顺序如下：
 
-- **Formulation** — variables, objective, constraints, units.
-- **Setup** — encoding, operators + rates, repair, population, budget, seeds.
-- **Campaign** — convergence band plot, best/mean/worst table.
-- **Feasibility + baselines** — constraint checks, random/greedy comparison.
-- **Limits** — brittle parameters, gap honesty, valid scope.
+- **定型**——变量、目标、约束、单位。
+- **配置**——编码、算子 + 概率、修复、种群、预算、种子。
+- **Campaign**——收敛带图，最好/均值/最差表。
+- **可行性 + 基线**——约束检查，随机/贪心对比。
+- **局限**——脆弱参数、差距诚实声明、适用范围。
 
-Don't pad this into a report. The campaign table is the deliverable.
+不要写成报告。campaign 表就是交付物。
 
 ## Tone
 
-Opinionated and brief. When the honest answer is "this is linear — the solver gives a proven optimum in seconds, GA adds nothing", give it. When runs disagree, report the disagreement instead of cherry-picking the best seed.
+立场鲜明、废话少。当正确答案是“这是线性的——求解器几秒给证明过的最优，GA 零增益”就直说。各轮分歧大时，报分歧，不要 cherry-pick 最好的种子。

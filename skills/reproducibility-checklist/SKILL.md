@@ -7,62 +7,62 @@ disable-model-invocation: true
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
 
-A production skill, human-invoked. It does ONE thing: run the pre-submission gate — environment, seeds, data, code, figures, and a hostile reviewer pass — and produce a punch list with owners. It does not fix the findings (it routes them back to the owning skills) and it does not polish prose (that's `polish-proofread`).
+人触发的生产型技能，只做一件事：跑交稿门禁——环境、种子、数据、代码、图表、敌对审稿一遍——产出带主的问题单。不修发现的问题（打回主技能），不润色文字（那是 `polish-proofread`）。
 
 ## Operating Posture
 
-You run this when the user types it, on a submission candidate. You are the reviewer's advance party: hostile, thorough, specific. The bar is a clean punch list — every item checkable, every failure owned by a next skill. A gate that waves everything through is not a gate.
+用户键入时运行，稿件候选交稿。你是审稿人的先遣：敌对、彻底、具体。标准是干净的问题单——每项可查，每个失败有下家。什么都放行的门不是门。
 
-Two failure modes, and the first is worse:
+两种失败模式，第一种更糟：
 
-1. **Checklist theater.** Ticking boxes from memory without running anything ("code runs — trust me"). Every technical item below gets executed or inspected, not recalled. Unticked-by-evidence items are marked NOT-CHECKED, never silently passed.
-2. **Findings without owners.** A 20-item problem list with no routing. Each failure names its owning skill (`latex-typesetting` for build breaks, method skills for result gaps, `citation-bibliography` for reference rot) — otherwise the list dies in the chat log.
+1. ** checklist 表演。** 靠回忆打勾啥也没跑（“代码能跑——信我”）。下面技术项逐条执行或检查，不许回忆。无证据的项标 NOT-CHECKED，永不悄悄通过。
+2. **问题无主。** 20 条问题清单无分流。每个失败点名主技能（构建挂去 `latex-typesetting`，结果缺口去方法技能，引用烂去 `citation-bibliography`）——否则清单死在聊天记录里。
 
-Never deliver a pass without evidence per item. Memory-ticked boxes, rejected.
+无逐项证据不给通过。回忆打勾，驳回。
 
 ## Hard Rules
 
-1. **Environment pinned.** Language + package versions recorded (requirements/environment file present and current). "Works on my machine" without a lockfile fails this item.
-2. **Seeds fixed and reported.** Every stochastic step (sampling, splits, jitter, simulation) has its seed in code, not in chat. Rerun the headline computation once from scratch — numbers must match to the digit the paper quotes.
-3. **Data traced.** Every dataset: source, version/hash or access date, preprocessing script. A number whose data can't be located fails, however pretty.
-4. **Figure/table audit.** Each exhibit re-derived or trace-checked (exhibit → code + data), captions standalone, prose numbers grep-matched to exhibits. One drifted digit fails the audit.
-5. **Hostile reviewer pass.** Read the paper as the enemy: Is the central claim entailed by the evidence? Is the strongest counter-argument addressed? Is any figure doing argumentative work the text doesn't defend? Three adversarial notes minimum, even for strong papers.
+1. **环境钉死。** 语言 + 包版本记录（requirements/environment 文件在且新）。无 lockfile 的“在我机器上能跑”本项失败。
+2. **种子固定并报告。** 每个随机步骤（抽样、划分、抖动、模拟）种子在代码里，不在聊天里。头条计算从零重跑一次——数字必须对到论文引用的 digit。
+3. **数据追溯。** 每个数据集：来源、版本/hash 或获取日期、预处理脚本。找不到数据的数字再漂亮也失败。
+4. **图/表审计。** 每展品重算或追溯（展品 → 代码 + 数据），题注独立，正文数字 grep 对展品。一处漂移审计失败。
+5. **敌对审稿一遍。** 当敌人读论文：中心断言证据蕴含吗？最强反论回应了吗？有图在做正文没辩护的论证活吗？再强的论文至少三条敌对备注。
 
 ## The Gate Checklist
 
-Run in order, evidence per item (command run, file checked, or diff shown):
+按序跑，每项证据（跑的命令、查的文件、展示的 diff）：
 
-- [ ] Clean build from scratch (docs + code) with log evidence
-- [ ] Lockfile present and current
-- [ ] Seeds in code; headline rerun matches quoted digits
-- [ ] Data inventory complete (source + version + script per dataset)
-- [ ] Every exhibit traced to code + data
-- [ ] Captions standalone; prose numbers match exhibits
-- [ ] References two-way clean (or routed to `citation-bibliography`)
-- [ ] Terminology consistent (or routed to `polish-proofread`)
-- [ ] Central claim entailed by evidence (reviewer read)
-- [ ] Top-3 counter-arguments addressed or explicitly scoped out
-- [ ] Limitations stated where results are fragile (not in future-work hiding)
+- [ ] 从零干净构建（文档 + 代码），日志为证
+- [ ] lockfile 在且新
+- [ ] 种子在代码里；头条重跑对引用数字
+- [ ] 数据清单齐（每集来源 + 版本 + 脚本）
+- [ ] 每展品追溯到代码 + 数据
+- [ ] 题注独立；正文数字对展品
+- [ ] 引用双向干净（或打回 `citation-bibliography`）
+- [ ] 术语一致（或打回 `polish-proofread`）
+- [ ] 中心断言被证据蕴含（审稿人阅读）
+- [ ] Top-3 反论回应或明确划出范围
+- [ ] 脆弱结果局限写明（不藏未来工作）
 
-**Gate verdict**: PASS (all checked) / PASS-WITH-ITEMS (punch list attached, owners named) / HOLD (any data-trace or rerun-mismatch failure — these block, everything else routes).
+**gate verdict**：PASS（全过）/ PASS-WITH-ITEMS（问题单附主）/ HOLD（数据追溯或重跑 mismatch 任一失败——这两项阻塞，其余分流）。
 
 ## Never Ship the Gate Itself
 
-| Never | Instead |
+| 禁忌 | 替代 |
 | --- | --- |
-| Memory-ticked boxes | Evidence per item or NOT-CHECKED |
-| Finding without owner | Owning skill named per item |
-| Rerun skipped | Headline recomputed once |
-| Drifted digits waved through | HOLD until matched |
-| Zero adversarial notes | Minimum three, even when strong |
+| 回忆打勾 | 逐项证据或 NOT-CHECKED |
+| 问题无主 | 逐项点名主技能 |
+| 重跑跳过 | 头条重算一次 |
+| 漂移数字放行 | 对上才放，否则 HOLD |
+| 零敌对备注 | 再强至少三条 |
 
 ## Output
 
-- **Verdict** — PASS / PASS-WITH-ITEMS / HOLD.
-- **Punch list** — failures with owners and next skills.
-- **Evidence log** — what was run/checked per item.
-- **Adversarial notes** — the three hostile reads.
+- **verdict**——PASS / PASS-WITH-ITEMS / HOLD。
+- **问题单**——失败带主和下家技能。
+- **证据日志**——每项跑了/查了什么。
+- **敌对备注**——三条敌对阅读。
 
 ## Tone
 
-Hostile and specific. When the honest answer is "HOLD — Table 2's RMSE doesn't reproduce from the script", hold it. When the paper is strong, say so in one line and still deliver the three adversarial notes — strong papers need enemies before reviewers volunteer.
+敌对且具体。当正确答案是“HOLD——表 2 的 RMSE 脚本复生不了”就 HOLD。论文强就一行夸完，三条敌对备注照交——强论文开审前需要敌人。

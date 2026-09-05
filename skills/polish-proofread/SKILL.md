@@ -7,63 +7,63 @@ disable-model-invocation: true
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
 
-A production skill, human-invoked. It does ONE thing: take a complete draft and return it with unified terminology, tightened sentences, and checkable diffs — without changing any claim. It does not restructure the paper (that's `paper-outline`) and it does not verify results (that's `reproducibility-checklist`).
+人触发的生产型技能，只做一件事：拿完整稿件，返回术语统一、句子收紧、diff 可查的版本——不断言任何改动。不重搭结构（那是 `paper-outline`），不验证结果（那是 `reproducibility-checklist`）。
 
 ## Operating Posture
 
-You run this when the user types it, on a full draft. The product is a diff the author can review line by line, plus a terminology table. The bar is claim-preserving: every number, every cited value, every logical connector survives; only the language changes. A polish that alters a result is not polish, it's unauthorized coauthorship.
+用户键入时运行，稿件齐全。产品是作者能逐行审的 diff 加术语表。标准是不断言：每个数字、每个引用值、每个逻辑连接词都活着；变的只有语言。改了结果的润色不是润色，是未经授权的合著。
 
-Two failure modes, and the first is worse:
+两种失败模式，第一种更糟：
 
-1. **Editing claims while editing sentences.** "Improving" a hedged conclusion into a strong one, rounding numbers in prose, upgrading "suggests" to "proves". Language changes that move scientific meaning need author approval per instance — default to preserving.
-2. **Cosmetic-only pass.** Fixing commas while terminology drifts (three names for one method), tenses flip mid-section, and figure callouts disagree with captions. Surface polish over structural inconsistency is proofreading theater.
+1. **改句子顺手改断言。** 留有余地的结论“优化”成强的，正文数字修约，“suggests”升级成“proves”。移动科学含义的语言改动逐处要作者批准——默认保义。
+2. **表面走一遍。** 逗号修了，术语三名一法，时态节内乱跳，图表 callout 和题注打架。结构性不一致上的表面抛光是审校表演。
 
-Never return edits without the diff and the term table. Unreviewable rewrite, refused.
+无 diff 和术语表不返回修改。不可审的重写，拒绝。
 
 ## Hard Rules
 
-1. **Terminology table first.** Extract every technical term + symbol, unify to one form each, record decisions. Same method under two names (or one name for two methods) gets fixed everywhere before any sentence work.
-2. **Tense/voice discipline per section.** IMRaD conventions: past for what was done, present for what the figures show and what is generally true. Mixed tenses inside a paragraph get normalized, flagged in the diff.
-3. **Sentence surgery, claim-preserving.** Cut filler ("it is well known that", "in order to" → "to"), break 40-word monsters, fix dangling modifiers — and any edit touching numbers, hedges, or logical strength gets a [MEANING-CHECK] flag for the author.
-4. **CJK/English mixed-text rules.** Full-width vs half-width punctuation consistent, spaces around inline English/math, translated terms matched to the table. These are mechanical — sweep them completely, not sampled.
-5. **Figure/table/callout cross-read.** Every "如图3所示" followed by what Fig. 3 actually shows; caption numbers vs in-text numbers vs exhibit files, all three agreeing. Mismatches listed, not silently fixed.
+1. **术语表先行。** 全文技术术语 + 符号抽出，一词一形，决策记录。一法三名（或一名两法）动句子前全篇先统一。
+2. **分节时态语态纪律。** IMRaD 惯例：做过的事过去时，图展示的和公认的真理现在时。段内时态混了就顺手 align，diff 里标记。
+3. **句子动手术，不断言。** 删 filler（“众所周知”、长句拆两半、悬垂修饰），40 词巨婴拆，碰数字、 hedge、逻辑强度的编辑挂 [MEANING-CHECK] 给作者。
+4. **中英混排机械规则。** 全半角标点一致，行内英文/公式两侧空格，译名对术语表。这些是机械活——全扫，不抽查。
+5. **图/表/callout 对读。** 每个“如图 3 所示”后面跟的真是图 3 的东西；题注编号对正文编号对展品文件，三方一致。 mismatch 列出来，不悄悄修。
 
 ## The Production Sequence
 
-### 1. Lock terms and scope
+### 1. 锁术语定范围
 
-- Build the term table from the draft; confirm scope with the user (whole paper vs sections) and the style target (venue guide where one exists).
-- Identify [MEANING-CHECK] candidates early (hedged conclusions, ambiguous comparatives) — these get questions, not edits.
+- 从稿件建术语表；和用户确认范围（全文还是节）与风格目标（有 venue 指南就按它）。
+- [MEANING-CHECK] 候选早筛（留余地的结论、模糊比较）——这些提问，不改。
 
-### 2. Pass 1: structure of language
+### 2. 第一遍：语言的结构
 
-- Terminology unification across the draft; tense/voice per section; paragraph logic connectors (however/therefore/moreover earning their place — a "therefore" without entailment gets flagged, not smoothed).
+- 全文术语统一；分节时态语态；段落逻辑连接（however/therefore/moreover 配位——无蕴含的“therefore”标出来，不抹平）。
 
-### 3. Pass 2: sentences and mechanics
+### 3. 第二遍：句子与机械
 
-- Tightening + mixed-text mechanics + caption/callout cross-read. [MEANING-CHECK] flags attached wherever meaning could shift.
+- 收紧 + 混排机械 + 题注/callout 对读。含义可能漂移处挂 [MEANING-CHECK]。
 
-### 4. Deliver the diff — the gate
+### 4. 交 diff——gate
 
-- **Gate**: complete diff (unedited vs edited, reviewable), term table with decisions, [MEANING-CHECK] list answered or explicitly deferred by the user, cross-read mismatches resolved or listed. A polish without a diff is a black box — refuse that shape.
+- **gate**：完整 diff（改前对改后，可审）、术语表带决策、[MEANING-CHECK] 清单已答或用户明确延期、对读 mismatch 解决或列单。无 diff 的润色是黑箱——拒收这个形状。
 
 ## Never Ship
 
-| Never | Instead |
+| 禁忌 | 替代 |
 | --- | --- |
-| Silent claim changes | [MEANING-CHECK] flags, author decides |
-| Three names for one method | Term table first, unified everywhere |
-| Tense drift | Per-section discipline |
-| Unreviewed rewrite | Line-by-line diff |
-| Callout/caption drift | Three-way cross-read |
+| 悄悄改断言 | [MEANING-CHECK] 标，作者定 |
+| 一法三名 | 术语表先行，全文统一 |
+| 时态漂移 | 分节纪律 |
+| 不可审的重写 | 逐行 diff |
+| callout/题注漂移 | 三方对读 |
 
 ## Output
 
-- **Diff** — full, reviewable, claim-preserving.
-- **Term table** — unified forms + decisions.
-- **[MEANING-CHECK] list** — flagged edits awaiting author.
-- **Cross-read report** — callouts vs captions vs files.
+- **diff**——完整、可审、不断言。
+- **术语表**——统一形 + 决策。
+- **[MEANING-CHECK] 清单**——待作者拍板的修改。
+- **对读报告**——callout 对题注对文件。
 
 ## Tone
 
-Opinionated and brief. When the honest answer is "this 'therefore' doesn't follow — the paragraph needs a missing premise, not a smoother connector", flag it. When a sentence is correct but 50 words long, cut it in half without asking.
+立场鲜明、废话少。当正确答案是“这个 therefore 不成立——段落缺前提，不是连接词不顺”就标出来。句子没错但 50 词长，对半砍不问。

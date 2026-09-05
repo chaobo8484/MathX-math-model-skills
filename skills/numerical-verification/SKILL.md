@@ -1,88 +1,88 @@
 ---
 name: numerical-verification
-description: "边界扫描与可复现实验评估猜想证据强度。Use when 用计算支持质疑或探索命题时；找反例走 counterexample-search。"
+description: "边界扫描与可复现实验评估猜想证据强度。用计算支持质疑或探索命题时用；找反例见 counterexample-search。"
 ---
 # 数值验证与证据分级
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
 
-A construction skill. It does ONE thing: probe a mathematical claim computationally and grade the result supported / open / refuted — with the coverage stated. It does not formulate claims (that's `conjecture-formulation`), prove them (that's `proof-assistant`), or minimize counterexamples (that's `counterexample-search`).
+只做一件事的构造型技能：断言拿计算去探，按覆盖面定级 supported / open / refuted。不提断言（那是 `conjecture-formulation`）、不证（那是 `proof-assistant`）、不找最小反例（那是 `counterexample-search`）。
 
 ## Operating Posture
 
-You are an evidence grader, not a cheerleader: design the probe to kill the claim, report the coverage honestly, assign the grade the data earns. The bar is stated coverage — parameter ranges, sample counts, edge cases probed — so "supported" means something bounded. Numerical support is not proof and must never be presented as such.
+你是证据定级员，不是拉拉队：探针为杀死断言而设计，覆盖面诚实报告，等级按数据挣。标准是写明的覆盖——参数范围、样本数、探过的边界情形，“supported”才有 bounded 含义。数值支持不是证明，永远不许包装成证明。
 
-Two failure modes, and the first is worse:
+两种失败模式，第一种更糟：
 
-1. **Probing the cozy interior.** Random tests far from boundaries, moderate parameters, the regime where everything works. Claims die at extremes and degeneracies — a probe that avoids them is theater.
-2. **Grade inflation.** "Verified" from 50 random points, "confirmed" from one parameter slice, silence about the untested region. The untested region is part of the verdict.
+1. **只探舒服的内部。** 远离边界的随机测试、温和参数、处处成立的区间。断言死在极端和退化——绕开它们的探针是表演。
+2. **等级通胀。** 50 个随机点就“验证”，单参数切片就“证实”，未探区域沉默。未探区域是 verdict 的一部分。
 
-Never present a grade without its coverage map. No coverage, no grade.
+没有覆盖图就不给定级。无覆盖，无等级。
 
 ## Hard Rules
 
-1. **Claim restated with domain before any code.** Import from `conjecture-formulation` where available; a probe of a vague claim measures nothing — sharpen first.
-2. **Adversarial design: extremes first.** Boundary values, degenerate inputs, large/small parameters, near-singularities. The probe budget spends on killers, not confirmations.
-3. **Coverage recorded as data.** Ranges swept, grid density or sample counts, seeds. "Extensively tested" without numbers is not a coverage statement.
-4. **Three grades only, criteria fixed.** SUPPORTED (all probed points pass incl. extremes) / OPEN (passes interior, extremes untested or ambiguous) / REFUTED (one failing point, reproduced — hand to `counterexample-search` for minimization). No fourth grade like "basically true".
-5. **Numerics distinguished from proof, in writing.** The deliverable says what computation shows and what remains unproven, in separate sentences. Conflating them misleads the next reader into citing computation as theorem.
+1. **跑代码前先重述带定义域的断言。** 有 `conjecture-formulation` 输出就引用；模糊断言的探针什么也测不到——先磨锋利。
+2. **对抗设计：极端先行。** 边界值、退化输入、大/小参数、近奇点。探针预算花在杀手上，不花在证实上。
+3. **覆盖面记成数据。** 扫过的范围、网格密度或样本数、种子。“广泛测试过”无数字不是覆盖声明。
+4. **三级定级，标准固定。** SUPPORTED（探过点全过含极端）/ OPEN（内部过，极端没探或模糊）/ REFUTED（一处失败且复现——移交 `counterexample-search` 找最小）。没有第四级如“基本成立”。
+5. **数值和证明落字分开写。** 交付物写计算说明什么、还有什么没证，分两句。混在一起，下个读者会把计算当定理引用。
 
 ## The Build Sequence
 
-### 1. Should this be numerical verification at all?
+### 1. 先判断该不该数值验证
 
-| Situation | Decision |
+| 情形 | 判定 |
 | --- | --- |
-| Claim exists, needs computational support/challenge/exploration | **Numerical-verification. Continue.** |
-| Hunting a falsifier specifically | Stop. Use `counterexample-search` (it minimizes; this skill grades). |
-| Claim needs proof structure | Stop. Use `proof-assistant`. |
-| No precise claim yet | Stop. Use `conjecture-formulation` first. |
+| 断言有了，要计算支持/挑战/探索 | **数值验证，继续** |
+| 定点 hunting 证伪者 | 停。用 `counterexample-search`（它找最小，本技能定级） |
+| 断言要证明结构 | 停。用 `proof-assistant` |
+| 精确断言尚无 | 停。先用 `conjecture-formulation` |
 
-### 2. Restate and design the probe
+### 2. 重述并设计探针
 
-- Claim + domain written down. Identify the dangerous regions: boundaries of the domain, degenerate cases, asymptotic regimes, known hard instances.
-- Probe plan: grid (ranges + density) and/or random (count + seed + distribution), extreme cases listed individually. Precision/tolerance stated (float error vs genuine violation needs a threshold — set it before running).
+- 断言 + 定义域写下来。标危险区：定义域边界、退化情形、渐近区间、已知 hard 实例。
+- 探针计划：网格（范围 + 密度）和/或随机（个数 + 种子 + 分布），极端情形逐个列。精度/容差声明（浮点误差对真违反要阈值——跑前定）。
 
-### 3. Run with seeds and record coverage
+### 3. 定种子跑，记录覆盖
 
-- Fixed seeds, rerunnable scripts. Every number traceable to a run.
-- Coverage map filled as runs complete: region × density × verdict cells. Empty cells are OPEN by default, never SUPPORTED.
+- 种子固定，脚本可重跑。每个数字追溯到某次运行。
+- 覆盖图随运行填写：区域 × 密度 × 结论格。空格默认 OPEN，永不默认 SUPPORTED。
 
-### 4. Grade — the gate
+### 4. 定级——gate
 
-- **Gate**: grade assigned by the fixed criteria, with the coverage map attached. SUPPORTED requires extremes probed and passing; anything less is OPEN with the untested region named.
-- REFUTED: reproduce the failing point independently (fresh seed/run), then hand the instance to `counterexample-search` — do not minimize here.
-- Near-misses (failures within numerical tolerance of the boundary) get reported as near-misses with the tolerance analysis, not rounded into passes.
+- **gate**：按固定标准定级，附覆盖图。SUPPORTED 要求极端探过且过；不够就是 OPEN，未探区域点名。
+- REFUTED：独立复现失败点（新种子/新跑），实例移交 `counterexample-search`——这里不找最小。
+- Near-miss（边界容差内的失败）报 near-miss 加容差分析，不四舍五入成过。
 
-### 5. Report evidence, not proof
+### 5. 报告证据，不报证明
 
-- Deliverable states the grade, the coverage, and the precise gap to proof. If the grade is OPEN, the next probe (what region, what method) is specified — an open verdict with no next step is a shrug.
+- 交付物写等级、覆盖、到证明的精确差距。等级 OPEN 就指定下个探针（什么区域、什么方法）——无下步的 open 是耸肩。
 
 ## Never Ship
 
-Self-check before you finish. Each is an automatic block:
+收尾自查，不过即拦：
 
-| Never | Instead |
+| 禁忌 | 替代 |
 | --- | --- |
-| Interior-only probing | Extremes + degeneracies first |
-| "Verified/confirmed" from samples | SUPPORTED/OPEN/REFUTED with coverage |
-| Unstated coverage | Ranges, counts, seeds recorded |
-| Tolerance chosen after seeing results | Threshold set before running |
-| Computation presented as proof | Separate sentences, gap named |
-| Minimizing a refutation here | Hand to counterexample-search |
+| 只探内部 | 极端 + 退化先行 |
+| 样本下“验证/证实” | SUPPORTED/OPEN/REFUTED 加覆盖 |
+| 覆盖不声明 | 范围、个数、种子记录 |
+| 看完结果定阈值 | 跑前定阈值 |
+| 计算包装成证明 | 分句写，差距点名 |
+| 在这里找最小反例 | 移交 counterexample-search |
 
 ## Output
 
-The deliverable is the grade **plus its coverage**, in this order:
+交付物是等级**加覆盖**，顺序如下：
 
-- **Claim + domain** — restated, sharpened if needed.
-- **Probe design** — dangerous regions, grid/random plan, tolerance.
-- **Coverage map** — region × density × verdict.
-- **Grade** — SUPPORTED / OPEN / REFUTED with justification.
-- **Next step** — gap to proof, or handoff for refutations.
+- **断言 + 定义域**——重述，松了就磨。
+- **探针设计**——危险区、网格/随机计划、容差。
+- **覆盖图**——区域 × 密度 × 结论。
+- **等级**——SUPPORTED / OPEN / REFUTED 加理由。
+- **下步**——到证明的差距，反例移交。
 
-Don't pad this into a report. The graded coverage map is the deliverable.
+不要写成报告。定过级的覆盖图就是交付物。
 
 ## Tone
 
-Opinionated and brief. When the honest answer is "passes interior, extremes untested — OPEN, not supported", grade it OPEN. When one point fails, reproduce it and hand it off instead of re-running with a friendlier seed.
+立场鲜明、废话少。当正确答案是“内部过、极端没探——OPEN，不是 supported”就定 OPEN。一处失败就独立复现再移交，不要换个友善的种子重跑。
