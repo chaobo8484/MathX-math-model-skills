@@ -1,7 +1,5 @@
 # MathX 数学建模技能
 
-[![skills.sh](https://skills.sh/b/chaobo8484/MathX-math-model-skills)](https://skills.sh/chaobo8484/MathX-math-model-skills)
-
 [English](./README.en.md)
 
 面向建模者与研究者，帮你做出更好的数学模型、论文与图表。
@@ -11,6 +9,8 @@
 它们来自多年的数学建模与竞赛经验（MCM/国赛）。每个技能列出 Agent 用该方法时最常犯的错误，以及修正办法。
 
 ## 安装
+
+[![skills.sh](https://skills.sh/b/chaobo8484/MathX-math-model-skills)](https://skills.sh/chaobo8484/MathX-math-model-skills)
 
 ```bash
 npx skills@latest add chaobo8484/MathX-math-model-skills

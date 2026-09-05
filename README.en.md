@@ -1,7 +1,5 @@
 # MathX Math-Model Skills
 
-[![skills.sh](https://skills.sh/b/chaobo8484/MathX-math-model-skills)](https://skills.sh/chaobo8484/MathX-math-model-skills)
-
 [中文版](./README.md) (primary)
 
 For modelers and researchers to help them build better mathematical models, papers, and figures.
@@ -11,6 +9,8 @@ Knowing whether you picked the right method — AHP or entropy-TOPSIS, ARIMA or 
 They are based on years of mathematical modeling and competition experience (MCM/国赛). Each skill lists the mistakes agents commonly make with that method and how to fix them.
 
 ## Install
+
+[![skills.sh](https://skills.sh/b/chaobo8484/MathX-math-model-skills)](https://skills.sh/chaobo8484/MathX-math-model-skills)
 
 ```bash
 npx skills@latest add chaobo8484/MathX-math-model-skills
