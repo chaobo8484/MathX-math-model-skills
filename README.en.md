@@ -41,6 +41,7 @@ Invocation: user-invoked = you type it; model-invoked = the agent fires it on it
 
 | Skill | What it does | Invocation |
 |---|---|---|
+| [ingest-inputs](./skills/ingest-inputs/SKILL.md) | Normalize user files: CSV/XLSX/TXT/PDF parsing, JPG classify-digitize-or-describe, MP4 frame extraction, with quality report | model-invoked |
 | [ahp](./skills/ahp/SKILL.md) | Pairwise-comparison hierarchy with consistency check (CR < 0.1) | model-invoked |
 | [evaluation-entropy-topsis](./skills/evaluation-entropy-topsis/SKILL.md) | Objective entropy weights + TOPSIS closeness, no subjective input | model-invoked |
 | [gray-prediction](./skills/gray-prediction/SKILL.md) | GM(1,1) forecast for tiny near-exponential samples (4–10 pts) | model-invoked |

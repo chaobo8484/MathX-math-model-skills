@@ -33,4 +33,5 @@ Read this file before running any skill in this repo. It holds the vocabulary ev
 
 - Compute in Python (NumPy/SciPy/SymPy/NetworkX/PuLP), plot in Matplotlib/Seaborn (static) or Plotly (interactive).
 - Solver default order: HiGHS → SCIP → CBC; record name + version actually used.
+- Input normalization via `ingest-inputs`: CSV/XLSX with pandas (encoding sniff UTF-8/GBK) + openpyxl, MP4 frame extraction at declared fps, JPG classified first (data-chart digitize / example-image describe).
 - practicedecisions live with the project using the skills (data dir, template version, backend), recorded by `setup-mathx` under `docs/agents/` — read that file too when it exists.

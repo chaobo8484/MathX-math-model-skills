@@ -5,6 +5,7 @@ description: "OLS、岭、Lasso、Logistic 的拟合选择与诊断。需解释�
 # 回归族与正则化
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
+> 输入先经 ingest-inputs 归一（质量报告与来源记录随数据走）。
 
 只做一件事的构造型技能：OLS、岭、Lasso、Logistic 带着审稿人能重跑的假设检查做拟合。不做非线性黑箱（那是 `bp-neural-network`）、不做无监督分组（那是 `clustering-classification`）、不做时间序列动态（那是 `time-series-arima`）。
 

@@ -41,6 +41,7 @@ Agent 没有建模判断力。
 
 | 技能 | 说明 | 触发 |
 |---|---|---|
+| [ingest-inputs](./skills/ingest-inputs/SKILL.md) | 用户文件解析归一：CSV/XLSX/TXT/PDF 归一，JPG 分类识数或转述，MP4 抽帧，附质量报告 | 自动 |
 | [ahp](./skills/ahp/SKILL.md) | 成对比较层次结构做主观排序，经判断矩阵算特征权重，CR < 0.1 | 自动 |
 | [evaluation-entropy-topsis](./skills/evaluation-entropy-topsis/SKILL.md) | 客观熵权 + TOPSIS 贴近度做多指标排序，无需主观打分 | 自动 |
 | [gray-prediction](./skills/gray-prediction/SKILL.md) | GM(1,1) 外推近指数趋势的极小样本（4–10 个点） | 自动 |

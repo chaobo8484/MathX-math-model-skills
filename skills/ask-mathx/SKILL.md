@@ -1,6 +1,6 @@
 ---
 name: ask-mathx
-description: "不知道 33 个技能该用哪个时先问我：我帮你选 1-2 个并排好顺序。"
+description: "不知道 34 个技能该用哪个时先问我：我帮你选 1-2 个并排好顺序。"
 disable-model-invocation: true
 ---
 
@@ -14,6 +14,7 @@ disable-model-invocation: true
 2. 先查混淆对（下表）——多数误触发都是其中之一。
 3. 最多点名两个技能加顺序。超过两个说明没理解任务；改问一个澄清问题。
 4. 项目第一次用？先路由 `/setup-mathx`。公共术语在 `CONTEXT.md`——原文照用。
+5. 用户直接甩文件（CSV/XLSX/TXT/PDF/JPG/MP4）？先路由 `ingest-inputs` 归一，拿质量报告再按任务路由。
 
 ## Confusion pairs（先查这里）
 
@@ -39,12 +40,15 @@ disable-model-invocation: true
 **Visualization**——绘图纪律：
 没定图型先 `chart-decision`；静态矢量图 `scientific-plotting`；带 N/p 值/CI 的统计结论 `statistical-plot`；要交互 `plotly-interactive`；定稿拼版 `publication-figure`；流程架构 `diagram-schematic`。
 
+**Inputs**——用户文件先过 `ingest-inputs`（解析归一 + 质量报告 + 来源记录），再进上面流程。
+
 ## Common flows（抄送答案）
 
 - 建模比赛从零开始：`paper-outline` → 方法技能 → `figure-table-generation` → `polish-proofread` → `reproducibility-checklist`。
 - 只有一小串数据要预测：先看点数，≤10 点 `gray-prediction`，30+ 点 `time-series-arima`，之间先问数据。
 - 论文定稿前：`figure-table-generation` → `latex-typesetting` → `citation-bibliography` → `polish-proofread` → `reproducibility-checklist`。
 - 猜想验证：`conjecture-formulation` → `numerical-verification`，证伪走 `counterexample-search`，证明走 `proof-assistant`。
+- 用户甩文件：先 `ingest-inputs` 归一，再按任务路由。
 
 ## Tone
 

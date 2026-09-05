@@ -5,6 +5,7 @@ description: "Mermaid/Graphviz/NetworkX 可编辑矢量示意图。表达方法�
 # 原理图、流程图与网络图
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
+> 示例图输入先经 ingest-inputs 转述为对应关系表，再逐项对稿。
 
 只做一件事的构造型技能：方法流程、系统架构、概念关系变成可编辑矢量示意图，源码留档。不做网络指标计算（那是 `graph-network`），不画任何数据图。
 

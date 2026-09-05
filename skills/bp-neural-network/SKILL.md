@@ -5,6 +5,7 @@ description: "反向传播前馈网络拟合非线性回归或分类。几十到
 # BP 神经网络
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
+> 输入先经 ingest-inputs 归一（质量报告与来源记录随数据走）。
 
 只做一件事的构造型技能：反向传播前馈网络拟合非线性回归或分类，样本外打赢线性基线。不做可解释系数建模（那是 `regression-family`）、不做无标签发现（那是 `clustering-classification`）、不做大规模深度学习。
 

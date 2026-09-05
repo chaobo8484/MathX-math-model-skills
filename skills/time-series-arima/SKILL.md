@@ -5,6 +5,7 @@ description: "带平稳性诊断与区间预测的 ARIMA/SARIMA 建模。等间�
 # 时间序列 ARIMA/SARIMA
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
+> 输入先经 ingest-inputs 归一（质量报告与来源记录随数据走）。
 
 只做一件事的构造型技能：把等间隔序列变成多步预测，残差是白噪声。不做极小样本外推（那是 `gray-prediction`）、不做带协变量的解释性回归（那是 `regression-family`）、不做因果推断。
 

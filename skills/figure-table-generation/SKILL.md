@@ -6,6 +6,7 @@ disable-model-invocation: true
 # 论文图表生成与规范化
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
+> 展品追溯上游到 ingest-inputs 的来源记录（含 JPG 识数误差声明）。
 
 人触发的生产型技能，只做一件事：分析结果变成带题注、带引用、栏宽尺寸的投稿级图表和 booktabs 表格。不画探索图（那是 `scientific-plotting` 一家），不拼终版（那是 `publication-figure`）。
 

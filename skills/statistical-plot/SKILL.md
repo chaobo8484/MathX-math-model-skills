@@ -5,6 +5,7 @@ description: "分布相关检验残差 ROC 与样本量 p 值置信区间同图�
 # 统计图表与诊断
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
+> 输入先经 ingest-inputs 归一（质量报告与来源记录随数据走）。
 
 只做一件事的构造型技能：统计结论、样本量、不确定度同页呈现——N、检验、p、效应、CI 一次读完。不拟合模型（那是 `regression-family` / `clustering-classification`），不做纯描述绘图（那是 `scientific-plotting`）。
 

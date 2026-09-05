@@ -5,6 +5,7 @@ description: "ODE 积分与有限差分描述连续演化系统。传染病、�
 # 微分方程建模
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
+> 输入先经 ingest-inputs 归一（质量报告与来源记录随数据走）。
 
 只做一件事的构造型技能：连续演化问题（传染病、热、种群）变成数值验证过的轨迹。不做数据驱动预测（那是 `time-series-arima`）、不做随机模拟（那是 `monte-carlo-simulation`）、不做符号闭式（那是 `symbolic-computation`）。
 

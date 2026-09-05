@@ -5,6 +5,7 @@ description: "KMeans/DBSCAN 分群与随机森林分类。为样本发现群组�
 # 聚类与分类
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
+> 输入先经 ingest-inputs 归一（质量报告与来源记录随数据走）。
 
 只做一件事的构造型技能：无标签数据找群组，或给新样本打标签，聚类数和误差都挣回来。不做解释性建模（那是 `regression-family`）、不做非线性黑箱（那是 `bp-neural-network`）、不为画图而画图（那是 `statistical-plot`）。
 
