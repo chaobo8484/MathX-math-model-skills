@@ -1,0 +1,23 @@
+{
+  "name": "mathx",
+  "owner": {
+    "name": "MathX",
+    "url": "https://github.com/chaobo8484/MathX-math-model-skills"
+  },
+  "description": "MathX math-modeling skills for Claude Code: modeling methods, paper writing, research, and figures.",
+  "plugins": [
+    {
+      "name": "mathx-skills",
+      "source": "./",
+      "description": "Math-modeling skills (AHP, ARIMA, LaTeX, plotting and more) plus ask-mathx router and setup-mathx.",
+      "category": "modeling",
+      "keywords": [
+        "modeling",
+        "skills",
+        "ahp",
+        "arima",
+        "latex"
+      ]
+    }
+  ]
+}
