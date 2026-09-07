@@ -12,7 +12,7 @@
 
 ## 安装
 
-[![skills.sh](https://www.skills.sh/p/erzQpLe9V6oIcDI2)](https://www.skills.sh/p/erzQpLe9V6oIcDI2)
+[![skills.sh](https://skills.sh/b/chaobo8484/MathX-math-model-skills)](https://skills.sh/chaobo8484/MathX-math-model-skills)
 
 ```bash
 npx skills add https://skills.sh/p/erzQpLe9V6oIcDI2
