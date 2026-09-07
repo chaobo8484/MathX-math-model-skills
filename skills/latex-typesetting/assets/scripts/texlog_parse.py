@@ -31,6 +31,18 @@ def main():
     font_subs = sorted(set(re.findall(r"Font shape `([^']+)' .*instead", text)))
     rerun = "Rerun to get" in text
 
+    # cumcmthesis 国赛类特有信号（SKILL.md Hard Rules 6：强制 XeLaTeX + 跟随字体）
+    engine_misuse = "You must use the `xelatex' driver" in text or "Please choose `xelatex'" in text
+    font_missing = sorted(set(re.findall(
+        r"(simkai\.ttf|simsun\.ttc|fontspec error:[^\n]*font[^\n]*not[^\n]*found"
+        r"|Font [^\n]*not found[^\n]*|! Package fontspec Error[^\n]*)",
+        text, flags=re.IGNORECASE)))
+    hints = []
+    if engine_misuse:
+        hints.append("引擎误用：cumcmthesis 只认 XeLaTeX，换 latexmk -xelatex 重编")
+    if font_missing:
+        hints.append("字体缺失：先确认已 \\usepackage{cumcm-fonts}（自动回退）；要官方原字形再跑 setup-fonts.py 装进系统字体目录")
+
     gates = {
         "zero_errors": len(errors) == 0,
         "n_errors": len(errors),
@@ -41,8 +53,16 @@ def main():
         "overfull_gt_5pt": [(ln, s) for ln, s in big_overfull],
         "font_substitutions": font_subs,
         "needs_rerun": rerun,
+        "engine_ok": not engine_misuse,
+        "fonts_ok": len(font_missing) == 0,
+        "font_missing_hits": font_missing,
+        "hints": hints,
     }
-    if errors:
+    if engine_misuse:
+        verdict = "HOLD — 引擎误用：换 latexmk -xelatex 重编"
+    elif font_missing:
+        verdict = f"HOLD — 字体缺失 {len(font_missing)} 处，装字体后重编"
+    elif errors:
         verdict = f"HOLD — 先修首错：{errors[0][:80]}"
     elif undefined or undef_refs:
         verdict = "HOLD — 未定义引用归零后重编"
@@ -57,7 +77,9 @@ def main():
     args.out.parent.mkdir(parents=True, exist_ok=True)
     with open(args.out, "w", encoding="utf-8") as f:
         json.dump(report, f, ensure_ascii=False, indent=2)
-    print(f"log: errors={len(errors)} undefined={len(undefined)} overfull={len(overfulls)} (>5pt {len(big_overfull)}) [{verdict}]")
+    print(f"log: errors={len(errors)} undefined={len(undefined)} overfull={len(overfulls)} (>5pt {len(big_overfull)}) engine_ok={not engine_misuse} fonts_ok={len(font_missing) == 0} [{verdict}]")
+    for h in hints:
+        print(f"hint: {h}")
     print(f"报告: {args.out}")
 
 if __name__ == "__main__":

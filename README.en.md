@@ -4,6 +4,13 @@
 
 ![MathX Math-Model Skills](./docs/for_README/mian_photo.jpg)
 
+<p align="center">
+  <a href="./plugin.json"><img src="https://img.shields.io/badge/version-0.4.0-blue.svg" alt="version" /></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License" /></a>
+  <a href="./requirements.txt"><img src="https://img.shields.io/badge/Python-%3E%3D3.10-blue.svg" alt="Python" /></a>
+  <a href="./skills/latex-typesetting/SKILL.md"><img src="https://img.shields.io/badge/LaTeX-XeLaTeX-green.svg" alt="XeLaTeX" /></a>
+</p>
+
 For modelers and researchers to help them build better mathematical models, papers, and figures.
 
 Knowing whether you picked the right method — AHP or entropy-TOPSIS, ARIMA or grey prediction, a bar chart or a heatmap — is hard. These skills aim to help you get to those right decisions faster.
@@ -11,7 +18,7 @@ Knowing whether you picked the right method — AHP or entropy-TOPSIS, ARIMA or 
 They are based on years of mathematical modeling and competition experience (MCM/国赛). Each skill lists the mistakes agents commonly make with that method and how to fix them.
 
 ## Install
-[![skills.sh](https://www.skills.sh/b/chaobo8484/MathX-math-model-skills)](https://www.skills.sh/chaobo8484/MathX-math-model-skills)
+[![skills.sh](https://skills.sh/b/chaobo8484/MathX-math-model-skills)](https://www.skills.sh/chaobo8484/MathX-math-model-skills)
 
 ```bash
 npx skills@latest add chaobo8484/MathX-math-model-skills
@@ -22,7 +29,7 @@ Works with Claude Code, Codex, and OpenCode. Claude Code can also install it as 
 
 > Requirements: `python >=3.10` (gate scripts use `X | None` syntax). Check with `python --version`.
 
-Shared vocabulary lives in [CONTEXT.md](./CONTEXT.md) — skills assume its terms. Run `/setup-mathx` once per project before the others.
+Shared vocabulary lives in [CONTEXT.md](./CONTEXT.md) — skills assume its terms. Suggested order: `/ask-mathx` to pick skills, `/setup-mathx` once per project to bind it, then methods → writing → pre-submission gates.
 
 ## Why use it?
 
@@ -65,7 +72,7 @@ Invocation: user-invoked = you type it; model-invoked = the agent fires it on it
 |---|---|---|
 | [literature-review](./skills/literature-review/SKILL.md) | Retrieval, dedup, theming into a traceable gap table | user-invoked |
 | [paper-outline](./skills/paper-outline/SKILL.md) | Chapter structure + Claim-Evidence-Link storyline | user-invoked |
-| [latex-typesetting](./skills/latex-typesetting/SKILL.md) | Block-by-block template filling, compile to PDF via log iteration; DOCX branch for drafts | user-invoked |
+| [latex-typesetting](./skills/latex-typesetting/SKILL.md) | Block-by-block filling of the official CUMCM `cumcmthesis` template, compile to PDF via log + 2026 compliance gates; DOCX branch for drafts | user-invoked |
 | [citation-bibliography](./skills/citation-bibliography/SKILL.md) | Clean BibTeX, two-way in-text ↔ list integrity | user-invoked |
 | [figure-table-generation](./skills/figure-table-generation/SKILL.md) | Captioned, cited figures and booktabs tables | user-invoked |
 | [polish-proofread](./skills/polish-proofread/SKILL.md) | Unified terminology, tense, voice, caption style (CN–EN) | user-invoked |

@@ -6,6 +6,7 @@ __pycache__/
 venv/
 *.pdf
 !skills/**/assets/templates/*.pdf
+!skills/**/assets/templates/**/*.pdf
 data/
 *.log
 .DS_Store

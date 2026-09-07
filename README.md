@@ -4,11 +4,18 @@
 
 ![MathX 数学建模 Skills](./docs/for_README/mian_photo.jpg)
 
+<p align="center">
+  <a href="./plugin.json"><img src="https://img.shields.io/badge/版本-0.4.0-blue.svg" alt="版本" /></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/许可证-MIT-yellow.svg" alt="许可证" /></a>
+  <a href="./requirements.txt"><img src="https://img.shields.io/badge/Python-%3E%3D3.10-blue.svg" alt="Python" /></a>
+  <a href="./skills/latex-typesetting/SKILL.md"><img src="https://img.shields.io/badge/LaTeX-XeLaTeX-green.svg" alt="XeLaTeX" /></a>
+</p>
+
 面向建模者与研究者，帮你做出更好的数学模型、论文与图表。
 
 选对方法很难——AHP 还是熵权 TOPSIS，ARIMA 还是灰色预测，柱状图还是热力图。这些技能帮你更快做出正确的决定。
 
-为 MCM/国赛 进行优化。每个技能列出 Agent 用该方法时最常犯的错误，以及修正办法。
+为 MCM/国赛进行优化。每个技能列出 Agent 用该方法时最常犯的错误，以及修正办法。
 
 ## 安装
 
@@ -23,7 +30,7 @@ npx skills add chaobo8484/MathX-math-model-skills
 
 > 运行要求：`python >=3.10`（门禁脚本使用 `X | None` 等 3.10 语法）。本地执行前 `python --version` 确认；门禁脚本依赖见 `pyproject.toml:8` / `requirements.txt:1`，安装 `pip install -r requirements.txt` 或 `pip install -e .[full]`。
 
-公共词汇在 [CONTEXT.md](./CONTEXT.md) 中——所有技能默认你已读过。每个项目先跑一次 `/setup-mathx`，再用其他技能。
+公共词汇在 [CONTEXT.md](./CONTEXT.md) 中——所有技能默认你已读过。上手顺序：先 `/ask-mathx` 选技能，再每个项目跑一次 `/setup-mathx` 绑定，然后按方法 → 写作 → 交稿门禁的顺序调用。
 
 ## 为什么要用？
 
@@ -66,7 +73,7 @@ Agent 没有建模判断力。
 |---|---|---|
 | [literature-review](./skills/literature-review/SKILL.md) | 结构化检索、去重与主题归类，输出可追溯的研究缺口表 | 人触发 |
 | [paper-outline](./skills/paper-outline/SKILL.md) | 为 MCM、国赛或期刊论文设计章节结构与 Claim-Evidence-Link 故事线 | 人触发 |
-| [latex-typesetting](./skills/latex-typesetting/SKILL.md) | 分块填入官方 LaTeX 模板并编译出 PDF，按报错日志迭代修错；协作草稿走 DOCX 分支 | 人触发 |
+| [latex-typesetting](./skills/latex-typesetting/SKILL.md) | 按国赛官方 `cumcmthesis` 模板分块填内容并编译出 PDF，日志门禁 + 2026 合规门禁迭代到干净交付；协作草稿走 DOCX 分支 | 人触发 |
 | [citation-bibliography](./skills/citation-bibliography/SKILL.md) | 清洗 BibTeX，核对文内引用与参考文献表双向一致 | 人触发 |
 | [figure-table-generation](./skills/figure-table-generation/SKILL.md) | 把分析结果整理成带题注引用的投稿级图表与 booktabs 表格 | 人触发 |
 | [polish-proofread](./skills/polish-proofread/SKILL.md) | 统一术语、时态、语态与图表标题的中英文学术润色 | 人触发 |
