@@ -12,10 +12,10 @@ They are based on years of mathematical modeling and competition experience (MCM
 
 ## Install
 
-[![skills.sh](https://skills.sh/b/chaobo8484/MathX-math-model-skills)](https://skills.sh/chaobo8484/MathX-math-model-skills)
+[![skills.sh](https://img.shields.io/badge/skills.sh-MathX--math--model--skills-blue)](https://www.skills.sh/p/erzQpLe9V6oIcDI2)
 
 ```bash
-npx skills@latest add chaobo8484/MathX-math-model-skills
+npx skills add https://skills.sh/p/erzQpLe9V6oIcDI2
 ```
 
 Works with Claude Code, Codex, and OpenCode. Claude Code can also install it as a managed plugin via the marketplace (`.claude-plugin/marketplace.json`).
