@@ -21,12 +21,23 @@
 
 [![skills.sh](https://skills.sh/b/chaobo8484/MathX-math-model-skills)](https://www.skills.sh/chaobo8484/MathX-math-model-skills)
 
+### 通用（Claude Code / Codex / OpenCode）
+
 ```bash
 npx skills@latest add chaobo8484/MathX-math-model-skills
 npx skills add chaobo8484/MathX-math-model-skills
 ```
 
-支持 Claude Code、Codex 与 OpenCode。Claude Code 还可以通过 marketplace（`.claude-plugin/marketplace.json`）安装为托管插件。
+### Claude Code 插件（托管安装）
+
+本仓库自带 `.claude-plugin/marketplace.json`（marketplace 名 `mathx`，插件名 `mathx-skills`），在 Claude Code 内依次执行：
+
+```text
+/plugin marketplace add chaobo8484/MathX-math-model-skills
+/plugin install mathx-skills@mathx
+```
+
+装好后各技能命令直接可用（如 `/setup-mathx`）；仓库有更新时重跑第二条命令即升级到最新版。
 
 > 运行要求：`python >=3.10`（门禁脚本使用 `X | None` 等 3.10 语法）。本地执行前 `python --version` 确认；门禁脚本依赖见 `pyproject.toml:8` / `requirements.txt:1`，安装 `pip install -r requirements.txt` 或 `pip install -e .[full]`。
 
