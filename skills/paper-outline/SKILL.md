@@ -28,7 +28,7 @@ disable-model-invocation: true
 4. **节间连接句。** 一句一个：本节结论怎么 feed 下节前提。断掉的连接是审稿人写“disconnected”的地方。
 5. **每节字数预算。** 总量 venue 封顶；分配跟论证权重（结果和方法拿最多）。40% 背景的大纲是穿论文衣服的综述。
 
-## The Production Sequence
+## Build Sequence
 
 ### 1. 定 venue、题型、问题
 
@@ -68,8 +68,11 @@ disable-model-invocation: true
 
 </outline-template>
 
-### 4. 移交
+> 大纲模板见 `assets/templates/outline-<venue>.md`（`outline-guoshai2026` / `outline-mcm` / `outline-journal`），按 `venue_template` 取用，直接填四行，不要重起格式。
 
+### 4. 迭代检测 + 移交
+
+- **是否已存在草稿 gate**：检查输出目录是否已有 `outline_v*.md`。无则 `create` 新稿；有则走 `iterate` 分支——调 `assets/scripts/versioned_write.py --in 新稿 --out-dir <out> --base-name outline --message "修订说明"`，产出带时间戳版本 + `revisions.md` 追加记录，不覆盖旧稿（对标 patent 的 `merger` + 时间戳 + 修订对话记录）。
 - 按序点名下个技能（方法跑 → `figure-table-generation` → `latex-typesetting` → `citation-bibliography` → `polish-proofread` → `reproducibility-checklist`）。大纲交付的标准：别人照它能独立执行整条链。
 
 ## Never Ship
