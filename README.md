@@ -2,6 +2,8 @@
 
 [English](./README.en.md)
 
+![MathX 数学建模技能](./docs/for_README/mian_photo.jpg)
+
 面向建模者与研究者，帮你做出更好的数学模型、论文与图表。
 
 选对方法很难——AHP 还是熵权 TOPSIS，ARIMA 还是灰色预测，柱状图还是热力图。这些技能帮你更快做出正确的决定。
@@ -17,6 +19,8 @@ npx skills@latest add chaobo8484/MathX-math-model-skills
 ```
 
 支持 Claude Code、Codex 与 OpenCode。Claude Code 还可以通过 marketplace（`.claude-plugin/marketplace.json`）安装为托管插件。
+
+> 运行要求：`python >=3.10`（门禁脚本使用 `X | None` 等 3.10 语法）。本地执行前 `python --version` 确认；门禁脚本依赖见 `pyproject.toml:8` / `requirements.txt:1`，安装 `pip install -r requirements.txt` 或 `pip install -e .[full]`。
 
 公共词汇在 [CONTEXT.md](./CONTEXT.md) 中——所有技能默认你已读过。每个项目先跑一次 `/setup-mathx`，再用其他技能。
 
@@ -35,7 +39,7 @@ Agent 没有建模判断力。
 | 入口 | 说明 | 触发 |
 |---|---|---|
 | [ask-mathx](./skills/ask-mathx/SKILL.md) | 不知道该用哪个技能时先走这里：帮你选 1–2 个并排好顺序 | 人触发 |
-| [setup-mathx](./skills/setup-mathx/SKILL.md) | 每个项目先跑一次：绑定数据目录、模板版本和绘图后端 | 人触发 |
+| [setup-mathx](./skills/setup-mathx/SKILL.md) | 每个项目先跑一次：绑定数据目录、模板版本、绘图后端和证据后端 | 人触发 |
 
 ### 建模 Modeling
 
@@ -61,7 +65,7 @@ Agent 没有建模判断力。
 |---|---|---|
 | [literature-review](./skills/literature-review/SKILL.md) | 结构化检索、去重与主题归类，输出可追溯的研究缺口表 | 人触发 |
 | [paper-outline](./skills/paper-outline/SKILL.md) | 为 MCM、国赛或期刊论文设计章节结构与 Claim-Evidence-Link 故事线 | 人触发 |
-| [latex-typesetting](./skills/latex-typesetting/SKILL.md) | 分块填入官方 LaTeX 模板并编译出 PDF，按报错日志迭代修错 | 人触发 |
+| [latex-typesetting](./skills/latex-typesetting/SKILL.md) | 分块填入官方 LaTeX 模板并编译出 PDF，按报错日志迭代修错；协作草稿走 DOCX 分支 | 人触发 |
 | [citation-bibliography](./skills/citation-bibliography/SKILL.md) | 清洗 BibTeX，核对文内引用与参考文献表双向一致 | 人触发 |
 | [figure-table-generation](./skills/figure-table-generation/SKILL.md) | 把分析结果整理成带题注引用的投稿级图表与 booktabs 表格 | 人触发 |
 | [polish-proofread](./skills/polish-proofread/SKILL.md) | 统一术语、时态、语态与图表标题的中英文学术润色 | 人触发 |
@@ -77,6 +81,7 @@ Agent 没有建模判断力。
 | [numerical-verification](./skills/numerical-verification/SKILL.md) | 边界扫描与可复现实验评估猜想证据强度 | 自动 |
 | [counterexample-search](./skills/counterexample-search/SKILL.md) | 暴力、剪枝与启发式寻找并验证最小反例 | 自动 |
 | [arxiv-literature-synthesis](./skills/arxiv-literature-synthesis/SKILL.md) | 从引用图梳理领域演化、定理依赖与开放问题 | 自动 |
+| [research-evidence](./skills/research-evidence/SKILL.md) | 单条断言外部取证：按后端阶梯检索抓取并输出证据卡，Firecrawl 只做深爬 | 自动 |
 
 ### 可视化 Visualization
 

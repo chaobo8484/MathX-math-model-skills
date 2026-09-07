@@ -2,6 +2,8 @@
 
 [中文版](./README.md) (primary)
 
+![MathX Math-Model Skills](./docs/for_README/mian_photo.jpg)
+
 For modelers and researchers to help them build better mathematical models, papers, and figures.
 
 Knowing whether you picked the right method — AHP or entropy-TOPSIS, ARIMA or grey prediction, a bar chart or a heatmap — is hard. These skills aim to help you get to those right decisions faster.
@@ -17,6 +19,8 @@ npx skills@latest add chaobo8484/MathX-math-model-skills
 ```
 
 Works with Claude Code, Codex, and OpenCode. Claude Code can also install it as a managed plugin via the marketplace (`.claude-plugin/marketplace.json`).
+
+> Requirements: `python >=3.10` (gate scripts use `X | None` syntax). Check with `python --version`.
 
 Shared vocabulary lives in [CONTEXT.md](./CONTEXT.md) — skills assume its terms. Run `/setup-mathx` once per project before the others.
 
@@ -35,7 +39,7 @@ Invocation: user-invoked = you type it; model-invoked = the agent fires it on it
 | Entry point | What it does | Invocation |
 |---|---|---|
 | [ask-mathx](./skills/ask-mathx/SKILL.md) | Start here when you don't know which skill fits: it picks 1–2 and orders them | user-invoked |
-| [setup-mathx](./skills/setup-mathx/SKILL.md) | Run once per project: binds the data directory, template version, and plotting backend | user-invoked |
+| [setup-mathx](./skills/setup-mathx/SKILL.md) | Run once per project: binds the data dir, template, plotting and evidence backends | user-invoked |
 
 ### Modeling
 
@@ -61,7 +65,7 @@ Invocation: user-invoked = you type it; model-invoked = the agent fires it on it
 |---|---|---|
 | [literature-review](./skills/literature-review/SKILL.md) | Retrieval, dedup, theming into a traceable gap table | user-invoked |
 | [paper-outline](./skills/paper-outline/SKILL.md) | Chapter structure + Claim-Evidence-Link storyline | user-invoked |
-| [latex-typesetting](./skills/latex-typesetting/SKILL.md) | Block-by-block template filling, compile to PDF via log iteration | user-invoked |
+| [latex-typesetting](./skills/latex-typesetting/SKILL.md) | Block-by-block template filling, compile to PDF via log iteration; DOCX branch for drafts | user-invoked |
 | [citation-bibliography](./skills/citation-bibliography/SKILL.md) | Clean BibTeX, two-way in-text ↔ list integrity | user-invoked |
 | [figure-table-generation](./skills/figure-table-generation/SKILL.md) | Captioned, cited figures and booktabs tables | user-invoked |
 | [polish-proofread](./skills/polish-proofread/SKILL.md) | Unified terminology, tense, voice, caption style (CN–EN) | user-invoked |
@@ -77,6 +81,7 @@ Invocation: user-invoked = you type it; model-invoked = the agent fires it on it
 | [numerical-verification](./skills/numerical-verification/SKILL.md) | Boundary scans grade evidence SUPPORTED/OPEN/REFUTED | model-invoked |
 | [counterexample-search](./skills/counterexample-search/SKILL.md) | Brute force + pruning + heuristics for minimal counterexamples | model-invoked |
 | [arxiv-literature-synthesis](./skills/arxiv-literature-synthesis/SKILL.md) | Field evolution, theorem dependencies, open problems from citations | model-invoked |
+| [research-evidence](./skills/research-evidence/SKILL.md) | External evidence per claim via backend ladder; Firecrawl for deep crawl only | model-invoked |
 
 ### Visualization
 
