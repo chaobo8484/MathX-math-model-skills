@@ -1,8 +1,8 @@
-# MathX 数学建模技能
+# MathX 数学建模 Skills
 
 [English](./README.en.md)
 
-![MathX 数学建模技能](./docs/for_README/mian_photo.jpg)
+![MathX 数学建模 Skills](./docs/for_README/mian_photo.jpg)
 
 面向建模者与研究者，帮你做出更好的数学模型、论文与图表。
 
@@ -12,7 +12,7 @@
 
 ## 安装
 
-[![skills.sh](https://skills.sh/b/chaobo8484/MathX-math-model-skills)](https://www.skills.sh/p/erzQpLe9V6oIcDI2)
+[![skills.sh](https://www.skills.sh/p/erzQpLe9V6oIcDI2)](https://www.skills.sh/p/erzQpLe9V6oIcDI2)
 
 ```bash
 npx skills add https://skills.sh/p/erzQpLe9V6oIcDI2
