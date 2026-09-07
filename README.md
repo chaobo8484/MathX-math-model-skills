@@ -12,10 +12,16 @@
 
 ## 安装
 
-[![skills.sh](https://img.shields.io/badge/skills.sh-MathX--math--model--skills-blue)](https://www.skills.sh/p/erzQpLe9V6oIcDI2)
+[![skills.sh](https://skills.sh/b/chaobo8484/MathX-math-model-skills)](https://www.skills.sh/p/erzQpLe9V6oIcDI2)
 
 ```bash
 npx skills add https://skills.sh/p/erzQpLe9V6oIcDI2
+```
+
+或用仓库直装（计入 skills.sh 排行榜安装数，徽章点亮靠它）：
+
+```bash
+npx skills add chaobo8484/MathX-math-model-skills
 ```
 
 支持 Claude Code、Codex 与 OpenCode。Claude Code 还可以通过 marketplace（`.claude-plugin/marketplace.json`）安装为托管插件。
