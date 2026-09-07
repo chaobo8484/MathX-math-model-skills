@@ -93,3 +93,7 @@ Agent 没有建模判断力。
 | [plotly-interactive](./skills/plotly-interactive/SKILL.md) | 缩放、悬停、联动的 Plotly 探索图，超万点降采样 | 自动 |
 | [publication-figure](./skills/publication-figure/SKILL.md) | 按单双栏尺寸、DPI、字体嵌入组装多子图投稿图 | 自动 |
 | [diagram-schematic](./skills/diagram-schematic/SKILL.md) | Mermaid/Graphviz/NetworkX 可编辑矢量示意图、流程图与网络图 | 自动 |
+
+## 许可 License
+
+本项目使用 MIT 许可证，见 [LICENSE](./LICENSE)。

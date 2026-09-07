@@ -93,3 +93,7 @@ Invocation: user-invoked = you type it; model-invoked = the agent fires it on it
 | [plotly-interactive](./skills/plotly-interactive/SKILL.md) | Zoom/hover/linked Plotly charts, downsampled past 10k points | model-invoked |
 | [publication-figure](./skills/publication-figure/SKILL.md) | Journal-compliant multi-panel figures (width, DPI, fonts) | model-invoked |
 | [diagram-schematic](./skills/diagram-schematic/SKILL.md) | Editable schematics, flowcharts, network diagrams | model-invoked |
+
+## License
+
+This project is licensed under the MIT License, see [LICENSE](./LICENSE).
