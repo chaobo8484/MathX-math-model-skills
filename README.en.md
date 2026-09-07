@@ -11,15 +11,10 @@ Knowing whether you picked the right method — AHP or entropy-TOPSIS, ARIMA or 
 They are based on years of mathematical modeling and competition experience (MCM/国赛). Each skill lists the mistakes agents commonly make with that method and how to fix them.
 
 ## Install
-[![skills.sh](https://www.skills.sh/p/chaobo8484/MathX-math-model-skills)](https://www.skills.sh/chaobo8484/MathX-math-model-skills)
+[![skills.sh](https://www.skills.sh/b/chaobo8484/MathX-math-model-skills)](https://www.skills.sh/chaobo8484/MathX-math-model-skills)
 
 ```bash
 npx skills@latest add chaobo8484/MathX-math-model-skills
-```
-
-Or install by repo directly (counts toward the skills.sh leaderboard; the badge lights up once installs register):
-
-```bash
 npx skills add chaobo8484/MathX-math-model-skills
 ```
 

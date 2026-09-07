@@ -12,15 +12,10 @@
 
 ## 安装
 
-[![skills.sh](https://skills.sh/b/xiayin8484-1725s-projects/MathX-math-model-skills)](https://www.skills.sh/p/erzQpLe9V6oIcDI2)
+[![skills.sh](https://skills.sh/b/chaobo8484/MathX-math-model-skills)](https://www.skills.sh/chaobo8484/MathX-math-model-skills)
 
 ```bash
-npx skills add https://skills.sh/p/erzQpLe9V6oIcDI2
-```
-
-或用仓库直装（计入 skills.sh 排行榜安装数，徽章点亮靠它）：
-
-```bash
+npx skills@latest add chaobo8484/MathX-math-model-skills
 npx skills add chaobo8484/MathX-math-model-skills
 ```
 
