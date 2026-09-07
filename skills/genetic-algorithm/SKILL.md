@@ -1,6 +1,6 @@
 ---
 name: genetic-algorithm
-description: "选择交叉变异求解非凸组合优化。调度选址路径等非光滑组合问题时用；目标约束可线性表达见 optimization-lp-milp。"
+description: "选择交叉变异求解非凸组合优化 `GA`。调度选址路径等非光滑组合问题时用；目标约束可线性表达见 optimization-lp-milp。"
 ---
 # 遗传算法 GA
 
@@ -28,7 +28,7 @@ description: "选择交叉变异求解非凸组合优化。调度选址路径等
 4. **收敛曲线留档。** 每代最好与均值适应度，画出来。第 5 代就平了是早熟（重启/加变异）；预算用完还在爬是预算太小。
 5. **基线每次都有。** 同适应度同预算的随机搜索和贪心。GA 打不赢贪心就交付贪心并说明。
 
-## The Build Sequence
+## Build Sequence
 
 ### 1. 先判断该不该用 GA
 
@@ -46,6 +46,8 @@ description: "选择交叉变异求解非凸组合优化。调度选址路径等
 - 每类约束配修复算子。修不了才用罚——系数声明，后面做敏感性。
 
 ### 3. 跑 campaign
+
+> 门禁兜底：调 `assets/scripts/ga_gate.py --config` 校验 `encoding/repair` 与 `n_rounds≥5`，并对可行性逐条代码验。
 
 - 种子固定并报告；N ≥ 5–10 轮独立运行。每轮同预算。
 - 留每代最好/均值适应度；画收敛带（轮间均值 ± 离散）。

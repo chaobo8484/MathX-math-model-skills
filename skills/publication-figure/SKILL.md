@@ -27,7 +27,7 @@ venue spec 不钉、合规表不填，就不交付拼版。无 spec，无拼版�
 4. **跨子图一套视觉系统。** 同色板、同字体族/字号，子图标签 (a)(b)(c) 同风格同位置逻辑。拼版读成一张图才算过，否则失败。
 5. **LaTeX 内联测试。** \includegraphics 按栏宽引入，编译干净，无 overfull，题注编号对正文引用。文档带着它编过，图才算完。
 
-## The Build Sequence
+## Build Sequence
 
 ### 1. 先判断该不该期刊拼版
 
@@ -50,6 +50,8 @@ venue spec 不钉、合规表不填，就不交付拼版。无 spec，无拼版�
 - 子图标签 (a)(b)(c)：同字体/字号/字重，同角落逻辑，不压数据。同尺度子图共享轴标签——重复标签是杂物，尺度不一是欺骗（选一种就声明）。
 
 ### 4. 合规——gate
+
+> 门禁兜底：成图先调 `assets/scripts/figure_gate.py --width-mm/--dpi-floor/--caption` 验尺寸/`DPI`/字体（`pdffonts` 有则验）与题注五件套，再填表。
 
 填表，每行实测，不是假设：
 

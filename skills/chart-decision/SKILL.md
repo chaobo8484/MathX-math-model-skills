@@ -27,7 +27,7 @@ description: "按数据类型与表达目标选图型并排除误导性编码。
 4. **移交给画图技能。** 静态 → `scientific-plotting`；统计推断 → `statistical-plot`；交互 → `plotly-interactive`；示意图 → `diagram-schematic`；终版拼版 → `publication-figure`。
 5. **推荐前先看数量和量程。** n = 3 不需要直方图；1000:1 的量程要声明对数尺度，不要事后发现。
 
-## The Decision Table
+## Build Sequence
 
 ### 1. 定任务
 

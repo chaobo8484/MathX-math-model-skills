@@ -1,0 +1,3 @@
+# clustering-classification — OpenAI/Codex adaptation
+display_name: clustering-classification
+description: "KMeans/DBSCAN 分群与随机森林分类。为样本发现群组或打标签时用；解释变量关系见 regression-fam"

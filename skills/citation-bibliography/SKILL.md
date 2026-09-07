@@ -29,11 +29,11 @@ disable-model-invocation: true
 5. **键稳定可读。** 作者年标题词键；编辑后碰撞的自动乱码键不要。改键全篇重查。
 6. **国赛 venue 执行第七条。** 引用他人或公开资料（含网上资料）必须文内标注 + 文末规范列出，纳入双向检查；漏标即 HOLD。
 
-## The Production Sequence
+## Build Sequence
 
 ### 1. 定体例盘库存
 
-- 体例记录；.bib 文件定位；条目数 + 键清单摘出。重复合并（同 DOI 两键是经典）。
+- 体例记录；TEX 用 .bib 文件定位，DOCX 用文末参考文献表定位；条目数 + 键清单摘出。重复合并（同 DOI 两键是经典）。
 
 ### 2. 洗条目
 
@@ -41,7 +41,10 @@ disable-model-invocation: true
 
 ### 3. 双向完整——gate
 
-- **gate**：全编译；未定义引用警告零；未被引条目零或已批准；PDF 终检 grep [?]。不过 → 修、重编、重 grep。
+> 门禁兜底：调 `assets/scripts/bib_check.py --tex/--bib/--log` 输出悬空/未被引/字段/`DOI` 门禁；作者名仍需人眼。
+
+- TEX **gate**：全编译；未定义引用警告零；未被引条目零或已批准；PDF 终检 grep [?]。不过 → 修、重编、重 grep。
+- DOCX **gate**：文内序号与文末表逐条对读（手工或 Word 引文域），两边计数一致；`[?]` 式悬空引用零容忍。
 
 ### 4. 移交
 

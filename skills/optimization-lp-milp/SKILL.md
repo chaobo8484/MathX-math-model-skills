@@ -1,6 +1,6 @@
 ---
 name: optimization-lp-milp
-description: "线性目标约束与整数决策交可复现求解器。问题可线性表达或线性化时用；非凸组合问题见 genetic-algorithm。"
+description: "线性目标约束与整数决策 `LP/MILP` 交可复现求解器。问题可线性表达或线性化时用；非凸组合问题见 genetic-algorithm。"
 ---
 # 线性/整数规划 LP/MILP
 
@@ -28,7 +28,7 @@ description: "线性目标约束与整数决策交可复现求解器。问题可
 4. **状态 + gap 强制。** LP：optimal + 对偶。MILP：optimal（gap 0）或 gap 值加时间上限声明。“Feasible”不是“optimal”——标签贴对。
 5. **敏感性随答案交付。** 对偶/松弛找紧约束；前两大紧约束行做 RHS 扰动。±5% 数据一动就塌的最优是脆的——说出来。
 
-## The Build Sequence
+## Build Sequence
 
 ### 1. 先判断该不该用 LP/MILP
 
@@ -48,6 +48,8 @@ description: "线性目标约束与整数决策交可复现求解器。问题可
 - Big-M：M 从数据界导出，越紧越好。“M = 1e9 求保险”是数值炸弹——论证或收紧。
 
 ### 3. 点名求解器求解
+
+> 门禁兜底：调 `assets/scripts/lp_gate.py --status/--gap/--solver` 输出证书校验，`optimal` 且 `gap==0` 且 `solver+version` 齐全才 `PASS`。
 
 - 代码建模（PuLP / OR-Tools / scipy.milp / PySCIPOpt），求解器 + 版本记录。
 - **gate**：代码里查状态——`Optimal`，否则分支：`Infeasible` → IIS / 松弛诊断（哪条约束冲突，点名）；`Unbounded` → 缺界（找到它，不要随意封目标）；时间到 → 报 gap，绝不四舍五入成 optimal。

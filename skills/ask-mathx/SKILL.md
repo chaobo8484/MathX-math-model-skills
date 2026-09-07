@@ -1,6 +1,6 @@
 ---
 name: ask-mathx
-description: "不知道 34 个技能该用哪个时先问我：我帮你选 1-2 个并排好顺序。"
+description: "不知道 35 个技能该用哪个时先问我：我帮你选 1-2 个并排好顺序。"
 disable-model-invocation: true
 ---
 
@@ -35,7 +35,7 @@ disable-model-invocation: true
 `paper-outline`（先搭大纲故事线）→ `literature-review`（缺口表）→ 方法技能 → `figure-table-generation`（图表）→ `latex-typesetting`（填模板编译）→ `citation-bibliography`（引用）→ `polish-proofread`（润色）→ `reproducibility-checklist`（交稿门禁）。
 
 **Research**——研究纪律，可组合：
-`conjecture-formulation`（提可证伪命题）→ `proof-assistant`（拆引理标缺口）/ `symbolic-computation`（符号推导）/ `numerical-verification`（数值证据分级）/ `counterexample-search`（找最小反例）；背景不清时先 `arxiv-literature-synthesis`。
+`conjecture-formulation`（提可证伪命题）→ `proof-assistant`（拆引理标缺口）/ `symbolic-computation`（符号推导）/ `numerical-verification`（数值证据分级）/ `counterexample-search`（找最小反例）；背景不清要地图时先 `arxiv-literature-synthesis`；单条断言需外部支撑（选型依据、邻居站位、求解器版本）时先 `research-evidence`。
 
 **Visualization**——绘图纪律：
 没定图型先 `chart-decision`；静态矢量图 `scientific-plotting`；带 N/p 值/CI 的统计结论 `statistical-plot`；要交互 `plotly-interactive`；定稿拼版 `publication-figure`；流程架构 `diagram-schematic`。
@@ -46,8 +46,9 @@ disable-model-invocation: true
 
 - 建模比赛从零开始：`paper-outline` → 方法技能 → `figure-table-generation` → `polish-proofread` → `reproducibility-checklist`。
 - 只有一小串数据要预测：先看点数，≤10 点 `gray-prediction`，30+ 点 `time-series-arima`，之间先问数据。
-- 论文定稿前：`figure-table-generation` → `latex-typesetting` → `citation-bibliography` → `polish-proofread` → `reproducibility-checklist`。
+- 论文定稿前：`figure-table-generation` → `latex-typesetting`（终稿 PDF 用 TEX，协作草稿用 DOCX 分支）→ `citation-bibliography` → `polish-proofread` → `reproducibility-checklist`。
 - 猜想验证：`conjecture-formulation` → `numerical-verification`，证伪走 `counterexample-search`，证明走 `proof-assistant`。
+- 需外部支撑（选型、站位、版本核验）：先 `research-evidence` 取证，再进方法技能。
 - 用户甩文件：先 `ingest-inputs` 归一，再按任务路由。
 
 ## Tone

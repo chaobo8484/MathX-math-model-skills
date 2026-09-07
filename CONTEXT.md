@@ -19,6 +19,7 @@ Read this file before running any skill in this repo. It holds the vocabulary ev
 
 - MCM / 国赛 / journal — the three venue types. Every writing skill asks which one before starting.
 - LaTeX compiler default: XeLaTeX for CJK content, pdfLaTeX otherwise. Bibliography per venue (GB/T 7714 for 国赛, venue .bst/biblatex for journals).
+- Output formats: TEX→PDF for submission finals; DOCX for collaboration drafts (`latex-typesetting` DOCX branch + `docx_gate.py`). 国赛终稿仍以 PDF 为准.
 - Figure sizes: single column ≈ 89mm, double ≈ 183mm (verify per venue in `publication-figure`).
 
 ## Method vocabulary (use these words, not synonyms)
@@ -31,7 +32,8 @@ Read this file before running any skill in this repo. It holds the vocabulary ev
 
 ## Tool defaults
 
-- Compute in Python (NumPy/SciPy/SymPy/NetworkX/PuLP), plot in Matplotlib/Seaborn (static) or Plotly (interactive).
+- Compute in Python `>=3.10` (NumPy/SciPy/SymPy/NetworkX/PuLP, `X | None` syntax; full list in `pyproject.toml:8` / `requirements.txt:1` → `pip install -r requirements.txt`), plot in Matplotlib/Seaborn (static) or Plotly (interactive).
 - Solver default order: HiGHS → SCIP → CBC; record name + version actually used.
 - Input normalization via `ingest-inputs`: CSV/XLSX with pandas (encoding sniff UTF-8/GBK) + openpyxl, MP4 frame extraction at declared fps, JPG classified first (data-chart digitize / example-image describe).
+- External evidence via `research-evidence`: backend ladder none → manual → generic → `firecrawl-advanced` (key-gated, deep-crawl only); local files always via `ingest-inputs`, never via web search.
 - practicedecisions live with the project using the skills (data dir, template version, backend), recorded by `setup-mathx` under `docs/agents/` — read that file too when it exists.

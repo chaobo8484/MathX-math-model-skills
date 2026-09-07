@@ -28,7 +28,7 @@ disable-model-invocation: true
 4. **中英混排机械规则。** 全半角标点一致，行内英文/公式两侧空格，译名对术语表。这些是机械活——全扫，不抽查。
 5. **图/表/callout 对读。** 每个“如图 3 所示”后面跟的真是图 3 的东西；题注编号对正文编号对展品文件，三方一致。 mismatch 列出来，不悄悄修。
 
-## The Production Sequence
+## Build Sequence
 
 ### 1. 锁术语定范围
 
@@ -43,9 +43,10 @@ disable-model-invocation: true
 
 - 收紧 + 混排机械 + 题注/callout 对读。含义可能漂移处挂 [MEANING-CHECK]。
 
-### 4. 交 diff——gate
+### 4. 交 diff + 版本化——gate
 
 - **gate**：完整 diff（改前对改后，可审）、术语表带决策、[MEANING-CHECK] 清单已答或用户明确延期、对读 mismatch 解决或列单。无 diff 的润色是黑箱——拒收这个形状。
+- **版本化**：若输出目录已含 `polish_v*.md`，则走 `iterate` 分支——调 `assets/scripts/versioned_write.py` 产出 `polish_v<timestamp>.md` + `revisions.md` 追加，不覆盖旧稿；版本间 `diff` 留痕。
 
 ## Never Ship
 

@@ -29,7 +29,7 @@ disable-model-invocation: true
 4. **栏宽矢量导出。** 宽度按 venue（单栏约 89mm 常见——确认），字号终版，色板走项目系统。按尺寸重生成；截图放大永不。
 5. **正文引用和图一致。** 正文引的每个数字在展品里一模一样（修约一致！）。交付前 grep 正文数字对表格——誊写漂移是经典静默撤稿。
 
-## The Production Sequence
+## Build Sequence
 
 ### 1. 盘点展品
 

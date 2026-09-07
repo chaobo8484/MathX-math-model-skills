@@ -1,6 +1,6 @@
 ---
 name: diagram-schematic
-description: "Mermaid/Graphviz/NetworkX 可编辑矢量示意图。表达方法流程系统架构概念关系时用。"
+description: "可编辑矢量示意图 `Mermaid/Graphviz/NetworkX`。表达方法流程系统架构概念关系时用。"
 ---
 # 原理图、流程图与网络图
 
@@ -28,7 +28,7 @@ description: "Mermaid/Graphviz/NetworkX 可编辑矢量示意图。表达方法�
 4. **论文风格系统。** 字体族/字号同论文配图，同色板，终版尺寸线宽 ≥ 0.5pt。示意图要像和别的图一家的。
 5. **源码 + 渲染测试留档。** .mmd/.dot/.py 源码跟导出放一起；用的地方 LaTeX 内联编译测过。
 
-## The Build Sequence
+## Build Sequence
 
 ### 1. 先判断该不该画示意图
 

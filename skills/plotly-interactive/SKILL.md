@@ -1,6 +1,6 @@
 ---
 name: plotly-interactive
-description: "缩放悬停联动的 Plotly 探索图。数据探索需交互或上万点需 WebGL 时用；定稿矢量图见 scientific-plotting。"
+description: "缩放悬停联动的探索图 `Plotly`。数据探索需交互或上万点需 `WebGL` 时用；定稿矢量图见 scientific-plotting。"
 ---
 # 交互式 Plotly 图表
 
@@ -27,7 +27,7 @@ description: "缩放悬停联动的 Plotly 探索图。数据探索需交互或�
 4. **spec 瘦，数据大了外置。** 生成脚本留档；数据小才内联。脚本复生不了的图是死胡同。
 5. **默认只做探索。** 这张图的某个视图进了论文，重去 `scientific-plotting` 画静态——交互图截图打印难看，且无样式契约。
 
-## The Build Sequence
+## Build Sequence
 
 ### 1. 先判断该不该交互
 

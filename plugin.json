@@ -1,0 +1,52 @@
+{
+  "name": "mathx-skills",
+  "version": "0.4.0",
+  "description": "MathX 数学建模技能：建模/写作/研究/可视化 35 技能，门禁代码化，证据层 key 门控。",
+  "author": {
+    "name": "MathX",
+    "url": "https://github.com/chaobo8484/MathX-math-model-skills"
+  },
+  "license": "MIT",
+  "skills": [
+    "ahp",
+    "arxiv-literature-synthesis",
+    "ask-mathx",
+    "bp-neural-network",
+    "chart-decision",
+    "citation-bibliography",
+    "clustering-classification",
+    "conjecture-formulation",
+    "counterexample-search",
+    "diagram-schematic",
+    "differential-equation",
+    "evaluation-entropy-topsis",
+    "figure-table-generation",
+    "genetic-algorithm",
+    "graph-network",
+    "gray-prediction",
+    "ingest-inputs",
+    "latex-typesetting",
+    "literature-review",
+    "monte-carlo-simulation",
+    "numerical-verification",
+    "optimization-lp-milp",
+    "paper-outline",
+    "plotly-interactive",
+    "polish-proofread",
+    "proof-assistant",
+    "publication-figure",
+    "regression-family",
+    "reproducibility-checklist",
+    "research-evidence",
+    "scientific-plotting",
+    "setup-mathx",
+    "statistical-plot",
+    "symbolic-computation",
+    "time-series-arima"
+  ],
+  "engines": {
+    "claude-code": ">=1.0.0",
+    "python": ">=3.10"
+  },
+  "requires-python": ">=3.10"
+}

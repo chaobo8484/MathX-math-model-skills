@@ -1,4 +1,4 @@
----
+﻿---
 name: clustering-classification
 description: "KMeans/DBSCAN 分群与随机森林分类。为样本发现群组或打标签时用；解释变量关系见 regression-family。"
 ---
@@ -28,7 +28,7 @@ description: "KMeans/DBSCAN 分群与随机森林分类。为样本发现群组�
 4. **有监督一侧：分层 k 折 CV + 混淆矩阵，每次都有。** 不平衡先声明；偏态类别下准确率永不当唯一头条。
 5. **预处理不许泄露。** 标准化、编码、特征选择只在训练折上拟合。泄露检查是交付物的一部分，一句话写明。
 
-## The Build Sequence
+## Build Sequence
 
 ### 1. 先分边，再判断该不该触发
 
@@ -49,12 +49,16 @@ description: "KMeans/DBSCAN 分群与随机森林分类。为样本发现群组�
 
 ### 3a. 聚类：把 K 挣回来
 
+> 门禁兜底：调 `assets/scripts/cluster_gate.py --mode cluster` 输出肘部+轮廓双指标与 ARI 稳定性，轮廓 `<0.25` 直接报结构弱。
+
 - KMeans 扫 K 值区间：肘部图（惯量）+ 每个 K 的轮廓系数，两个都展示。DBSCAN 方案：k 距离图定 eps，minPts 按维度给默认值并声明。
 - **gate**：选中的 K 肘部支撑 + 轮廓最好或并列；轮廓 < ~0.25 → 报“结构弱”，不要给群组起人设。
 - 稳定性：bootstrap/抖动重跑，轮次间 adjusted Rand 指数。不稳定的划分报不稳定，不要平均成虚假信心。
 - 每个群组画像（质心、规模、区分特征）——一句话说不清的群是碎片，不是细分。
 
 ### 3b. 分类：把误差挣回来
+
+> 同脚本 `--mode classify` 输出分层 5 折 CV + 混淆矩阵 + `beats_baseline`，预处理泄露检查随报告走。
 
 - 模型：默认随机森林（n_estimators、max_depth 写明）；对 `regression-family` 的 Logistic 基线。
 - 分层 k 折 CV（常用 k = 5），种子报告。每折指标：准确率 + F1（macro）+ 二分类再加 AUC；混淆矩阵汇总。

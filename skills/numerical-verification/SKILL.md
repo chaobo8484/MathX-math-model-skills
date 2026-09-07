@@ -1,6 +1,6 @@
 ---
 name: numerical-verification
-description: "边界扫描与可复现实验评估猜想证据强度。用计算支持质疑或探索命题时用；找反例见 counterexample-search。"
+description: "边界扫描与可复现实验评估猜想证据强度 `SUPPORTED/OPEN/REFUTED`。用计算支持质疑或探索命题时用。"
 ---
 # 数值验证与证据分级
 
@@ -27,7 +27,7 @@ description: "边界扫描与可复现实验评估猜想证据强度。用计算
 4. **三级定级，标准固定。** SUPPORTED（探过点全过含极端）/ OPEN（内部过，极端没探或模糊）/ REFUTED（一处失败且复现——移交 `counterexample-search` 找最小）。没有第四级如“基本成立”。
 5. **数值和证明落字分开写。** 交付物写计算说明什么、还有什么没证，分两句。混在一起，下个读者会把计算当定理引用。
 
-## The Build Sequence
+## Build Sequence
 
 ### 1. 先判断该不该数值验证
 
@@ -49,6 +49,8 @@ description: "边界扫描与可复现实验评估猜想证据强度。用计算
 - 覆盖图随运行填写：区域 × 密度 × 结论格。空格默认 OPEN，永不默认 SUPPORTED。
 
 ### 4. 定级——gate
+
+> 门禁兜底：覆盖表按 `assets/templates/coverage-schema.json` 填，调 `assets/scripts/coverage_grade.py` 定级。缺字段、无种子、失败未复现直接 `HOLD`。
 
 - **gate**：按固定标准定级，附覆盖图。SUPPORTED 要求极端探过且过；不够就是 OPEN，未探区域点名。
 - REFUTED：独立复现失败点（新种子/新跑），实例移交 `counterexample-search`——这里不找最小。

@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.12"]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install deps
+        run: pip install -r requirements.txt
+      - name: Frontmatter check
+        run: python scripts/ci/check_frontmatter.py
+      - name: CONTEXT cross-ref check
+        run: python scripts/ci/check_context_refs.py
+      - name: Evidence wiring check
+        run: python scripts/ci/check_evidence_refs.py
+      - name: Gate scripts compile check
+        run: python scripts/ci/check_compile.py
+      - name: versioned_write sync check
+        run: python scripts/ci/check_versioned_sync.py

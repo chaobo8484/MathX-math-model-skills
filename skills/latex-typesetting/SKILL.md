@@ -1,13 +1,13 @@
 ---
 name: latex-typesetting
-description: "把内容填入官方 LaTeX 模板并编译出 PDF，按报错日志迭代修错。"
+description: "把内容填入官方 LaTeX 模板并编译出 PDF，按报错日志迭代修错。需 Word 协作稿时走 DOCX 分支。"
 disable-model-invocation: true
 ---
 # LaTeX 排版与模板填充
 
 > 先读仓库根目录的 CONTEXT.md（术语/单位/venue 默认），全文用它的词。
 
-人触发的生产型技能，只做一件事：官方模板分块填内容，对编译日志迭代到干净 PDF。不设计论文逻辑（那是 `paper-outline`），不画图（那是 `publication-figure` / `figure-table-generation`）。
+人触发的生产型技能，只做一件事：官方模板分块填内容，对编译日志迭代到干净 PDF；用户不用 TEX 时走 DOCX 分支。不设计论文逻辑（那是 `paper-outline`），不画图（那是 `publication-figure` / `figure-table-generation`）。
 
 ## Operating Posture
 
@@ -28,12 +28,19 @@ disable-model-invocation: true
 4. **占位跟踪，一个不留。** 模板 TODO、dummy、lorem ipsum——交付前 grep。投稿版里活着的占位是没读过文档的自证。
 5. **图/表走文件，永不粘贴。** \includegraphics/\input 指版本化资源；宽度相对（\linewidth 分数），绝不用跨模板即碎的绝对英寸。
 6. **国赛 venue 走专用合规块。** A4 白纸，页边距上下左右 ≥2.5cm，左侧装订预留；页码从摘要页起、页脚中部、阿拉伯数字从 1 连续编号；正文无目录；电子版第一页必须是摘要页（承诺书/编号专用页只进纸质版构建）；电子版单文件 PDF 优先、≤20MB、不压缩（第十条）。
+7. **输出格式先定，TEX 与 DOCX 不混。** 投稿终稿走 TEX→PDF；协作草稿走 DOCX（`python-docx` 直编优先，`pandoc` 转换必跑 `assets/scripts/docx_gate.py` 重验）。DOCX 样式走内置（`Heading`/`Normal`/`Caption`），映射见 `assets/references/docx-mapping.md`。国赛终稿仍以 PDF 为准，DOCX 只做过程稿。
 
-## The Production Sequence
+## Build Sequence
+
+### 0. 选输出格式——gate
+
+- 问一句：终稿投 PDF 还是协作要 DOCX。`venue` 投稿/国赛终稿默认 TEX；组内传阅、导师批注默认 DOCX。
+- **gate**：格式定死再动手。两边同时填等于两份稿，选一边。
 
 ### 1. 填前盘点
 
-- 模板名 + 版本，编译器（pdfLaTeX/XeLaTeX/LuaLaTeX——中文内容通常 XeLaTeX），文献系统（BibTeX/biblatex + 样式），占位清单 grep 摘出。
+- TEX：模板名 + 版本，编译器（pdfLaTeX/XeLaTeX/LuaLaTeX——中文内容通常 XeLaTeX），文献系统（BibTeX/biblatex + 样式），占位清单 grep 摘出。
+- DOCX：生产方式二选一（`python-docx` 直编 / `pandoc` 转换），样式映射见 `assets/references/docx-mapping.md`。
 - 空模板基线先编过：内容进来前必须干净构建。基线坏了赖内容，整轮白费。
 
 ### 2. 分块填
@@ -43,11 +50,15 @@ disable-model-invocation: true
 
 ### 3. 杀日志——gate
 
-- **gate**：全构建（含 bibtex/biber 若干遍）零错误收尾；剩余警告逐个 triage（overfull > 5pt 修，未定义引用归零，字体替换认领）。
+> 门禁兜底：调 `assets/scripts/texlog_parse.py <main.log>` 先找首错与分类计数（错误/未定义/`overfull>5pt`/字体替换），再自上而下修。
+
+- TEX **gate**：全构建（含 bibtex/biber 若干遍）零错误收尾；剩余警告逐个 triage（overfull > 5pt 修，未定义引用归零，字体替换认领）。
+- DOCX **gate**：调 `assets/scripts/docx_gate.py`（样式内置、题注 `图/表 n` 连续、占位清零、标题属性设好）。`pandoc` 转来的稿必重验，公式与题注常漂移。
 - 100% 目检：浮动体位置合理，无 widow/orphan 扎眼，题注编号连续，PDF 元数据（标题/作者）设好。
 
-### 4. 移交
+### 4. 迭代检测 + 移交
 
+- **是否已存在稿件 gate**：检查输出目录是否已有 `paper_v*.tex` / `paper_v*.pdf`。有则走 `iterate` 分支——调 `assets/scripts/versioned_write.py --in 新稿 --out-dir <out> --base-name paper --ext .tex --message "修订说明"`，产出时间戳版本 + `revisions.md` 追加，不覆盖旧稿；版本间用 `git diff` / `diff` 留痕。
 - PDF + 日志摘要 + 剩余风险备注（如“图 3 终版尺寸要重导出”）。下步：引用不干净去 `citation-bibliography`，文字去 `polish-proofread`，门禁去 `reproducibility-checklist`。
 
 ## Never Ship
@@ -62,10 +73,14 @@ disable-model-invocation: true
 | 警告不读 | 逐个 triage |
 | 国赛稿出现身份/学校/赛区信息 | 匿名 grep 全文清零（第六条、第十一条），否则 HOLD |
 | 国赛电子版混入承诺书/编号页 | 双构建分离：纸质版含、电子版第一页摘要页（第十条） |
+| DOCX 直接格式刷屏 | 内置样式，`docx_gate.py` 验过 |
+| DOCX 题注手写编号 | `图/表 n` 连续，引用对读 |
+| DOCX 公式图片无替代文本 | OMML 或图片加替代文本 |
 
 ## Output
 
-- **PDF**——干净构建，目检过。
+- **PDF**——干净构建，目检过（TEX 分支）。
+- **DOCX**——门禁报告 + 目检（DOCX 分支，过程稿）。
 - **日志轨迹**——踩过的错和修法，警告 triage。
 - **占位 grep**——零残留，证据展示。
 - **移交**——下个技能点名。

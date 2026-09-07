@@ -1,6 +1,6 @@
 ---
 name: symbolic-computation
-description: "SymPy 化简求导积分解方程并导出 LaTeX。需可复核的符号推导时用。"
+description: "符号推导化简求导积分解方程并导出 LaTeX `SymPy`。需可复核的符号推导时用。"
 ---
 # 符号计算与推导
 
@@ -27,7 +27,7 @@ description: "SymPy 化简求导积分解方程并导出 LaTeX。需可复核的
 4. **随机点数值探针。** 3–5 个容许随机点，两边代入比容差（相对 1e-8 常用）。探针失败就是推导错，找那步去，不要悄悄放宽容差。
 5. **LaTeX 从验证过的式子导出。** 导出公式由探过的表达式生成，不手打。重打引入的正是这条链要防的错误。
 
-## The Build Sequence
+## Build Sequence
 
 ### 1. 先判断该不该符号算
 

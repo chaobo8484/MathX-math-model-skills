@@ -28,7 +28,7 @@ description: "分布相关检验残差 ROC 与样本量 p 值置信区间同图�
 4. **视觉上效应优先，p 其次。** 墨水给 CI 和效应幅度（森林图、估计图）；p 值是标注，永不当头条字形。
 5. **多重比较要声明。** k 个检验 → 校正点名（Bonferroni/Holm/FDR），或大声说“未校正探索性”。十个没校正的 p 值配一颗星，是带图例的 p-hacking。
 
-## The Build Sequence
+## Build Sequence
 
 ### 1. 选哪种展品
 

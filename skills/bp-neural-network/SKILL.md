@@ -1,6 +1,6 @@
 ---
 name: bp-neural-network
-description: "反向传播前馈网络拟合非线性回归或分类。几十到几千样本、特征与目标复杂非线性时用；需可解释系数见 regression-family。"
+description: "反向传播前馈网络 `BP` 拟合非线性回归或分类。几十到几千样本、特征与目标复杂非线性时用；需可解释系数见 regression-family。"
 ---
 # BP 神经网络
 
@@ -28,7 +28,7 @@ description: "反向传播前馈网络拟合非线性回归或分类。几十到
 4. **早停带 patience，每次都有。** 盯验证损失，停滞就停（patience 写明，如按规模 10–50 epoch）。没有学习曲线支撑，不做固定 epoch 训练。
 5. **报告 CV 误差 + 种子方差。** fold 或种子上的均值 ± 标准差。单次运行的数字是轶事，离散才是结果。
 
-## The Build Sequence
+## Build Sequence
 
 ### 1. 先判断该不该用 BP 网络
 
@@ -49,12 +49,14 @@ description: "反向传播前馈网络拟合非线性回归或分类。几十到
 
 ### 3. 结构与训练
 
-- 起点：1 隐层，单元数 ≈ √(p·out) 到 2p，隐层 tanh/ReLU，按任务配 linear/sigmoid/softmax 输出。有验证信号才加。
+- 起点：1 隐层，单元数 ≈ √(p·out) 到 2p，隐层 `tanh`/`ReLU`，按任务配 `linear`/`sigmoid`/`softmax` 输出。有验证信号才加。
 - 损失配任务：回归 MSE/MAE，分类交叉熵。写明。
 - 优化器 + 学习率写明（如 Adam 1e-3）；学习曲线（训练 vs 验证损失）画出来留档。发散或剧烈振荡 → 降 lr，不要加 epoch 硬撑。
 - 验证损失早停，patience 写明；恢复最优权重。
 
 ### 4. 诚实评估
+
+> 门禁兜底：调 `assets/scripts/bp_gate.py --y --features` 输出 `beats_baseline`，未打赢直接 `HOLD`。
 
 - 开一次测试集，原始单位误差：回归 RMSE/MAE，分类准确率/F1/AUC + 混淆矩阵，旁边摆基线的数。
 - **gate**：网络样本外打赢基线，否则交付物就是“网络零增益”连同数字。绝不在测试集上调参；验证好看测试拉胯，两个都报并诊断（分布漂移？n 太小？），不要悄悄重划分。

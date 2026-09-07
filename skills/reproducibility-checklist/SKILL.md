@@ -28,7 +28,9 @@ disable-model-invocation: true
 4. **图/表审计。** 每展品重算或追溯（展品 → 代码 + 数据），题注独立，正文数字 grep 对展品。一处漂移审计失败。
 5. **敌对审稿一遍。** 当敌人读论文：中心断言证据蕴含吗？最强反论回应了吗？有图在做正文没辩护的论证活吗？再强的论文至少三条敌对备注。
 
-## The Gate Checklist
+## Build Sequence
+
+> 门禁兜底：先调 `assets/scripts/checklist_runner.py --project <dir> --venue <venue>` 跑机器可检项（`lockfile/种子/占位/匿名/PDF/log`），输出 `verdict`；人审项标 `NOT-CHECKED` 并点名主技能，不许回忆打勾。
 
 按序跑，每项证据（跑的命令、查的文件、展示的 diff）：
 
@@ -58,7 +60,7 @@ disable-model-invocation: true
 - [ ] 全文件匿名：摘要/正文/附录/支撑材料无身份、学校、赛区信息，grep 为证（第六条、第十一条）
 - [ ] 引用文内标注 + 文末规范列出，含网上资料（第七条，见 `citation-bibliography`）
 
-## Never Ship the Gate Itself
+## Never Ship
 
 | 禁忌 | 替代 |
 | --- | --- |

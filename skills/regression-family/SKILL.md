@@ -28,7 +28,7 @@ description: "OLS、岭、Lasso、Logistic 的拟合选择与诊断。需解释�
 4. **回归看残差，分类看校准。** 残差-拟合图、QQ、尺度-位置图；Logistic 看校准曲线 + ROC/AUC 和声明阈值下的混淆矩阵。
 5. **原始单位报告，带不确定度。** 系数带 CI；负担得起就给预测区间。只报标准化的系数是藏故事。
 
-## The Build Sequence
+## Build Sequence
 
 ### 1. 先判断该不该用回归
 
@@ -41,11 +41,15 @@ description: "OLS、岭、Lasso、Logistic 的拟合选择与诊断。需解释�
 
 ### 2. EDA 与共线性 gate
 
+> 门禁兜底：调 `assets/scripts/regression_gate.py --y --features` 输出 VIF 表与 `vif_max`，`VIF>10` 直接 HOLD。
+
 - 表格：n、p、每列缺失率、处理方法点名。偏态目标（|skew| > 1）→ 考虑 log/Box-Cox，声明。
 - 相关矩阵 + VIF 表。**gate**：最大 VIF > 10 → 解读前先删/合并/正则化。每个变量怎么处理的，逐个报告。
 - 类别编码声明（独热/去一）；泄露检查——特征不许用目标算出来。
 
 ### 3. CV 选正则化再拟合
+
+> 同脚本输出 `cv.best_alpha / best_C`，`λ` 手拍不算数。
 
 - OLS 做基准（p < n 且 VIF 干净时）。收缩够用选岭；要选择选 Lasso/elastic-net。
 - λ 路径 + CV 曲线画出来；按 1-SE 原则选 λ，在曲线上标出来。报告 CV 误差（回归 RMSE，Logistic 离差/AUC）。

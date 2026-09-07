@@ -1,6 +1,6 @@
 ---
 name: scientific-plotting
-description: "Matplotlib/Seaborn 色盲安全静态矢量图。需折线柱状散点直方箱线等投稿插图时用；带统计推断标注见 statistical-plot。"
+description: "色盲安全静态矢量图 `Matplotlib/Seaborn`。需折线柱状散点直方箱线等投稿插图时用；带统计推断标注见 statistical-plot。"
 ---
 # 科学绘图基座
 
@@ -22,12 +22,12 @@ description: "Matplotlib/Seaborn 色盲安全静态矢量图。需折线柱状�
 ## Hard Rules
 
 1. **一项目一样式块，复用。** rcParams 一次设全（字体族/字号、线宽、刻度朝向、网格、savefig dpi/bbox）。每图复制粘贴样式行必然漂移——import 那块。
-2. **色板色盲安全，每次都。** 分类 Okabe-Ito（最多约 8 类，尾部合并），连续 viridis/cividis。jet/rainbow/hsv 永不。红绿编码关键区分永不。
-3. **字号按磅，终版尺寸验收。** 栏宽下坐标标签 ≥ 8pt、刻度 ≥ 7pt；线宽数据 ≥ 1pt、网格/轴 ≥ 0.5pt。100% 下要放大镜看的，错了。
+2. **色板色盲安全，每次都。** 分类 `Okabe-Ito`（最多约 8 类，尾部合并），连续 `viridis`/`cividis`，详见 `docs/figure-spec.md`。`jet`/`rainbow`/`hsv` 永不。红绿编码关键区分永不。
+3. **字号与图幅按磅，终版尺寸验收。** 栏宽见 `docs/figure-spec.md`（单栏约 89 mm，双栏约 183 mm），坐标标签 ≥ 8pt、刻度 ≥ 7pt；线宽数据 ≥ 1pt、网格/轴 ≥ 0.5pt。100% 下要放大镜看的，错了。
 4. **坐标轴诚实。** 柱状从 0 起；每轴标单位；双轴无声明理由加基线一致不许用；图例放数据区外，绝不压点。
 5. **矢量出，光栅故意才用。** 论文 PDF/SVG；PNG 只给幻灯/网页且 ≥ 300dpi 并写明。抖动/抽样处种子固定。
 
-## The Build Sequence
+## Build Sequence
 
 ### 1. 先判断该不该静态绘图
 
@@ -51,6 +51,8 @@ description: "Matplotlib/Seaborn 色盲安全静态矢量图。需折线柱状�
 - 能直接标线就直接标；直接标打架才用图例。正文引用的值标出来（箭头 + 数字），图和文对上。
 
 ### 4. 导出验证——gate
+
+> 门禁兜底：绘图脚本先过 `assets/scripts/style_lint.py`（禁用色板/`DPI` 下限）；成图按 `publication-figure` 的 `figure_gate.py` 验尺寸与题注五件套。灰度/bbox 仍需人眼。
 
 - 存 PDF（论文）+ PNG@300dpi（预览）。**gate**：PDF 按终版尺寸打开，字体渲染、灰度打印可读、标签无裁切（bbox_inches='tight' 要验，不要假设）。
 - 脚本 + 数据版本跟文件放一起。无生成脚本的图不可编辑——按草稿处理。
