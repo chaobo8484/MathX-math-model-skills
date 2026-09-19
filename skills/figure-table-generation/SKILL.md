@@ -34,6 +34,7 @@ disable-model-invocation: true
 ### 1. 盘点展品
 
 - 按大纲列：哪个主张要哪张图/表。无引用展品删或领主——绝不“备着”生产。
+- **输出格式先定，定死再画——gate**：问用户要 PNG / SVG / PDF（三选一或多选）：PDF 进论文 LaTeX 内联，SVG 给网页/可编辑矢量，PNG 给幻灯/网页预览（≥300dpi）。用户不答按 venue 默认（论文 PDF，网页/幻灯 PNG@300dpi）。问过一次记入项目（`setup-mathx` 记录），同项目后续沿用，不重复问。
 
 ### 2. 逐个建
 
@@ -46,7 +47,7 @@ disable-model-invocation: true
 
 ### 4. 移交
 
-- 编号文件（fig03.pdf、tab02.tex）加题注目录；去 `latex-typesetting` 入版，去 `publication-figure` 多子图拼版，去 `polish-proofread` 修周围文字。
+- 编号文件（fig03.pdf / fig03.svg / fig03.png 按定死的格式、tab02.tex）加题注目录；去 `latex-typesetting` 入版，去 `publication-figure` 多子图拼版，去 `polish-proofread` 修周围文字。
 
 ## Never Ship
 
@@ -61,7 +62,7 @@ disable-model-invocation: true
 
 ## Output
 
-- **展品文件**——编号矢量 + 表格源码。
+- **展品文件**——约定格式的编号图 + 表格源码。
 - **题注目录**——独立题注，全展品。
 - **追溯表**——展品 → 代码 + 数据 + 种子。
 - **一致 grep**——正文数字相符，证据展示。

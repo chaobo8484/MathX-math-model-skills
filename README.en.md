@@ -24,7 +24,6 @@ They are based on years of mathematical modeling and competition experience (MCM
 
 ```bash
 npx skills@latest add chaobo8484/MathX-math-model-skills
-npx skills add chaobo8484/MathX-math-model-skills
 ```
 
 ### Claude Code plugin (managed install)

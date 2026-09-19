@@ -25,14 +25,13 @@
 
 ```bash
 npx skills@latest add chaobo8484/MathX-math-model-skills
-npx skills add chaobo8484/MathX-math-model-skills
 ```
 
 ### Claude Code 插件（托管安装）
 
 本仓库自带 `.claude-plugin/marketplace.json`（marketplace 名 `mathx`，插件名 `mathx-skills`），在 Claude Code 内依次执行：
 
-```text
+```bash
 /plugin marketplace add chaobo8484/MathX-math-model-skills
 /plugin install mathx-skills@mathx
 ```

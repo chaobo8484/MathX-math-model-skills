@@ -21,11 +21,12 @@ description: "色盲安全静态矢量图 `Matplotlib/Seaborn`。需折线柱状
 
 ## Hard Rules
 
-1. **一项目一样式块，复用。** rcParams 一次设全（字体族/字号、线宽、刻度朝向、网格、savefig dpi/bbox）。每图复制粘贴样式行必然漂移——import 那块。
+1. **一项目一样式块，复用。** 国赛默认 `assets/templates/cumcm_style_block.py`（E 题沉淀：中文字体链、字号、语义色、`twin_legends`/`month_axis`/`savefig` 三件套）——import 那块。rcParams 一次设全（字体族/字号、线宽、刻度朝向、网格、savefig dpi/bbox）。每图复制粘贴样式行必然漂移。E 题九种画法见 `assets/references/etime-patterns.md`，对号入座不自创版式。
 2. **色板色盲安全，每次都。** 分类 `Okabe-Ito`（最多约 8 类，尾部合并），连续 `viridis`/`cividis`，详见 `docs/figure-spec.md`。`jet`/`rainbow`/`hsv` 永不。红绿编码关键区分永不。
 3. **字号与图幅按磅，终版尺寸验收。** 栏宽见 `docs/figure-spec.md`（单栏约 89 mm，双栏约 183 mm），坐标标签 ≥ 8pt、刻度 ≥ 7pt；线宽数据 ≥ 1pt、网格/轴 ≥ 0.5pt。100% 下要放大镜看的，错了。
 4. **坐标轴诚实。** 柱状从 0 起；每轴标单位；双轴无声明理由加基线一致不许用；图例放数据区外，绝不压点。
 5. **矢量出，光栅故意才用。** 论文 PDF/SVG；PNG 只给幻灯/网页且 ≥ 300dpi 并写明。抖动/抽样处种子固定。
+6. **输出格式先定，定死再画。** 动笔前问用户要 PNG / SVG / PDF（三选一或多选）：PDF 进论文 LaTeX 内联，SVG 给网页/可编辑矢量，PNG 给幻灯/网页预览（≥300dpi）。用户不答按 venue 默认（论文 PDF，网页/幻灯 PNG@300dpi）。问过一次记入项目（`setup-mathx` 记录），同项目后续沿用，不重复问。
 
 ## Build Sequence
 
@@ -54,7 +55,7 @@ description: "色盲安全静态矢量图 `Matplotlib/Seaborn`。需折线柱状
 
 > 门禁兜底：绘图脚本先过 `assets/scripts/style_lint.py`（禁用色板/`DPI` 下限）；成图按 `publication-figure` 的 `figure_gate.py` 验尺寸与题注五件套。灰度/bbox 仍需人眼。
 
-- 存 PDF（论文）+ PNG@300dpi（预览）。**gate**：PDF 按终版尺寸打开，字体渲染、灰度打印可读、标签无裁切（bbox_inches='tight' 要验，不要假设）。
+- 存约定格式（默认论文 PDF + PNG@300dpi 预览；用户另选按定死的来）。**gate**：终版文件按终版尺寸打开，字体渲染、灰度打印可读、标签无裁切（bbox_inches='tight' 要验，不要假设）。
 - 脚本 + 数据版本跟文件放一起。无生成脚本的图不可编辑——按草稿处理。
 
 ## Never Ship
@@ -75,7 +76,7 @@ description: "色盲安全静态矢量图 `Matplotlib/Seaborn`。需折线柱状
 
 交付物是图**加配方**，顺序如下：
 
-- **图文件**——PDF（+ 预览 PNG），按题注编号命名。
+- **图文件**——约定格式（PDF/SVG/PNG 按定死的交付），按题注编号命名。
 - **脚本**——数据 → 样式块 → 绘图 → 导出，种子注明。
 - **样式记录**——色板十六进制、字体/字号/线宽表。
 - **验证**——终版尺寸检查、灰度检查、带 N 和单位的题注草稿。
